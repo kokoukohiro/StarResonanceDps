@@ -412,7 +412,7 @@ VOICEVOX를 다시 시작하세요.</value>
     <value>Windows 시작 시 앱 실행</value>
   </data>
   <data name="Settings_Startup_CheckForUpdates" xml:space="preserve">
-    <value>시작 시 업데이트 확인</value>
+    <value>앱 시작 시 업데이트 확인</value>
   </data>
   <data name="Settings_Startup_StartHotkeyHelper" xml:space="preserve">
     <value>앱 시작 시 단축키 보조 프로그램 실행</value>
@@ -471,6 +471,25 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="PluginAlreadyAdded_Message" xml:space="preserve">
     <value>이 플러그인은 이미 추가되어 있습니다.</value>
   </data>
+  <data name="PluginUpdate_Title" xml:space="preserve">
+    <value>플러그인 업데이트</value>
+  </data>
+  <data name="PluginUpdate_Message" xml:space="preserve">
+    <value>{0}을(를) v{1}(으)로 업데이트합니다.</value>
+  </data>
+  <data name="PluginUpdate_Detail" xml:space="preserve">
+    <value>앱을 다시 시작할 때 업데이트합니다.
+설정은 그대로 유지됩니다.</value>
+  </data>
+  <data name="PluginUpdateFailed_Title" xml:space="preserve">
+    <value>플러그인 업데이트 오류</value>
+  </data>
+  <data name="PluginUpdateFailed_Message" xml:space="preserve">
+    <value>플러그인을 업데이트할 수 없습니다.</value>
+  </data>
+  <data name="PluginUpdateFailed_Detail" xml:space="preserve">
+    <value>앱을 종료하고 Plugins 폴더 안의 {0} 폴더에 선택한 DLL이 있는 폴더의 내용을 덮어쓴 뒤 앱을 다시 실행하세요.</value>
+  </data>
   <data name="PluginError_Title" xml:space="preserve">
     <value>플러그인 오류</value>
   </data>
@@ -522,6 +541,9 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="PluginStatus_PendingDeletion" xml:space="preserve">
     <value>재시작 후 삭제</value>
   </data>
+  <data name="PluginStatus_PendingUpdate" xml:space="preserve">
+    <value>재시작 후 업데이트</value>
+  </data>
   <data name="PluginStatus_MissingFiles" xml:space="preserve">
     <value>필요한 파일({0})을 찾을 수 없습니다</value>
   </data>
@@ -545,6 +567,9 @@ VOICEVOX를 다시 시작하세요.</value>
   </data>
   <data name="PluginStatus_DeletionFailed" xml:space="preserve">
     <value>삭제하지 못했습니다, 다음 실행 시 다시 삭제합니다</value>
+  </data>
+  <data name="PluginStatus_UpdateFailed" xml:space="preserve">
+    <value>업데이트하지 못했습니다, 다음 실행 시 다시 업데이트합니다</value>
   </data>
   <data name="Confirm_UninstallPlugin_Title" xml:space="preserve">
     <value>플러그인 삭제</value>
@@ -638,23 +663,20 @@ VOICEVOX를 다시 시작하세요.</value>
     <value>앱을 닫고 업데이트한 뒤 다시 시작합니다.
 설정과 기록은 그대로 유지됩니다.</value>
   </data>
-  <data name="Update_Confirm_ReleaseNotes" xml:space="preserve">
-    <value>릴리스 노트 열기</value>
-  </data>
   <data name="Update_Progress_Downloading" xml:space="preserve">
-    <value>다운로드하는 중입니다</value>
+    <value>다운로드하는 중입니다…</value>
   </data>
   <data name="Update_Progress_Extracting" xml:space="preserve">
-    <value>압축을 푸는 중입니다</value>
+    <value>압축을 푸는 중입니다…</value>
   </data>
   <data name="Update_Progress_WaitingForExit" xml:space="preserve">
-    <value>앱이 닫히기를 기다리는 중입니다</value>
+    <value>앱이 닫히기를 기다리는 중입니다…</value>
   </data>
   <data name="Update_Progress_WaitingForFiles" xml:space="preserve">
-    <value>사용 중인 파일이 해제되기를 기다리는 중입니다</value>
+    <value>사용 중인 파일이 해제되기를 기다리는 중입니다…</value>
   </data>
   <data name="Update_Progress_Replacing" xml:space="preserve">
-    <value>파일을 교체하는 중입니다</value>
+    <value>파일을 교체하는 중입니다…</value>
   </data>
   <data name="Update_Progress_Size" xml:space="preserve">
     <value>{0:0.0} / {1:0.0} MB</value>
@@ -677,17 +699,21 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="Update_Error_Network" xml:space="preserve">
     <value>인터넷 연결을 확인한 뒤 다시 시도해 주세요.</value>
   </data>
+  <data name="Update_Error_Server" xml:space="preserve">
+    <value>GitHub 서버가 응답하지 않았습니다.
+잠시 후 다시 시도해 주세요.</value>
+  </data>
   <data name="Update_Error_RateLimit" xml:space="preserve">
     <value>GitHub 접속이 일시적으로 제한되었습니다.
 잠시 후 다시 시도해 주세요.</value>
   </data>
   <data name="Update_Error_InvalidRelease" xml:space="preserve">
     <value>릴리스 정보를 읽지 못했습니다.
-릴리스 페이지에서 zip을 받아 앱 폴더에 덮어쓰세요.</value>
+릴리스 노트에서 zip을 받아 앱 폴더에 덮어쓰세요.</value>
   </data>
   <data name="Update_Error_NotFromZip" xml:space="preserve">
     <value>릴리스 zip으로 설치한 앱이 아니므로 앱 안에서 업데이트할 수 없습니다.
-릴리스 페이지에서 zip을 받으세요.</value>
+릴리스 노트에서 zip을 받으세요.</value>
   </data>
   <data name="Update_Error_Corrupt" xml:space="preserve">
     <value>다운로드한 파일이 손상되었습니다.
@@ -706,10 +732,10 @@ VOICEVOX를 다시 시작하세요.</value>
   </data>
   <data name="Update_Error_RestoreFailed" xml:space="preserve">
     <value>이전 버전으로 되돌리지 못했습니다.
-릴리스 페이지에서 zip을 받아 앱 폴더에 덮어쓰세요.</value>
+릴리스 노트에서 zip을 받아 앱 폴더에 덮어쓰세요.</value>
   </data>
-  <data name="Update_OpenReleasesPage" xml:space="preserve">
-    <value>릴리스 페이지 열기</value>
+  <data name="Update_OpenReleaseNotes" xml:space="preserve">
+    <value>릴리스 노트 열기</value>
   </data>
   <data name="Update_RestartFailed_Message" xml:space="preserve">
     <value>업데이트했지만 다시 시작하지 못했습니다.</value>

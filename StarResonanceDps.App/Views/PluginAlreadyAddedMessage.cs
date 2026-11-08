@@ -3,7 +3,7 @@ using StarResonanceDps.App.Localization;
 
 namespace StarResonanceDps.App.Views;
 
-/// <summary>プラグインの一覧の「＋」で選んだプラグインが、同じIDですでに一覧にあることを出す。</summary>
+/// <summary>プラグインの一覧の「＋」で選んだプラグインが、同じか新しいバージョンですでに一覧にあることを出す。</summary>
 public static class PluginAlreadyAddedMessage
 {
     public static void Show(Window? owner)

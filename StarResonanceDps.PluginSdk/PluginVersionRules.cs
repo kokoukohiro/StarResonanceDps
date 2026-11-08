@@ -33,4 +33,28 @@ internal static class PluginVersionRules
 
         return true;
     }
+
+    /// <summary>
+    /// どちらも <see cref="IsValid"/> を通る版を、番号ごとに数の大きさで比べる(2.0.10 は 2.0.9 より新しい)。
+    /// 桁数に上限が無いので、数へ変換しない。
+    /// </summary>
+    public static int Compare(string left, string right)
+    {
+        var leftParts = left.Trim().Split('.');
+        var rightParts = right.Trim().Split('.');
+        for (var index = 0; index < leftParts.Length; index++)
+        {
+            var leftNumber = leftParts[index].TrimStart('0');
+            var rightNumber = rightParts[index].TrimStart('0');
+            var result = leftNumber.Length != rightNumber.Length
+                ? leftNumber.Length.CompareTo(rightNumber.Length)
+                : string.CompareOrdinal(leftNumber, rightNumber);
+            if (result != 0)
+            {
+                return result;
+            }
+        }
+
+        return 0;
+    }
 }

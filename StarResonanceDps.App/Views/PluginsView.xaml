@@ -65,13 +65,25 @@
             <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
         </Style>
 
-        <!-- 「エラー」。理由は TIPS。押しても何も起きない行なので、押しても TIPS を閉じない。 -->
+        <!-- 「エラー」。理由は TIPS。押しても何も起きない行なので、押しても TIPS を閉じない。更新を待っている行は更新で直るので出さない。 -->
         <Style x:Key="PluginItem.ErrorPill" TargetType="{x:Type Border}" BasedOn="{StaticResource Panel.StatusPill}">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="behaviors:ToolTipBehavior.IsEnabled" Value="True" />
             <Setter Property="behaviors:ToolTipBehavior.KeepsOnClick" Value="True" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding RowState}" Value="{x:Static services:PluginRowState.Error}">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsUpdatePending}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PluginItem.PendingUpdatePill" TargetType="{x:Type Border}" BasedOn="{StaticResource Panel.StatusPill}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsUpdatePending}" Value="True">
                     <Setter Property="Visibility" Value="Visible" />
                 </DataTrigger>
             </Style.Triggers>
@@ -207,6 +219,11 @@
                                         <Border Grid.Column="2" Style="{StaticResource PluginItem.PendingDeletionPill}">
                                             <TextBlock Style="{StaticResource PluginItem.PillText}"
                                                        Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PluginStatus_PendingDeletion]}" />
+                                        </Border>
+
+                                        <Border Grid.Column="2" Style="{StaticResource PluginItem.PendingUpdatePill}">
+                                            <TextBlock Style="{StaticResource PluginItem.PillText}"
+                                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PluginStatus_PendingUpdate]}" />
                                         </Border>
                                     </Grid>
 

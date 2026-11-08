@@ -34,11 +34,15 @@ namespace StarResonanceDps.App.Services;
 /// アンインストール(<see cref="Uninstall"/>)は、読み込んだ DLL を動いている間は消せないので、フォルダに印を書いてプラグインを止め、
 /// 次の起動で読み込む前にフォルダを消す(<see cref="DiscoverPlugins"/>)。
 /// </para>
+///
+/// <para>
+/// 更新も同じ理由で、新しい版のファイルをフォルダの中へ写し(<see cref="AddFromFile"/>)、今の版は動かしたまま、次の起動で読み込む前に置き換える(<see cref="PluginUpdateFiles"/>)。
+/// </para>
 /// </summary>
 public sealed class PluginManager
 {
     /// <summary>このプラグインの例外でアプリが終わった印。プラグインのフォルダに置く。</summary>
-    private const string TerminatedAppMarkerFileName = "app_terminated.marker";
+    internal const string TerminatedAppMarkerFileName = "app_terminated.marker";
 
     /// <summary>アンインストールした印。プラグインのフォルダに置き、次の起動でフォルダごと消す。</summary>
     private const string UninstallMarkerFileName = "uninstall.marker";
@@ -75,6 +79,7 @@ public sealed class PluginManager
     /// <summary>
     /// Plugins のフォルダを読み、一覧に出すプラグインを返す(入れた順 = フォルダの作成時刻の古い順、同じ時刻は名前の順)。初期化はしない。
     /// アンインストールの印のあるフォルダは、読む前に消す。消せなければ読まずに、削除できなかった行にする(次の起動でまた消す)。
+    /// 更新を待っているフォルダは、読む前に置き換える。置き換えられなければ読まずに、更新できなかった行にする(次の起動でまた置き換える)。
     /// </summary>
     public IReadOnlyList<PluginInfo> DiscoverPlugins()
     {
@@ -99,18 +104,19 @@ public sealed class PluginManager
                      .OrderBy(path => Directory.GetCreationTimeUtc(path))
                      .ThenBy(path => Path.GetFileName(path), StringComparer.OrdinalIgnoreCase))
         {
-            if (!File.Exists(Path.Combine(folder, UninstallMarkerFileName)))
+            if (File.Exists(Path.Combine(folder, UninstallMarkerFileName)))
             {
-                AddEntry(ReadPlugin(folder));
+                if (!TryDeleteUninstalledFolder(folder))
+                {
+                    AddEntry(CreateUnreadEntry(folder, PluginErrorReason.DeletionFailed));
+                }
+
                 continue;
             }
 
-            if (!TryDeleteUninstalledFolder(folder))
-            {
-                var entry = new PluginEntry(Path.GetFileName(folder), folder);
-                SetFailure(entry, PluginErrorReason.DeletionFailed, []);
-                AddEntry(entry);
-            }
+            AddEntry(PluginUpdateFiles.TryApplyPending(folder)
+                ? ReadPlugin(folder)
+                : CreateUnreadEntry(folder, PluginErrorReason.UpdateFailed));
         }
 
         return GetDiscoveredPlugins();
@@ -118,7 +124,7 @@ public sealed class PluginManager
 
     /// <summary>
     /// 読めたプラグインを全部初期化する(起動の処理で1回)。読めなかった・初期化できなかったプラグインの名前を返す。
-    /// 削除できなかったフォルダは返さない(読み込みの失敗ではなく、直し方も違う)。
+    /// 削除・更新できなかったフォルダは返さない(読み込みの失敗ではなく、直し方も違う)。
     /// </summary>
     public IReadOnlyList<string> InitializeAll()
     {
@@ -132,7 +138,8 @@ public sealed class PluginManager
 
         var culture = LocalizationManager.Instance.CurrentCulture;
         return entries
-            .Where(entry => entry.State == PluginState.Failed && entry.ErrorReason != PluginErrorReason.DeletionFailed)
+            .Where(entry => entry.State == PluginState.Failed
+                && entry.ErrorReason is not (PluginErrorReason.DeletionFailed or PluginErrorReason.UpdateFailed))
             .Select(entry => entry.Info.GetDisplayName(culture))
             .ToArray();
     }
@@ -143,17 +150,19 @@ public sealed class PluginManager
         var entry = _entries[pluginKey];
         return entry.State switch
         {
-            PluginState.PendingDeletion => new PluginStatus(PluginRowState.PendingDeletion, null, [], CanUninstall: false),
+            PluginState.PendingDeletion => new PluginStatus(PluginRowState.PendingDeletion, null, [], CanUninstall: false, IsUpdatePending: false),
             PluginState.Failed or PluginState.Stopped => new PluginStatus(
                 PluginRowState.Error,
                 entry.ErrorReason ?? throw new InvalidOperationException($"The plugin '{entry.Key}' failed without a reason."),
                 entry.MissingFiles,
-                CanUninstall: !IsAwaitingDeletion(entry)),
+                CanUninstall: !IsAwaitingDeletion(entry),
+                IsUpdatePending: entry.PendingUpdateVersion is not null),
             _ => new PluginStatus(
                 entry.Info.HasWindow ? PluginRowState.Openable : PluginRowState.NoWindow,
                 null,
                 [],
-                CanUninstall: true),
+                CanUninstall: true,
+                IsUpdatePending: entry.PendingUpdateVersion is not null),
         };
     }
 
@@ -194,8 +203,9 @@ public sealed class PluginManager
     /// <summary>
     /// プラグインの一覧の「＋」。DLLを選ばせ、要るファイル(<see cref="PluginDependencyScanner"/>)が全部あれば
     /// <c>Plugins\&lt;アセンブリ名&gt;\</c> へ写して読み込み、初期化して、<see cref="PluginRegistered"/> を出す。
-    /// 選んだファイルがプラグインかは写す前に確かめる(<see cref="ReadPluginKey"/>)。プラグインでないファイルを写すと、
+    /// 選んだファイルがプラグインかは写す前に確かめる(<see cref="ReadPluginInfo"/>)。プラグインでないファイルを写すと、
     /// 起動のたびに読めないフォルダが Plugins に残るため。
+    /// 同じプラグインの新しいバージョンなら、次の起動で置き換える(<see cref="StageUpdate"/>)。
     /// </summary>
     public void AddFromFile()
     {
@@ -248,17 +258,24 @@ public sealed class PluginManager
             return;
         }
 
-        if (ReadPluginKey(sourcePath) is not { } pluginKey)
+        if (ReadPluginInfo(sourcePath) is not { } selectedInfo)
         {
             PluginAddFailureMessage.ShowInvalidFile(owner);
             return;
         }
 
+        var pluginKey = selectedInfo.Key;
         var targetFolder = Path.Combine(Path.GetFullPath(_pluginsDirectory), pluginKey);
         _entries.TryGetValue(pluginKey, out var existingEntry);
         if (existingEntry is not null && IsAwaitingDeletion(existingEntry))
         {
             PluginAddFailureMessage.ShowPendingDeletion(owner);
+            return;
+        }
+
+        if (existingEntry is not null && IsNewerThanInstalled(selectedInfo, existingEntry))
+        {
+            StageUpdate(existingEntry, scan, selectedInfo, owner);
             return;
         }
 
@@ -298,6 +315,37 @@ public sealed class PluginManager
         }
 
         PluginRegistered?.Invoke(this, addedEntry.Info);
+    }
+
+    /// <summary>
+    /// 選んだ DLL が今の版より新しいか。更新を待っていれば待っている版と比べる。
+    /// 読めなかった行は版が分からないので新しいものとする(更新で直せるようにする。削除して入れ直すと設定が消える)。
+    /// </summary>
+    private static bool IsNewerThanInstalled(PluginInfo selectedInfo, PluginEntry entry)
+    {
+        var installedVersion = entry.PendingUpdateVersion ?? entry.Info.Version;
+        return installedVersion is null || PluginVersionRules.Compare(selectedInfo.Version!, installedVersion) > 0;
+    }
+
+    /// <summary>新しい版のファイルをフォルダの中へ写し、行を更新待ちにする。今の版は次の起動まで動かす。</summary>
+    private void StageUpdate(PluginEntry entry, PluginDependencyScan scan, PluginInfo newInfo, Window? owner)
+    {
+        if (!PluginUpdateFiles.TryStage(entry.Folder, scan))
+        {
+            if (entry.PendingUpdateVersion is not null && !PluginUpdateFiles.HasPending(entry.Folder))
+            {
+                entry.PendingUpdateVersion = null;
+                RaiseStatusChanged(entry);
+            }
+
+            PluginUpdateMessage.ShowFailed(owner, entry.Key);
+            return;
+        }
+
+        entry.PendingUpdateVersion = newInfo.Version;
+        Log.Information("[Plugin:{Plugin}] The update to version {Version} is applied at the next start", entry.Key, newInfo.Version);
+        RaiseStatusChanged(entry);
+        PluginUpdateMessage.ShowPending(owner, newInfo.GetDisplayName(LocalizationManager.Instance.CurrentCulture), newInfo.Version!);
     }
 
     /// <summary>
@@ -765,17 +813,17 @@ public sealed class PluginManager
     }
 
     /// <summary>
-    /// DLLが起動時と同じ確かめ(<see cref="CreateRegistration"/>)を通るプラグインかを見て、プラグインの鍵(アセンブリ名)を返す。通らなければnull。
+    /// DLLが起動時と同じ確かめ(<see cref="CreateRegistration"/>)を通るプラグインかを見て、プラグインの情報(鍵・版など)を返す。通らなければnull。
     /// ファイルを掴まないよう、中身をメモリから捨てられる読み込み先に読み(部品も選んだDLLのフォルダから)、見終わったら捨てる。
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static string? ReadPluginKey(string assemblyPath)
+    private static PluginInfo? ReadPluginInfo(string assemblyPath)
     {
         var loadContext = new PluginLoadContext(assemblyPath, readsFromMemory: true);
         try
         {
             var assembly = loadContext.LoadPluginAssembly(assemblyPath);
-            return CreateRegistration(assembly, Path.GetFileNameWithoutExtension(assemblyPath)).Info.Key;
+            return CreateRegistration(assembly, Path.GetFileNameWithoutExtension(assemblyPath)).Info;
         }
         catch (Exception exception)
         {
@@ -892,6 +940,14 @@ public sealed class PluginManager
             ?? throw new InvalidOperationException($"The plugin contains duplicate {description}s for one culture.");
     }
 
+    /// <summary>読まずに失敗の行にする(フォルダを消せなかった・置き換えられなかった)。</summary>
+    private static PluginEntry CreateUnreadEntry(string folder, PluginErrorReason reason)
+    {
+        var entry = new PluginEntry(Path.GetFileName(folder), folder);
+        SetFailure(entry, reason, []);
+        return entry;
+    }
+
     private static void Fail(
         PluginEntry entry,
         PluginErrorReason reason,
@@ -957,7 +1013,7 @@ public sealed class PluginManager
         Log.Error(exception, "[Plugin:{Plugin}] {Message}", pluginName, message);
     }
 
-    private static void TryDeleteFolder(string folder)
+    internal static void TryDeleteFolder(string folder)
     {
         try
         {
@@ -1033,6 +1089,9 @@ public sealed class PluginManager
 
         /// <summary><see cref="PluginErrorReason.MissingFiles"/> のときの、足りないファイルの名前。</summary>
         public IReadOnlyList<string> MissingFiles { get; set; } = [];
+
+        /// <summary>次の起動で置き換える版(<see cref="PluginUpdateFiles"/>)。待っていなければ null。</summary>
+        public string? PendingUpdateVersion { get; set; }
 
         public PluginLoadContext? LoadContext { get; set; }
 

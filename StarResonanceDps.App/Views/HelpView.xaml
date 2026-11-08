@@ -144,7 +144,7 @@
                                           Style="{StaticResource Icon.Fill}"
                                           Data="{DynamicResource Icon.Update}" />
                                     <TextBlock VerticalAlignment="Center"
-                                               Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Help_CheckForUpdates]}" />
+                                               Text="{Binding CheckForUpdatesText}" />
                                 </StackPanel>
                             </Button>
                         </Grid>

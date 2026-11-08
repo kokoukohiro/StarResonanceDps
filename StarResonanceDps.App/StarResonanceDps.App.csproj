@@ -160,7 +160,6 @@
     <ProjectReference Include="..\StarResonanceDps.Core\StarResonanceDps.Core.csproj" />
     <ProjectReference Include="..\StarResonanceDps.PluginSdk\StarResonanceDps.PluginSdk.csproj" />
 
-    <ProjectReference Include="..\StarResonanceDps.Plugins.KeybindTool\StarResonanceDps.Plugins.KeybindTool.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\StarResonanceDps.Plugins.ModuleTool\StarResonanceDps.Plugins.ModuleTool.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\StarResonanceDps.HotkeyHost\StarResonanceDps.HotkeyHost.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
@@ -282,24 +281,21 @@
     <BundledPluginOutputSubdirectory>net10.0-windows</BundledPluginOutputSubdirectory>
     <HotkeyHostOutputSubdirectory>net10.0-windows</HotkeyHostOutputSubdirectory>
     <HotkeyHostOutputSubdirectory Condition="'$(RuntimeIdentifier)' != ''">net10.0-windows\$(RuntimeIdentifier)</HotkeyHostOutputSubdirectory>
-    <KeybindPluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.KeybindTool\bin\$(Configuration)\$(BundledPluginOutputSubdirectory)\KeybindTool.dll</KeybindPluginAssembly>
     <ModulePluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.ModuleTool\bin\$(Configuration)\$(BundledPluginOutputSubdirectory)\ModuleTool.dll</ModulePluginAssembly>
   </PropertyGroup>
 
   <!-- プラグインは Plugins\<アセンブリ名>\ に1つずつ置く。フォルダには設定ファイルも入るので、フォルダごと消さない。直下の DLL は前の置き方の残り。 -->
   <Target Name="CopyBundledPluginAssemblies" AfterTargets="Build">
-    <Delete Files="$(OutDir)Plugins\KeybindTool.dll;$(OutDir)Plugins\ModuleTool.dll;$(OutDir)Plugins\plugin.json;$(OutDir)Plugins\KeybindTool.deps.json;$(OutDir)Plugins\ModuleTool.deps.json;$(OutDir)Plugins\KeybindTool.runtimeconfig.json;$(OutDir)Plugins\ModuleTool.runtimeconfig.json" />
+    <Delete Files="$(OutDir)Plugins\ModuleTool.dll;$(OutDir)Plugins\plugin.json;$(OutDir)Plugins\ModuleTool.deps.json;$(OutDir)Plugins\ModuleTool.runtimeconfig.json" />
 
-    <MakeDir Directories="$(OutDir)Plugins\KeybindTool;$(OutDir)Plugins\ModuleTool" />
-    <Copy SourceFiles="$(KeybindPluginAssembly)" DestinationFiles="$(OutDir)Plugins\KeybindTool\KeybindTool.dll" SkipUnchangedFiles="true" />
+    <MakeDir Directories="$(OutDir)Plugins\ModuleTool" />
     <Copy SourceFiles="$(ModulePluginAssembly)" DestinationFiles="$(OutDir)Plugins\ModuleTool\ModuleTool.dll" SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="CopyBundledPluginAssembliesToPublish" AfterTargets="Publish">
-    <Delete Files="$(PublishDir)Plugins\KeybindTool.dll;$(PublishDir)Plugins\ModuleTool.dll;$(PublishDir)Plugins\plugin.json;$(PublishDir)Plugins\KeybindTool.deps.json;$(PublishDir)Plugins\ModuleTool.deps.json;$(PublishDir)Plugins\KeybindTool.runtimeconfig.json;$(PublishDir)Plugins\ModuleTool.runtimeconfig.json" />
+    <Delete Files="$(PublishDir)Plugins\ModuleTool.dll;$(PublishDir)Plugins\plugin.json;$(PublishDir)Plugins\ModuleTool.deps.json;$(PublishDir)Plugins\ModuleTool.runtimeconfig.json" />
 
-    <MakeDir Directories="$(PublishDir)Plugins\KeybindTool;$(PublishDir)Plugins\ModuleTool" />
-    <Copy SourceFiles="$(KeybindPluginAssembly)" DestinationFiles="$(PublishDir)Plugins\KeybindTool\KeybindTool.dll" SkipUnchangedFiles="true" />
+    <MakeDir Directories="$(PublishDir)Plugins\ModuleTool" />
     <Copy SourceFiles="$(ModulePluginAssembly)" DestinationFiles="$(PublishDir)Plugins\ModuleTool\ModuleTool.dll" SkipUnchangedFiles="true" />
   </Target>
 

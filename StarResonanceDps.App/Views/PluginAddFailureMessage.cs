@@ -24,7 +24,7 @@ public static class PluginAddFailureMessage
         Show(owner, LocalizationManager.Instance.Format("PluginAddFailed_MissingDependency_Detail", string.Join(", ", missingFiles)));
     }
 
-    /// <summary>同じプラグイン(アセンブリ名か ID が同じ)が、アンインストールしてアプリの再起動での削除を待っている。</summary>
+    /// <summary>同じプラグイン(アセンブリ名が同じ)が、アンインストールしてアプリの再起動での削除を待っている。</summary>
     public static void ShowPendingDeletion(Window? owner)
     {
         Show(owner, LocalizationManager.Instance.GetString("PluginAddFailed_PendingDeletion_Detail"));

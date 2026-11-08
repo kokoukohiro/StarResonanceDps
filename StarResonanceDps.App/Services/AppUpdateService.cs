@@ -30,6 +30,7 @@ public enum AppUpdateStatus
 public enum AppUpdateFailure
 {
     Network,
+    Server,
     RateLimit,
     InvalidRelease,
     NotFromZip,
@@ -58,24 +59,25 @@ public static class AppUpdateService
     private static bool _isBusy;
     private static Task _cleanUpTask = Task.CompletedTask;
 
+    /// <summary>確認の途中だけある。</summary>
+    private static CancellationTokenSource? _checkCancellation;
+
     /// <summary>今のバージョン。実行ファイルの版(csprojのVersion)の先頭3つの数字。</summary>
     public static Version CurrentVersion { get; } = ReadCurrentVersion();
 
-    private static readonly HttpClient CheckClient = CreateClient(TimeSpan.FromSeconds(10));
-
-    /// <summary>zipの取得だけに使う。止めるのはキャンセルで、時間では打ち切らない。</summary>
-    private static readonly HttpClient DownloadClient = CreateClient(Timeout.InfiniteTimeSpan);
+    /// <summary>確認にも取得にも使う。止めるのはキャンセルで、時間では打ち切らない(接続そのものができなければ Windows が失敗を返す)。</summary>
+    private static readonly HttpClient Client = CreateClient();
 
     /// <summary>最後の確認の結果。</summary>
     public static AppUpdateStatus Status { get; private set; } = AppUpdateStatus.NotChecked;
 
-    /// <summary>確認から取得までの処理の途中か。途中はヘルプタブの「更新を確認」を押せない。</summary>
-    public static bool IsBusy => _isBusy;
+    /// <summary>確認の途中か。途中はヘルプタブのボタンがキャンセルになる。</summary>
+    public static bool IsChecking => Status == AppUpdateStatus.Checking;
 
     /// <summary>今の起動が、更新の置き換えが済んだ後の起動か。</summary>
     public static bool WasJustUpdated { get; private set; }
 
-    /// <summary><see cref="Status"/> か <see cref="IsBusy"/> が変わった。画面のスレッドで届く。</summary>
+    /// <summary><see cref="Status"/> が変わった。画面のスレッドで届く。</summary>
     public static event EventHandler? StatusChanged;
 
     /// <summary>
@@ -110,6 +112,12 @@ public static class AppUpdateService
     public static Task CheckManuallyAsync(Window owner)
     {
         return CheckAsync(owner, isManual: true);
+    }
+
+    /// <summary>確認をやめる。ヘルプタブの行は確認する前の表示に戻る。</summary>
+    public static void CancelCheck()
+    {
+        _checkCancellation?.Cancel();
     }
 
     private static async Task CheckAsync(Window owner, bool isManual)
@@ -165,7 +173,6 @@ public static class AppUpdateService
         finally
         {
             _isBusy = false;
-            StatusChanged?.Invoke(null, EventArgs.Empty);
         }
     }
 
@@ -182,21 +189,23 @@ public static class AppUpdateService
         return new Version(version.Major, version.Minor, version.Build);
     }
 
-    private static HttpClient CreateClient(TimeSpan timeout)
+    private static HttpClient CreateClient()
     {
-        var client = new HttpClient { Timeout = timeout };
+        var client = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
         client.DefaultRequestHeaders.UserAgent.ParseAdd($"StarResonanceDps/{CurrentVersion.ToString(3)}");
         return client;
     }
 
     private static async Task<ReleaseCheck> FetchLatestReleaseAsync()
     {
+        using var cancellation = new CancellationTokenSource();
+        _checkCancellation = cancellation;
         try
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, ProjectLinks.LatestReleaseApiUrl);
             request.Headers.Accept.ParseAdd("application/vnd.github+json");
             request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
-            using var response = await CheckClient.SendAsync(request);
+            using var response = await Client.SendAsync(request, cancellation.Token);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -213,16 +222,31 @@ public static class AppUpdateService
             if (!response.IsSuccessStatusCode)
             {
                 Log.Warning("The update check failed (HTTP {StatusCode})", (int)response.StatusCode);
-                return ReleaseCheck.Failed(AppUpdateFailure.Network);
+                return ReleaseCheck.Failed(GetHttpFailure(response.StatusCode));
             }
 
-            return ParseLatestRelease(await response.Content.ReadAsStringAsync());
+            return ParseLatestRelease(await response.Content.ReadAsStringAsync(cancellation.Token));
         }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+        {
+            Log.Information("The update check was cancelled");
+            return new ReleaseCheck(AppUpdateStatus.NotChecked);
+        }
+        catch (HttpRequestException exception)
         {
             Log.Warning(exception, "The update check failed");
             return ReleaseCheck.Failed(AppUpdateFailure.Network);
         }
+        finally
+        {
+            _checkCancellation = null;
+        }
+    }
+
+    /// <summary>GitHubが5xxを返したならサーバーの側、それ以外(応答が無いときも)は接続の側として知らせる。</summary>
+    private static AppUpdateFailure GetHttpFailure(HttpStatusCode? statusCode)
+    {
+        return (int?)statusCode >= 500 ? AppUpdateFailure.Server : AppUpdateFailure.Network;
     }
 
     private static ReleaseCheck ParseLatestRelease(string json)
@@ -263,7 +287,6 @@ public static class AppUpdateService
                     AppUpdateStatus.Available,
                     new AppRelease(
                         version,
-                        root.GetProperty("html_url").GetString()!,
                         asset.GetProperty("browser_download_url").GetString()!,
                         digest[Sha256DigestPrefix.Length..],
                         asset.GetProperty("size").GetInt64()));
@@ -297,7 +320,7 @@ public static class AppUpdateService
     {
         var completion = new TaskCompletionSource<bool>();
         OwnerModalWindow.RunWhenNotMovingOrSizing(
-            () => completion.SetResult(UpdateConfirmMessage.Show(owner, release.Version, release.PageUrl)));
+            () => completion.SetResult(UpdateConfirmMessage.Show(owner, release.Version)));
         return completion.Task;
     }
 
@@ -335,7 +358,7 @@ public static class AppUpdateService
         catch (HttpRequestException exception)
         {
             Log.Error(exception, "Could not download the update");
-            failure = AppUpdateFailure.Network;
+            failure = GetHttpFailure(exception.StatusCode);
         }
         catch (InvalidDataException exception)
         {
@@ -384,21 +407,28 @@ public static class AppUpdateService
         }, cancellationToken);
 
         window.ShowStatus("Update_Progress_Downloading");
+        window.ShowProgress(0, FormatDownloadSize(0, release.PackageSize));
         var downloadProgress = new Progress<(long Done, long Total)>(value => window.ShowProgress(
             (double)value.Done / value.Total,
-            LocalizationManager.Instance.Format(
-                "Update_Progress_Size",
-                value.Done / BytesPerMegabyte,
-                value.Total / BytesPerMegabyte)));
+            FormatDownloadSize(value.Done, value.Total)));
         await Task.Run(() => DownloadPackageAsync(release, packagePath, downloadProgress, cancellationToken), cancellationToken);
 
         window.ShowStatus("Update_Progress_Extracting");
+        window.ShowProgress(0);
         var extractProgress = new Progress<double>(ratio => window.ShowProgress(ratio));
         await Task.Run(() => ExtractPackage(packagePath, newDirectory, extractProgress, cancellationToken), cancellationToken);
 
         // ここから先は取り消せない。
         window.DisableCancel();
         return await StartNewVersionAsync(newDirectory);
+    }
+
+    private static string FormatDownloadSize(long done, long total)
+    {
+        return LocalizationManager.Instance.Format(
+            "Update_Progress_Size",
+            done / BytesPerMegabyte,
+            total / BytesPerMegabyte);
     }
 
     /// <summary>zipを取り、GitHubが返すSHA-256と照らす。合わなければ止める。</summary>
@@ -408,7 +438,7 @@ public static class AppUpdateService
         IProgress<(long Done, long Total)> progress,
         CancellationToken cancellationToken)
     {
-        using var response = await DownloadClient.GetAsync(release.PackageUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+        using var response = await Client.GetAsync(release.PackageUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
 
         var total = response.Content.Headers.ContentLength ?? release.PackageSize;
@@ -556,7 +586,7 @@ public static class AppUpdateService
     }
 
     /// <summary>最新のリリース。<paramref name="PackageSha256"/> はzipのSHA-256(16進)。</summary>
-    private sealed record AppRelease(Version Version, string PageUrl, string PackageUrl, string PackageSha256, long PackageSize);
+    private sealed record AppRelease(Version Version, string PackageUrl, string PackageSha256, long PackageSize);
 
     private sealed record ReleaseCheck(AppUpdateStatus Status, AppRelease? Release = null, AppUpdateFailure? Failure = null)
     {

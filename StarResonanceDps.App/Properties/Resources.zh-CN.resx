@@ -412,7 +412,7 @@
     <value>Windows启动时运行应用</value>
   </data>
   <data name="Settings_Startup_CheckForUpdates" xml:space="preserve">
-    <value>启动时检查更新</value>
+    <value>应用启动时检查更新</value>
   </data>
   <data name="Settings_Startup_StartHotkeyHelper" xml:space="preserve">
     <value>应用启动时运行快捷键辅助程序</value>
@@ -471,6 +471,25 @@
   <data name="PluginAlreadyAdded_Message" xml:space="preserve">
     <value>此插件已添加。</value>
   </data>
+  <data name="PluginUpdate_Title" xml:space="preserve">
+    <value>插件更新</value>
+  </data>
+  <data name="PluginUpdate_Message" xml:space="preserve">
+    <value>将把{0}更新到v{1}。</value>
+  </data>
+  <data name="PluginUpdate_Detail" xml:space="preserve">
+    <value>将在重新启动应用时更新。
+设置会保留。</value>
+  </data>
+  <data name="PluginUpdateFailed_Title" xml:space="preserve">
+    <value>插件更新错误</value>
+  </data>
+  <data name="PluginUpdateFailed_Message" xml:space="preserve">
+    <value>无法更新插件。</value>
+  </data>
+  <data name="PluginUpdateFailed_Detail" xml:space="preserve">
+    <value>请退出应用，将所选DLL所在文件夹中的内容覆盖到Plugins文件夹中的{0}文件夹后，重新启动应用。</value>
+  </data>
   <data name="PluginError_Title" xml:space="preserve">
     <value>插件错误</value>
   </data>
@@ -522,6 +541,9 @@
   <data name="PluginStatus_PendingDeletion" xml:space="preserve">
     <value>重启后删除</value>
   </data>
+  <data name="PluginStatus_PendingUpdate" xml:space="preserve">
+    <value>重启后更新</value>
+  </data>
   <data name="PluginStatus_MissingFiles" xml:space="preserve">
     <value>找不到必要的文件({0})</value>
   </data>
@@ -545,6 +567,9 @@
   </data>
   <data name="PluginStatus_DeletionFailed" xml:space="preserve">
     <value>无法删除，下次启动时会再次删除</value>
+  </data>
+  <data name="PluginStatus_UpdateFailed" xml:space="preserve">
+    <value>无法更新，下次启动时会再次更新</value>
   </data>
   <data name="Confirm_UninstallPlugin_Title" xml:space="preserve">
     <value>删除插件</value>
@@ -638,23 +663,20 @@
     <value>将关闭应用进行更新，然后重新启动。
 设置和历史记录会保留。</value>
   </data>
-  <data name="Update_Confirm_ReleaseNotes" xml:space="preserve">
-    <value>打开更新日志</value>
-  </data>
   <data name="Update_Progress_Downloading" xml:space="preserve">
-    <value>正在下载</value>
+    <value>正在下载…</value>
   </data>
   <data name="Update_Progress_Extracting" xml:space="preserve">
-    <value>正在解压</value>
+    <value>正在解压…</value>
   </data>
   <data name="Update_Progress_WaitingForExit" xml:space="preserve">
-    <value>正在等待应用关闭</value>
+    <value>正在等待应用关闭…</value>
   </data>
   <data name="Update_Progress_WaitingForFiles" xml:space="preserve">
-    <value>正在等待占用的文件释放</value>
+    <value>正在等待占用的文件释放…</value>
   </data>
   <data name="Update_Progress_Replacing" xml:space="preserve">
-    <value>正在替换文件</value>
+    <value>正在替换文件…</value>
   </data>
   <data name="Update_Progress_Size" xml:space="preserve">
     <value>{0:0.0} / {1:0.0} MB</value>
@@ -677,17 +699,21 @@
   <data name="Update_Error_Network" xml:space="preserve">
     <value>请检查网络连接后重试。</value>
   </data>
+  <data name="Update_Error_Server" xml:space="preserve">
+    <value>GitHub服务器没有响应。
+请稍后重试。</value>
+  </data>
   <data name="Update_Error_RateLimit" xml:space="preserve">
     <value>GitHub访问暂时受限。
 请稍后重试。</value>
   </data>
   <data name="Update_Error_InvalidRelease" xml:space="preserve">
     <value>无法读取发行版信息。
-请从发行版页面下载zip并覆盖到应用文件夹。</value>
+请从更新日志下载zip并覆盖到应用文件夹。</value>
   </data>
   <data name="Update_Error_NotFromZip" xml:space="preserve">
     <value>此应用不是通过发行版zip安装的，无法在应用内更新。
-请从发行版页面下载zip。</value>
+请从更新日志下载zip。</value>
   </data>
   <data name="Update_Error_Corrupt" xml:space="preserve">
     <value>下载的文件已损坏。
@@ -706,10 +732,10 @@
   </data>
   <data name="Update_Error_RestoreFailed" xml:space="preserve">
     <value>无法恢复到原来的版本。
-请从发行版页面下载zip并覆盖到应用文件夹。</value>
+请从更新日志下载zip并覆盖到应用文件夹。</value>
   </data>
-  <data name="Update_OpenReleasesPage" xml:space="preserve">
-    <value>打开发行版页面</value>
+  <data name="Update_OpenReleaseNotes" xml:space="preserve">
+    <value>打开更新日志</value>
   </data>
   <data name="Update_RestartFailed_Message" xml:space="preserve">
     <value>已更新，但无法重新启动。</value>

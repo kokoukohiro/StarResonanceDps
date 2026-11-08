@@ -52,7 +52,10 @@
 **同梱のプラグイン**
 
 - [ただのモジュールツール](ただのモジュールツール)
-- [BPSR：パッド勢を救いたい](BPSR：パッド勢を救いたい)
+
+**そのほかのプラグイン**
+
+- [BPSR：パッド勢を救いたい](https://github.com/kokoukohiro/BPSRControllerHelper)
 
 **困ったとき**
 

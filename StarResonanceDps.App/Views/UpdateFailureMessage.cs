@@ -4,7 +4,7 @@ using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.Views;
 
-/// <summary>更新の確認や置き換えができなかったことを出す。詳細は理由か直し方で、zipの取得が直し方ならリリースのページのリンクも入れる。</summary>
+/// <summary>更新の確認や置き換えができなかったことを出す。詳細は理由か直し方で、zipの取得が直し方ならリリースノートのリンクも入れる。</summary>
 public static class UpdateFailureMessage
 {
     public static void ShowCheckFailed(Window? owner, AppUpdateFailure failure)
@@ -43,7 +43,7 @@ public static class UpdateFailureMessage
                 message,
                 [
                     new MessageDetailPart(detail + Environment.NewLine),
-                    new MessageDetailPart(localization.GetString("Update_OpenReleasesPage"), ProjectLinks.ReleasesUrl)
+                    new MessageDetailPart(localization.GetString("Update_OpenReleaseNotes"), ProjectLinks.ReleasesUrl)
                 ]);
             return;
         }
@@ -56,6 +56,7 @@ public static class UpdateFailureMessage
         return failure switch
         {
             AppUpdateFailure.Network => "Update_Error_Network",
+            AppUpdateFailure.Server => "Update_Error_Server",
             AppUpdateFailure.RateLimit => "Update_Error_RateLimit",
             AppUpdateFailure.InvalidRelease => "Update_Error_InvalidRelease",
             AppUpdateFailure.NotFromZip => "Update_Error_NotFromZip",

@@ -42,14 +42,19 @@ public enum PluginErrorReason
 
     /// <summary>アンインストールの印があるのにフォルダを消せなかった。次の起動でまた消す。</summary>
     DeletionFailed,
+
+    /// <summary>待っている更新を置き換えられなかった。次の起動でまた置き換える。</summary>
+    UpdateFailed,
 }
 
 /// <summary>一覧の行1つの状態。</summary>
 /// <param name="ErrorReason"><see cref="PluginRowState.Error"/> のときだけ値がある。</param>
 /// <param name="MissingFiles"><see cref="PluginErrorReason.MissingFiles"/> のときの、足りないファイルの名前。</param>
 /// <param name="CanUninstall">ゴミ箱を押せるか。削除を待っている行と、削除できなかった行(次の起動でまた消す)は押せない。</param>
+/// <param name="IsUpdatePending">新しいバージョンを選び、次の起動での置き換えを待っている。</param>
 public sealed record PluginStatus(
     PluginRowState RowState,
     PluginErrorReason? ErrorReason,
     IReadOnlyList<string> MissingFiles,
-    bool CanUninstall);
+    bool CanUninstall,
+    bool IsUpdatePending);

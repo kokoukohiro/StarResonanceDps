@@ -55,6 +55,9 @@ public sealed partial class PluginListItemViewModel : ViewModelBase
     [NotifyCanExecuteChangedFor(nameof(UninstallCommand))]
     private bool _canUninstall;
 
+    [ObservableProperty]
+    private bool _isUpdatePending;
+
     /// <summary>「エラー」のピルの TIPS(理由)。エラーでなければ空。</summary>
     [ObservableProperty]
     private string _statusToolTip = string.Empty;
@@ -88,6 +91,7 @@ public sealed partial class PluginListItemViewModel : ViewModelBase
         _status = PluginManager.Instance.GetStatus(PluginKey);
         RowState = _status.RowState;
         CanUninstall = _status.CanUninstall;
+        IsUpdatePending = _status.IsUpdatePending;
         StatusToolTip = FormatStatusToolTip(_status);
     }
 
@@ -105,6 +109,7 @@ public sealed partial class PluginListItemViewModel : ViewModelBase
             PluginErrorReason.PacketBacklog => localization.GetString("PluginStatus_PacketBacklog"),
             PluginErrorReason.TerminatedApp => localization.GetString("PluginStatus_TerminatedApp"),
             PluginErrorReason.DeletionFailed => localization.GetString("PluginStatus_DeletionFailed"),
+            PluginErrorReason.UpdateFailed => localization.GetString("PluginStatus_UpdateFailed"),
             _ => throw new ArgumentOutOfRangeException(nameof(status), status.ErrorReason, "Unknown plugin error reason."),
         };
     }

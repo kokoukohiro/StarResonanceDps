@@ -15,7 +15,7 @@ namespace StarResonanceDps.App.DebugTools;
 /// <summary>
 /// アプリのメッセージウィンドウ・確認ウィンドウを、エラーを起こさずに出して見た目を確かめる。Debug の構成でだけビルドされる。
 /// 本物の呼び出しと同じ文言の鍵の組を並べてある。本物の窓を足したり本文と詳細の分け方を変えたら、ここも直す。
-/// キーバインドツール・モジュールツールの窓は、プラグインの文言(<see cref="PluginLocalizer"/>)を引き、プラグインの文が通る本体側の表示(<see cref="PluginMessageService"/>)で出す。
+/// モジュールツールの窓は、プラグインの文言(<see cref="PluginLocalizer"/>)を引き、プラグインの文が通る本体側の表示(<see cref="PluginMessageService"/>)で出す。
 /// </summary>
 public partial class MessagePreviewWindow : Window
 {
@@ -24,19 +24,14 @@ public partial class MessagePreviewWindow : Window
     // 「設定できませんでした(エラー N)」の文を出すための試しの値。
     private const int SampleOtherError = 5;
 
-    // 一部を保存できなかったときの行を出すための試しの値。
-    private const int SampleRelativeOffset = 0x120;
-    private const uint SampleControllerInputType = 0x00000003u;
-    private const uint SampleStateValue = 0u;
-
     // 更新の進み具合の窓を出すための試しの値。
     private const double SampleUpdateRatio = 0.4;
     private const double SampleUpdateDoneMegabytes = 21.8;
     private const double SampleUpdateTotalMegabytes = 54.6;
 
-    private const string KeybindAssemblyName = "KeybindTool";
-    private const string KeybindResourceBaseName = "StarResonanceDps.Plugins.KeybindTool.Properties.Resources";
-    private const string KeybindLayoutFileName = "keybind_config.json";
+    // プラグインの更新の窓を出すための試しの値。
+    private const string SamplePluginVersion = "2.0.1";
+
     private const string ModuleAssemblyName = "ModuleTool";
     private const string ModuleResourceBaseName = "StarResonanceDps.Plugins.ModuleTool.Properties.Resources";
     private const string ModuleConfigFileName = "module_config.json";
@@ -44,7 +39,6 @@ public partial class MessagePreviewWindow : Window
     private readonly PluginMessageService _pluginMessages = new();
     private readonly PluginLocalizationService _pluginLocalization = new(new PluginCallGuard((operation, exception) =>
         Log.Error(exception, "[MessagePreview] {Operation} failed", operation)));
-    private PluginLocalizer? _keybindTexts;
     private PluginLocalizer? _moduleTexts;
 
     public MessagePreviewWindow()
@@ -52,7 +46,6 @@ public partial class MessagePreviewWindow : Window
         InitializeComponent();
         Closed += (_, _) =>
         {
-            _keybindTexts?.Dispose();
             _moduleTexts?.Dispose();
             _pluginLocalization.Detach();
         };
@@ -60,20 +53,12 @@ public partial class MessagePreviewWindow : Window
 
     private static LocalizationManager Localization => LocalizationManager.Instance;
 
-    private PluginLocalizer KeybindTexts => _keybindTexts ??= new PluginLocalizer(
-        _pluginLocalization,
-        LoadPluginAssembly(KeybindAssemblyName),
-        KeybindResourceBaseName);
-
     private PluginLocalizer ModuleTexts => _moduleTexts ??= new PluginLocalizer(
         _pluginLocalization,
         LoadPluginAssembly(ModuleAssemblyName),
         ModuleResourceBaseName);
 
-    // キーバインドツールが使う設定ファイルの場所(プラグインの設定は本体がプラグインのフォルダに置く)。
-    private static string KeybindLayoutFilePath => Path.Combine(AppDataPaths.PluginsDirectory, KeybindAssemblyName, KeybindLayoutFileName);
-
-    // モジュールツールが使う設定ファイルの場所。
+    // モジュールツールが使う設定ファイルの場所(プラグインの設定は本体がプラグインのフォルダに置く)。
     private static string ModuleConfigFilePath => Path.Combine(AppDataPaths.PluginsDirectory, ModuleAssemblyName, ModuleConfigFileName);
 
     // 本物: 起動時(実行フォルダの Data に書けないとき)。場所は実際の Data のフォルダ。
@@ -103,7 +88,7 @@ public partial class MessagePreviewWindow : Window
     // 本物: 新しいバージョンがあるとき(起動時・ヘルプタブの「更新を確認」)。バージョンは今のもの。
     private void UpdateConfirm_Click(object sender, RoutedEventArgs e)
     {
-        _ = UpdateConfirmMessage.Show(this, AppUpdateService.CurrentVersion, ProjectLinks.ReleasesUrl);
+        _ = UpdateConfirmMessage.Show(this, AppUpdateService.CurrentVersion);
     }
 
     // 本物: 更新の取得と置き換えの進み具合。キャンセルで閉じる。
@@ -152,22 +137,34 @@ public partial class MessagePreviewWindow : Window
         PluginAddFailureMessage.ShowCannotPlaceFile(this);
     }
 
-    // 本物: メイン画面のプラグインの一覧の「＋」(同じフォルダ・同じIDのプラグインがすでにあるとき)
+    // 本物: メイン画面のプラグインの一覧の「＋」(同じプラグインの、同じか古いバージョンを選んだとき)
     private void PluginAlreadyAdded_Click(object sender, RoutedEventArgs e)
     {
         PluginAlreadyAddedMessage.Show(this);
     }
 
-    // 本物: メイン画面のプラグインの一覧の「＋」(プラグインが使うファイルが選んだDLLのフォルダに無いとき)。ファイル名は同梱のプラグインのもの。
+    // 本物: メイン画面のプラグインの一覧の「＋」(プラグインが使うファイルが選んだDLLのフォルダに無いとき)。ファイル名は同梱のプラグインとサンプルのもの。
     private void PluginAddFailedMissingDependency_Click(object sender, RoutedEventArgs e)
     {
-        PluginAddFailureMessage.ShowMissingFiles(this, [KeybindAssemblyName + ".dll", ModuleAssemblyName + ".dll"]);
+        PluginAddFailureMessage.ShowMissingFiles(this, [ModuleAssemblyName + ".dll", "SampleDependency.Library.dll"]);
     }
 
     // 本物: メイン画面のプラグインの一覧の「＋」(同じプラグインがアンインストールして削除を待っているとき)
     private void PluginAddFailedPendingDeletion_Click(object sender, RoutedEventArgs e)
     {
         PluginAddFailureMessage.ShowPendingDeletion(this);
+    }
+
+    // 本物: メイン画面のプラグインの一覧の「＋」(同じプラグインの新しいバージョンを選んだとき)。名前は今の一覧の最初のプラグイン。
+    private void PluginUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        PluginUpdateMessage.ShowPending(this, PluginNames[0], SamplePluginVersion);
+    }
+
+    // 本物: メイン画面のプラグインの一覧の「＋」(新しいバージョンのファイルを写せなかったとき)。フォルダは今の一覧の最初のプラグイン。
+    private void PluginUpdateFailed_Click(object sender, RoutedEventArgs e)
+    {
+        PluginUpdateMessage.ShowFailed(this, PluginManager.Instance.DiscoverPlugins()[0].Key);
     }
 
     // 本物: メイン画面のプラグインの一覧のゴミ箱。名前は今の一覧の最初のプラグイン。
@@ -355,145 +352,6 @@ public partial class MessagePreviewWindow : Window
     private void HistoryLoadFailed_Click(object sender, RoutedEventArgs e)
     {
         HistoryLoadFailureMessage.Show(this);
-    }
-
-    // 本物: キーバインドツール(ファイルの場所を開くとき、フォルダが無い)
-    private void KeybindDirectoryNotFound_Click(object sender, RoutedEventArgs e)
-    {
-        ShowKeybindMessage(
-            "Keybind.Message.Title.OpenLocationError",
-            "Keybind.Message.DirectoryNotFound",
-            Path.GetDirectoryName(KeybindLayoutFilePath));
-    }
-
-    // 本物: キーバインドツール(ファイルの場所を開けなかった)
-    private void KeybindOpenDirectoryFailed_Click(object sender, RoutedEventArgs e)
-    {
-        ShowKeybindMessage(
-            "Keybind.Message.Title.OpenLocationError",
-            "Keybind.Message.OpenDirectoryFailed",
-            KeybindTexts["Keybind.Message.OpenDirectoryFailedDetail"]);
-    }
-
-    // 本物: キーバインドツール(確認/キャンセルを編集できない設定ファイル)
-    private void KeybindPresetUnavailable_Click(object sender, RoutedEventArgs e)
-    {
-        ShowKeybindMessage(
-            "Keybind.Message.Title.PresetUnavailable",
-            "Keybind.Message.PresetUnavailableBody",
-            KeybindTexts["Keybind.Message.PresetUnavailableDetail"]);
-    }
-
-    // 本物: キーバインドツール(設定ファイルを読み込めなかった)
-    private void KeybindLoadError_Click(object sender, RoutedEventArgs e)
-    {
-        ShowKeybindMessage(
-            "Keybind.Message.Title.LoadError",
-            "Keybind.Message.LoadErrorBody",
-            KeybindTexts["Keybind.Message.LoadErrorDetail"]);
-    }
-
-    // 本物: キーバインドツール(キー設定プリセットが無い)
-    private void KeybindLayoutFileMissing_Click(object sender, RoutedEventArgs e)
-    {
-        ShowKeybindMessage(
-            "Keybind.Message.Title.LayoutLoadError",
-            "Keybind.Message.LayoutFileMissing",
-            KeybindLayoutFilePath);
-    }
-
-    // 本物: キーバインドツール(キー設定プリセットを読み込んだ)
-    private void KeybindLayoutLoaded_Click(object sender, RoutedEventArgs e)
-    {
-        ShowKeybindMessage(
-            "Keybind.Message.Title.LayoutLoaded",
-            "Keybind.Message.LayoutLoadedBody",
-            KeybindTexts["Keybind.Message.LayoutLoadedDetail"]);
-    }
-
-    // 本物: キーバインドツール(キー設定プリセットを読み込めなかった。読み込みのボタンと起動時)
-    private void KeybindLayoutLoadFailed_Click(object sender, RoutedEventArgs e)
-    {
-        ShowKeybindMessage(
-            "Keybind.Message.Title.LayoutLoadError",
-            "Keybind.Message.LayoutLoadFailedBody",
-            KeybindTexts["Keybind.Message.LayoutLoadFailedDetail"]);
-    }
-
-    // 本物: キーバインドツール(設定ファイルを選ばずに保存した)
-    private void KeybindSelectFileFirst_Click(object sender, RoutedEventArgs e)
-    {
-        ShowKeybindMessage(
-            "Keybind.Message.Title.SaveError",
-            "Keybind.Message.SelectFileFirst",
-            KeybindTexts["Keybind.Message.SelectFileFirstSaveDetail"]);
-    }
-
-    // 本物: キーバインドツール(未設定のキーがある)。一覧はプラグインと同じ書式で2行。
-    private void KeybindIncompleteSettings_Click(object sender, RoutedEventArgs e)
-    {
-        var controller = KeybindTexts["Keybind.InputDevice.Controller"];
-        var lines = new[]
-        {
-            KeybindTexts.Format("Keybind.Message.IncompleteSettingsItem", controller, KeybindTexts["Keybind.Label.Helper1"]),
-            KeybindTexts.Format("Keybind.Message.IncompleteSettingsItem", controller, KeybindTexts["Keybind.Label.Helper2"])
-        };
-        ShowKeybindMessage(
-            "Keybind.Message.Title.SaveError",
-            "Keybind.Message.IncompleteSettings",
-            string.Join(Environment.NewLine, lines));
-    }
-
-    // 本物: キーバインドツール(一部のキーを保存できなかった)。一覧はプラグインと同じ書式と末尾の2行。
-    private void KeybindPartialSave_Click(object sender, RoutedEventArgs e)
-    {
-        var lines = new[]
-        {
-            KeybindTexts.Format(
-                "Keybind.Message.PartialSaveTarget",
-                KeybindTexts["Keybind.InputDevice.Controller"],
-                KeybindTexts["Keybind.Group.Main"],
-                KeybindTexts["Keybind.Action.Main.Abilities"]),
-            KeybindTexts.Format(
-                "Keybind.Message.PartialSaveControllerOffset",
-                SampleRelativeOffset,
-                SampleControllerInputType,
-                SampleStateValue),
-            string.Empty,
-            KeybindTexts["Keybind.Message.PartialSaveRecovery"],
-            KeybindTexts["Keybind.Message.PartialSaveNote"]
-        };
-        ShowKeybindMessage(
-            "Keybind.Message.Title.PartialSave",
-            "Keybind.Message.PartialSaveIntro",
-            string.Join(Environment.NewLine, lines));
-    }
-
-    // 本物: キーバインドツール(キー設定プリセットを作成した)
-    private void KeybindSaveCompleted_Click(object sender, RoutedEventArgs e)
-    {
-        ShowKeybindMessage(
-            "Keybind.Message.Title.SaveCompleted",
-            "Keybind.Message.SaveCompletedBody",
-            KeybindLayoutFilePath);
-    }
-
-    // 本物: キーバインドツール(書き込めなかった)
-    private void KeybindSaveError_Click(object sender, RoutedEventArgs e)
-    {
-        ShowKeybindMessage(
-            "Keybind.Message.Title.SaveError",
-            "Keybind.Message.SaveErrorBody",
-            KeybindTexts["Keybind.Message.SaveErrorDetail"]);
-    }
-
-    // プラグインの ShowMessageWithDetail と同じく、空の詳細は渡さない。
-    private void ShowKeybindMessage(string titleKey, string messageKey, string? detail)
-    {
-        _pluginMessages.Show(
-            KeybindTexts[titleKey],
-            KeybindTexts[messageKey],
-            string.IsNullOrWhiteSpace(detail) ? null : detail);
     }
 
     // 本物: モジュールツール(組み合わせの検索で例外が出た)

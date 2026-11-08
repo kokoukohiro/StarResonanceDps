@@ -158,6 +158,7 @@ internal static class AppUpdateApplier
 
         window.DisableCancel();
         window.ShowStatus("Update_Progress_Replacing");
+        window.ShowProgress(0);
         var progress = new Progress<double>(ratio => window.ShowProgress(ratio));
         return await Task.Run(() => plan.Apply(progress));
     }

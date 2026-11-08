@@ -412,7 +412,7 @@ Restart VOICEVOX.</value>
     <value>Launch app when Windows starts</value>
   </data>
   <data name="Settings_Startup_CheckForUpdates" xml:space="preserve">
-    <value>Check for updates at startup</value>
+    <value>Check for updates at app startup</value>
   </data>
   <data name="Settings_Startup_StartHotkeyHelper" xml:space="preserve">
     <value>Launch hotkey helper at app startup</value>
@@ -471,6 +471,25 @@ Restart VOICEVOX.</value>
   <data name="PluginAlreadyAdded_Message" xml:space="preserve">
     <value>This plugin has already been added.</value>
   </data>
+  <data name="PluginUpdate_Title" xml:space="preserve">
+    <value>Plugin Update</value>
+  </data>
+  <data name="PluginUpdate_Message" xml:space="preserve">
+    <value>{0} will be updated to v{1}.</value>
+  </data>
+  <data name="PluginUpdate_Detail" xml:space="preserve">
+    <value>The update is applied when you restart the app.
+Its settings are kept.</value>
+  </data>
+  <data name="PluginUpdateFailed_Title" xml:space="preserve">
+    <value>Plugin Update Error</value>
+  </data>
+  <data name="PluginUpdateFailed_Message" xml:space="preserve">
+    <value>Could not update the plugin.</value>
+  </data>
+  <data name="PluginUpdateFailed_Detail" xml:space="preserve">
+    <value>Close the app, copy the contents of the selected DLL's folder over the {0} folder in the Plugins folder, then start the app again.</value>
+  </data>
   <data name="PluginError_Title" xml:space="preserve">
     <value>Plugin Error</value>
   </data>
@@ -522,6 +541,9 @@ Restart the app, then add it again.</value>
   <data name="PluginStatus_PendingDeletion" xml:space="preserve">
     <value>Deleted on restart</value>
   </data>
+  <data name="PluginStatus_PendingUpdate" xml:space="preserve">
+    <value>Updated on restart</value>
+  </data>
   <data name="PluginStatus_MissingFiles" xml:space="preserve">
     <value>Required files are missing ({0}).</value>
   </data>
@@ -545,6 +567,9 @@ Restart the app, then add it again.</value>
   </data>
   <data name="PluginStatus_DeletionFailed" xml:space="preserve">
     <value>Could not be deleted; it is deleted again the next time the app starts.</value>
+  </data>
+  <data name="PluginStatus_UpdateFailed" xml:space="preserve">
+    <value>Could not be updated; it is updated again the next time the app starts.</value>
   </data>
   <data name="Confirm_UninstallPlugin_Title" xml:space="preserve">
     <value>Delete plugin</value>
@@ -638,23 +663,20 @@ Its settings will also be deleted.</value>
     <value>The app will close, update, and restart.
 Your settings and history are kept.</value>
   </data>
-  <data name="Update_Confirm_ReleaseNotes" xml:space="preserve">
-    <value>Open the release notes</value>
-  </data>
   <data name="Update_Progress_Downloading" xml:space="preserve">
-    <value>Downloading</value>
+    <value>Downloading…</value>
   </data>
   <data name="Update_Progress_Extracting" xml:space="preserve">
-    <value>Extracting</value>
+    <value>Extracting…</value>
   </data>
   <data name="Update_Progress_WaitingForExit" xml:space="preserve">
-    <value>Waiting for the app to close</value>
+    <value>Waiting for the app to close…</value>
   </data>
   <data name="Update_Progress_WaitingForFiles" xml:space="preserve">
-    <value>Waiting for files in use to be released</value>
+    <value>Waiting for files in use to be released…</value>
   </data>
   <data name="Update_Progress_Replacing" xml:space="preserve">
-    <value>Replacing files</value>
+    <value>Replacing files…</value>
   </data>
   <data name="Update_Progress_Size" xml:space="preserve">
     <value>{0:0.0} / {1:0.0} MB</value>
@@ -677,17 +699,21 @@ Your settings and history are kept.</value>
   <data name="Update_Error_Network" xml:space="preserve">
     <value>Check your internet connection and try again.</value>
   </data>
+  <data name="Update_Error_Server" xml:space="preserve">
+    <value>GitHub's server did not respond.
+Try again later.</value>
+  </data>
   <data name="Update_Error_RateLimit" xml:space="preserve">
     <value>Access to GitHub is temporarily limited.
 Try again later.</value>
   </data>
   <data name="Update_Error_InvalidRelease" xml:space="preserve">
     <value>Could not read the release information.
-Download the zip from the releases page and overwrite the app folder.</value>
+Download the zip from the release notes and overwrite the app folder.</value>
   </data>
   <data name="Update_Error_NotFromZip" xml:space="preserve">
     <value>This copy was not installed from a release zip, so it cannot update itself.
-Download the zip from the releases page.</value>
+Download the zip from the release notes.</value>
   </data>
   <data name="Update_Error_Corrupt" xml:space="preserve">
     <value>The downloaded file was corrupted.
@@ -706,10 +732,10 @@ Close other apps using the app folder and try again.</value>
   </data>
   <data name="Update_Error_RestoreFailed" xml:space="preserve">
     <value>The previous version could not be restored.
-Download the zip from the releases page and overwrite the app folder.</value>
+Download the zip from the release notes and overwrite the app folder.</value>
   </data>
-  <data name="Update_OpenReleasesPage" xml:space="preserve">
-    <value>Open the releases page</value>
+  <data name="Update_OpenReleaseNotes" xml:space="preserve">
+    <value>Open the release notes</value>
   </data>
   <data name="Update_RestartFailed_Message" xml:space="preserve">
     <value>Updated, but the app could not restart.</value>

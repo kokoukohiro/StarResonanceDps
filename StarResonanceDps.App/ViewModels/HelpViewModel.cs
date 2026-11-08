@@ -16,6 +16,10 @@ public sealed partial class HelpViewModel : ObservableObject
     [ObservableProperty]
     private string _versionText = string.Empty;
 
+    /// <summary>更新のボタンの文字。確認の途中は「キャンセル」。</summary>
+    [ObservableProperty]
+    private string _checkForUpdatesText = string.Empty;
+
     public HelpViewModel()
     {
         RefreshTexts();
@@ -38,17 +42,19 @@ public sealed partial class HelpViewModel : ObservableObject
         VersionText = statusKey is null
             ? version
             : localization.Format("Help_VersionWithStatus", version, localization.GetString(statusKey));
-        CheckForUpdatesCommand.NotifyCanExecuteChanged();
+        CheckForUpdatesText = localization.GetString(AppUpdateService.IsChecking ? "Common_Cancel" : "Help_CheckForUpdates");
     }
 
-    private bool CanCheckForUpdates()
-    {
-        return !AppUpdateService.IsBusy;
-    }
-
-    [RelayCommand(CanExecute = nameof(CanCheckForUpdates))]
+    /// <summary>確認の途中はキャンセルになるので、途中でも押せる。</summary>
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task CheckForUpdatesAsync()
     {
+        if (AppUpdateService.IsChecking)
+        {
+            AppUpdateService.CancelCheck();
+            return;
+        }
+
         if (Application.Current?.MainWindow is { } owner)
         {
             await AppUpdateService.CheckManuallyAsync(owner);

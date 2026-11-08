@@ -57,6 +57,7 @@
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Update_Completed" Click="UpdateCompleted_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Update_CheckError" Click="UpdateCheckError_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Update_Error_Network" Tag="{x:Static services:AppUpdateFailure.Network}" Click="UpdateError_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Update_Error_Server" Tag="{x:Static services:AppUpdateFailure.Server}" Click="UpdateError_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Update_Error_RateLimit" Tag="{x:Static services:AppUpdateFailure.RateLimit}" Click="UpdateError_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Update_Error_InvalidRelease" Tag="{x:Static services:AppUpdateFailure.InvalidRelease}" Click="UpdateError_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Update_Error_NotFromZip" Tag="{x:Static services:AppUpdateFailure.NotFromZip}" Click="UpdateError_Click" />
@@ -95,6 +96,8 @@
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginAlreadyAdded" Click="PluginAlreadyAdded_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginAddFailed_MissingDependency" Click="PluginAddFailedMissingDependency_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginAddFailed_PendingDeletion" Click="PluginAddFailedPendingDeletion_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginUpdate" Click="PluginUpdate_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginUpdateFailed" Click="PluginUpdateFailed_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Confirm_UninstallPlugin" Click="ConfirmUninstallPlugin_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginDeleteFailed" Click="PluginDeleteFailed_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginLoadFailed" Click="PluginLoadFailed_Click" />
@@ -103,22 +106,8 @@
                         <Button Style="{StaticResource Button.Text}" Width="Auto" Content="Aggregation_LoadFailed" Click="HistoryLoadFailed_Click" />
                     </StackPanel>
 
-                    <!-- キーバインドツールの窓 -->
+                    <!-- モジュールツールの窓 -->
                     <StackPanel Grid.Column="2">
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Keybind.DirectoryNotFound" Click="KeybindDirectoryNotFound_Click" />
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Keybind.OpenDirectoryFailed" Click="KeybindOpenDirectoryFailed_Click" />
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Keybind.PresetUnavailableBody" Click="KeybindPresetUnavailable_Click" />
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Keybind.LoadErrorBody" Click="KeybindLoadError_Click" />
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Keybind.LayoutFileMissing" Click="KeybindLayoutFileMissing_Click" />
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Keybind.LayoutLoadedBody" Click="KeybindLayoutLoaded_Click" />
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Keybind.LayoutLoadFailedBody" Click="KeybindLayoutLoadFailed_Click" />
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Keybind.SelectFileFirst" Click="KeybindSelectFileFirst_Click" />
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Keybind.IncompleteSettings" Click="KeybindIncompleteSettings_Click" />
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Keybind.PartialSaveIntro" Click="KeybindPartialSave_Click" />
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Keybind.SaveCompletedBody" Click="KeybindSaveCompleted_Click" />
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Keybind.SaveErrorBody" Click="KeybindSaveError_Click" />
-
-                        <!-- モジュールツールの窓 -->
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Module.SearchError" Click="ModuleSearchError_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Module.SaveError" Click="ModuleSaveError_Click" />
                         <Button Style="{StaticResource Button.Text}" Width="Auto" Content="Module.SettingsLoadError" Click="ModuleSettingsLoadError_Click" />
