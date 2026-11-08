@@ -1,4 +1,4 @@
-StarResonanceDpsの使い方のWikiです。StarResonanceDpsは、ブループロトコル：スターレゾナンスの戦闘の数値(DPSなど)を表示する非公式のツールです。
+StarResonanceDpsの使い方のWikiです。StarResonanceDpsは、『ブループロトコル：スターレゾナンス』の戦闘情報(DPSなど)を表示する非公式のツールです(Windows用)。
 
 ## はじめに
 

@@ -328,12 +328,6 @@ public partial class SettingsWindow : Window
         ScrollToSection(ThemeSection);
     }
 
-
-    private void UpdateNavButton_Click(object sender, RoutedEventArgs e)
-    {
-        ScrollToSection(UpdateSection);
-    }
-
     private void ResetButton_Click(object sender, RoutedEventArgs e)
     {
         var confirmed = ConfirmWindow.Show(

@@ -10,8 +10,6 @@ namespace StarResonanceDps.App.Views;
 
 public partial class ManagerView : UserControl
 {
-    private const string HelpUrl = "https://github.com/kokoukohiro/StarResonanceDps";
-
     private bool _isSyncingExternalScrollBar;
 
     public ManagerView()
@@ -23,6 +21,8 @@ public partial class ManagerView : UserControl
         AggregationContent.ContentScrollViewer.SizeChanged += ContentScrollViewer_SizeChanged;
         PluginsContent.ContentScrollViewer.ScrollChanged += ContentScrollViewer_ScrollChanged;
         PluginsContent.ContentScrollViewer.SizeChanged += ContentScrollViewer_SizeChanged;
+        HelpContent.ContentScrollViewer.ScrollChanged += ContentScrollViewer_ScrollChanged;
+        HelpContent.ContentScrollViewer.SizeChanged += ContentScrollViewer_SizeChanged;
         Loaded += ManagerView_Loaded;
     }
 
@@ -56,9 +56,9 @@ public partial class ManagerView : UserControl
         ShowNavigationContent(ManagerContent.Logs);
     }
 
-    private void HelpButton_Click(object sender, RoutedEventArgs e)
+    private void HelpNavigationButton_Checked(object sender, RoutedEventArgs e)
     {
-        ExternalLinkOpener.Open(HelpUrl);
+        ShowNavigationContent(ManagerContent.Help);
     }
 
     private void ShowNavigationContent(ManagerContent content)
@@ -80,6 +80,9 @@ public partial class ManagerView : UserControl
             ? Visibility.Visible
             : Visibility.Collapsed;
         LogsContent.Visibility = content == ManagerContent.Logs
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        HelpContent.Visibility = content == ManagerContent.Help
             ? Visibility.Visible
             : Visibility.Collapsed;
 
@@ -221,8 +224,13 @@ public partial class ManagerView : UserControl
             return PluginsContent.ContentScrollViewer;
         }
 
-        return LogsContent.Visibility == Visibility.Visible
-            ? LogsContent.ContentScrollViewer
+        if (LogsContent.Visibility == Visibility.Visible)
+        {
+            return LogsContent.ContentScrollViewer;
+        }
+
+        return HelpContent.Visibility == Visibility.Visible
+            ? HelpContent.ContentScrollViewer
             : null;
     }
 
@@ -232,6 +240,7 @@ public partial class ManagerView : UserControl
         Aggregation,
         Notifications,
         Plugins,
-        Logs
+        Logs,
+        Help
     }
 }

@@ -9,6 +9,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>StarResonanceDps</AssemblyName>
+    <Version>4.0.0</Version>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\Images\ApplicationIcon.ico</ApplicationIcon>
   </PropertyGroup>

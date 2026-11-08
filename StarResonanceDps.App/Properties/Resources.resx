@@ -562,6 +562,54 @@ Its settings will also be deleted.</value>
   <data name="PluginDeleteFailed_Detail" xml:space="preserve">
     <value>Close the app, then delete the {0} folder in the Plugins folder.</value>
   </data>
+  <data name="Help_Version" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+  <data name="Help_CheckForUpdates" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="Help_Intro_Summary" xml:space="preserve">
+    <value>An unofficial tool that shows combat information (such as DPS) for Blue Protocol: Star Resonance (Windows).</value>
+  </data>
+  <data name="Help_Intro_Features" xml:space="preserve">
+    <value>It shows combat in real time and lets you look back on past battles. It also supports notifications for in-combat events and extensions.</value>
+  </data>
+  <data name="Help_Intro_Notice" xml:space="preserve">
+    <value>It does not modify the game client or send combat data anywhere. Do not use the displayed numbers to defame other players or otherwise harm the community.</value>
+  </data>
+  <data name="Help_Links_Title" xml:space="preserve">
+    <value>Links</value>
+  </data>
+  <data name="Help_Usage_Title" xml:space="preserve">
+    <value>How to use</value>
+  </data>
+  <data name="Help_Usage_Description" xml:space="preserve">
+    <value>Screens and settings</value>
+  </data>
+  <data name="Help_PluginDevelopment_Title" xml:space="preserve">
+    <value>Making plugins</value>
+  </data>
+  <data name="Help_PluginDevelopment_Description" xml:space="preserve">
+    <value>Guide for developers</value>
+  </data>
+  <data name="Help_GitHub_Title" xml:space="preserve">
+    <value>GitHub</value>
+  </data>
+  <data name="Help_GitHub_Description" xml:space="preserve">
+    <value>Repository home page</value>
+  </data>
+  <data name="Help_ReleaseNotes_Title" xml:space="preserve">
+    <value>Release notes</value>
+  </data>
+  <data name="Help_ReleaseNotes_Description" xml:space="preserve">
+    <value>Changes in each version</value>
+  </data>
+  <data name="Help_Copyright" xml:space="preserve">
+    <value>Copyright © 2026 kokoukohiro (GNU GPL v3)</value>
+  </data>
+  <data name="Help_LicenseInformation" xml:space="preserve">
+    <value>License</value>
+  </data>
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>Network Adapter</value>
   </data>
@@ -688,9 +736,6 @@ Its settings will also be deleted.</value>
   <data name="Settings_Switch_Off" xml:space="preserve">
     <value>Off</value>
   </data>
-  <data name="Settings_Section_Update_Title" xml:space="preserve">
-    <value>Update</value>
-  </data>
   <data name="Settings_Language_Title" xml:space="preserve">
     <value>Language</value>
   </data>
@@ -738,12 +783,6 @@ Its settings will also be deleted.</value>
   </data>
   <data name="Settings_Theme_WindowOpacity" xml:space="preserve">
     <value>Window Opacity</value>
-  </data>
-  <data name="Settings_Update_Check_Label" xml:space="preserve">
-    <value>Check for updates</value>
-  </data>
-  <data name="Settings_Update_Check_Button" xml:space="preserve">
-    <value>Check</value>
   </data>
   <data name="ColorPicker_SelectedColor" xml:space="preserve">
     <value>Selected color</value>

@@ -108,16 +108,6 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Theme_Title]}" />
                             </StackPanel>
                         </Button>
-
-
-                        <Button x:Name="UpdateNavButton"
-                                Click="UpdateNavButton_Click"
-                                Style="{StaticResource Button.Sidebar}">
-                            <StackPanel Orientation="Horizontal">
-                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.Update}" />
-                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Update_Title]}" />
-                            </StackPanel>
-                        </Button>
                     </StackPanel>
                 </ContentControl>
 
@@ -1121,35 +1111,6 @@
                                             </Grid>
                                         </Border>
 
-                                    </StackPanel>
-                                </ContentControl>
-
-
-                                <TextBlock x:Name="UpdateSection"
-                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Update_Title]}"
-                                           Foreground="{DynamicResource Brush.TextPrimary}"
-                                           FontSize="16"
-                                           FontWeight="SemiBold"
-                                           Margin="0,0,0,10" />
-                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
-                                    <StackPanel>
-                                        <Border Style="{StaticResource Panel.SettingFieldLast}">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Update_Check_Label]}"
-                                                               Foreground="{DynamicResource Brush.TextPrimary}"
-                                                               FontSize="14"
-                                                               FontWeight="SemiBold" />
-                                                </StackPanel>
-
-                                                <Button Grid.Column="1" Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Update_Check_Button]}" Style="{StaticResource Button.Text}" />
-                                            </Grid>
-                                        </Border>
                                     </StackPanel>
                                 </ContentControl>
                                 </StackPanel>

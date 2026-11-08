@@ -88,8 +88,10 @@
                                 Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Navigation_Logs]}" />
                         </StackPanel>
                     </RadioButton>
-                    <Button Style="{DynamicResource Button.Sidebar}"
-                            Click="HelpButton_Click">
+                    <RadioButton x:Name="HelpNavigationButton"
+                                 GroupName="ManagerNavigation"
+                                 Style="{DynamicResource RadioButton.SidebarNavigation}"
+                                 Checked="HelpNavigationButton_Checked">
                         <StackPanel Orientation="Horizontal">
                             <Path
                                 Style="{DynamicResource Icon.Fill}"
@@ -99,7 +101,7 @@
                                 VerticalAlignment="Center"
                                 Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Navigation_Help]}" />
                         </StackPanel>
-                    </Button>
+                    </RadioButton>
                 </StackPanel>
 
                 <Button VerticalAlignment="Bottom" Margin="0" Style="{DynamicResource Button.Sidebar}" Click="SettingsButton_Click">
@@ -194,6 +196,7 @@
                 <views:AggregationView x:Name="AggregationContent" Visibility="Collapsed" />
                 <views:PluginsView x:Name="PluginsContent" Visibility="Collapsed" />
                 <views:LogsView x:Name="LogsContent" Visibility="Collapsed" />
+                <views:HelpView x:Name="HelpContent" Visibility="Collapsed" />
             </Grid>
         </ContentControl>
 

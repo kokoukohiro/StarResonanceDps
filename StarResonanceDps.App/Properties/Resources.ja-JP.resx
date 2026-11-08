@@ -562,6 +562,54 @@ VOICEVOXを起動し直してください。</value>
   <data name="PluginDeleteFailed_Detail" xml:space="preserve">
     <value>アプリを終了して、Pluginsフォルダの中の{0}フォルダを削除してください。</value>
   </data>
+  <data name="Help_Version" xml:space="preserve">
+    <value>バージョン {0}</value>
+  </data>
+  <data name="Help_CheckForUpdates" xml:space="preserve">
+    <value>更新を確認</value>
+  </data>
+  <data name="Help_Intro_Summary" xml:space="preserve">
+    <value>『ブループロトコル：スターレゾナンス』の戦闘情報(DPSなど)を表示する非公式のツールです(Windows用)。</value>
+  </data>
+  <data name="Help_Intro_Features" xml:space="preserve">
+    <value>戦闘の状況をリアルタイムで表示し、過去の戦闘の結果も振り返ることができます。戦闘中のできごとの通知や、機能の拡張にも対応しています。</value>
+  </data>
+  <data name="Help_Intro_Notice" xml:space="preserve">
+    <value>ゲームのクライアントを改変せず、戦闘のデータを外部へ送信することもありません。表示される数値を、他のプレイヤーへの誹謗中傷など、コミュニティの環境を損なう目的で使用しないでください。</value>
+  </data>
+  <data name="Help_Links_Title" xml:space="preserve">
+    <value>リンク</value>
+  </data>
+  <data name="Help_Usage_Title" xml:space="preserve">
+    <value>使い方</value>
+  </data>
+  <data name="Help_Usage_Description" xml:space="preserve">
+    <value>画面と設定の説明</value>
+  </data>
+  <data name="Help_PluginDevelopment_Title" xml:space="preserve">
+    <value>プラグインの作り方</value>
+  </data>
+  <data name="Help_PluginDevelopment_Description" xml:space="preserve">
+    <value>開発者向けの説明</value>
+  </data>
+  <data name="Help_GitHub_Title" xml:space="preserve">
+    <value>GitHub</value>
+  </data>
+  <data name="Help_GitHub_Description" xml:space="preserve">
+    <value>リポジトリのホームページ</value>
+  </data>
+  <data name="Help_ReleaseNotes_Title" xml:space="preserve">
+    <value>リリースノート</value>
+  </data>
+  <data name="Help_ReleaseNotes_Description" xml:space="preserve">
+    <value>バージョンごとの変更点</value>
+  </data>
+  <data name="Help_Copyright" xml:space="preserve">
+    <value>Copyright © 2026 kokoukohiro(GNU GPL v3)</value>
+  </data>
+  <data name="Help_LicenseInformation" xml:space="preserve">
+    <value>ライセンス情報</value>
+  </data>
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>ネットワークアダプター</value>
   </data>
@@ -688,9 +736,6 @@ VOICEVOXを起動し直してください。</value>
   <data name="Settings_Switch_Off" xml:space="preserve">
     <value>オフ</value>
   </data>
-  <data name="Settings_Section_Update_Title" xml:space="preserve">
-    <value>アップデート</value>
-  </data>
   <data name="Settings_Language_Title" xml:space="preserve">
     <value>言語</value>
   </data>
@@ -738,12 +783,6 @@ VOICEVOXを起動し直してください。</value>
   </data>
   <data name="Settings_Theme_WindowOpacity" xml:space="preserve">
     <value>ウィンドウの不透明度</value>
-  </data>
-  <data name="Settings_Update_Check_Label" xml:space="preserve">
-    <value>更新を確認</value>
-  </data>
-  <data name="Settings_Update_Check_Button" xml:space="preserve">
-    <value>確認</value>
   </data>
   <data name="ColorPicker_SelectedColor" xml:space="preserve">
     <value>選択中の色</value>

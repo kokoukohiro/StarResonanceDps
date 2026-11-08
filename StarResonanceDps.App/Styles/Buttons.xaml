@@ -266,7 +266,7 @@
         角丸が 外6・内5 なので、当てるのは ButtonOutline ではなく RoundedOutline のほう。
     -->
 
-    <!-- 計測 / リセット。高さは検索欄(Input.SearchFrame)に合わせてある。 -->
+    <!-- 計測・リセット・プラグインを追加、ヘルプタブの更新を確認のもと。高さは検索欄(Input.SearchFrame)に合わせてある。 -->
     <Style x:Key="Button.AggregationAction" TargetType="{x:Type Button}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="38" />
@@ -304,9 +304,6 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.InputHoverBackground}" />
                         </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.ControlActiveBackground}" />
-                        </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Cursor" Value="Arrow" />
                             <Setter Property="Opacity" Value="0.45" />
@@ -318,12 +315,12 @@
     </Style>
 
     <!--
-        履歴の1行。
+        履歴の1行。ヘルプタブのリンクの欄も同じ見た目で使う。
 
         **選択しても面の色は変えない。** 示すのは左端の帯と、行の右に出る「表示中」のピルの2つ。
 
         選択状態は行の DataContext(EncounterHistoryItem)の IsSelected をそのまま読む。
-        この行を作るのは集計タブの ItemTemplate 1か所だけなので、Tag を経由させる理由がない。
+        選択があるのは集計タブの履歴の行だけ。ヘルプタブのリンクの欄はDataContextにIsSelectedが無いので、帯は出ない。
     -->
     <Style x:Key="Button.AggregationRow" TargetType="{x:Type Button}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
