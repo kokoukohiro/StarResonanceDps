@@ -9,6 +9,7 @@ Copyright (C) 2026 kokoukohiro
 | `StarResonanceDps.PluginSdk/` | MIT License (`StarResonanceDps.PluginSdk/LICENSE`) |
 | `StarResonanceDps.PluginSdk.Analyzers/` | MIT License (`StarResonanceDps.PluginSdk.Analyzers/LICENSE`) |
 | `StarResonanceDps.Plugins.Samples/` | MIT License (`StarResonanceDps.Plugins.Samples/LICENSE`) |
+| `docs/` | MIT License (`docs/LICENSE`) |
 | Everything else | GNU General Public License version 3 only (`LICENSE`), with the additional permissions below |
 
 ## GNU General Public License version 3
