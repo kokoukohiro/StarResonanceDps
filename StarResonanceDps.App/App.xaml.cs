@@ -23,8 +23,19 @@ public partial class App : Application
     /// <summary>受け手の無い例外の窓は最初の1件だけ出す(2件目からはログだけ)。</summary>
     private static int _unhandledExceptionShown;
 
+    /// <summary>更新のモードで動いているか(<see cref="AppUpdateApplier"/>)。本体の部品は作らない。</summary>
+    private bool _isUpdateMode;
+
     protected override void OnStartup(StartupEventArgs e)
     {
+        // 更新のモードは本体を動かさない。二重起動の印は、今のバージョンが閉じてから取る。
+        if (AppUpdateApplier.TryParseApplyRequest(e.Args, out var applyRequest))
+        {
+            base.OnStartup(e);
+            RunUpdateMode(applyRequest);
+            return;
+        }
+
         if (!TryAcquireSingleInstance())
         {
             BringExistingInstanceToFront();
@@ -46,6 +57,7 @@ public partial class App : Application
 
         // ログはここから。これより後の失敗(設定・言語・テーマ・Npcap・初期化・受け手の無い例外)は全部 Data\CombatRuntime.log に残る。
         CombatRuntimeHost.ConfigureLogging();
+        AppUpdateService.CleanUpAtStartup(e.Args);
 
         var configManager = ConfigManager.Instance;
 
@@ -90,6 +102,26 @@ public partial class App : Application
         var mainWindow = StarResonanceDps.App.MainWindow.Create(npcapVersion);
         MainWindow = mainWindow;
         mainWindow.Show();
+    }
+
+    /// <summary>更新のモード。窓の言語とテーマは置き換える先の設定を読んで当てる。終わったら自分で終わる。</summary>
+    private async void RunUpdateMode(AppUpdateApplyRequest request)
+    {
+        _isUpdateMode = true;
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        try
+        {
+            CombatRuntimePaths.UseBaseDirectory(request.TargetDirectory);
+            ApplyLanguageAndTheme(ConfigManager.Instance.GetSettingsSnapshot());
+            await AppUpdateApplier.RunAsync(request, TryAcquireSingleInstance, ReleaseSingleInstance);
+            Shutdown(0);
+        }
+        catch (Exception exception)
+        {
+            Log.Fatal(exception, "The update mode failed");
+            UnhandledExceptionMessage.Show(null);
+            Shutdown(1);
+        }
     }
 
     private static void ApplyLanguageAndTheme(SettingsConfig settings)
@@ -190,6 +222,13 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        if (_isUpdateMode)
+        {
+            ReleaseSingleInstance();
+            base.OnExit(e);
+            return;
+        }
+
         // 通知タブで打ったばかりの文章は、保存を待っていることがある。
         (MainWindow?.DataContext as ViewModels.MainViewModel)?.Notifications.FlushPendingSave();
         GlobalHotkeyService.Instance.Dispose();

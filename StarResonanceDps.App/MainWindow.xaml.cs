@@ -90,8 +90,8 @@ public partial class MainWindow : Window
     /// <para>
     /// 起動できないときはその窓を出して終わる。続けるときは、設定ファイルの知らせ → Windows起動の登録を合わせる →
     /// プラグインの初期化 → ウィジェットの復元 → ホットキー(起動設定でオンなら補助を起動) → VOICEVOX の起動(起動設定でオンなら) →
-    /// VOICEVOX の初期化 → 古い Npcap の確認 → 読み上げの声の確認、の順。1つの処理に直列なので、途中で
-    /// メッセージが回ってもこの順は崩れない。
+    /// VOICEVOX の初期化 → 古い Npcap の確認 → 読み上げの声の確認 → 更新が済んだことの知らせ → 更新の確認(起動設定でオンなら)、の順。
+    /// 1つの処理に直列なので、途中でメッセージが回ってもこの順は崩れない。
     /// </para>
     /// </summary>
     private async void MainWindow_ContentRendered(object? sender, EventArgs e)
@@ -151,6 +151,16 @@ public partial class MainWindow : Window
             this,
             ConfigManager.Instance.GetNotificationsSnapshot(),
             checksVoicevox: !hasLaunchedVoicevox);
+
+        if (AppUpdateService.WasJustUpdated)
+        {
+            UpdateCompletedMessage.Show(this);
+        }
+
+        if (ConfigManager.Instance.GetSettingsSnapshot().CheckForUpdatesOnStartup)
+        {
+            await AppUpdateService.CheckOnStartupAsync(this);
+        }
     }
 
     /// <summary>

@@ -1,5 +1,4 @@
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Input;
 using StarResonanceDps.App.Services;
 
@@ -46,22 +45,7 @@ public partial class MessageWindow : Window
         var parts = detail.ToArray();
         ShowWhenNotMovingOrSizing(owner, title, message, window =>
         {
-            var linkStyle = (Style)window.FindResource("Hyperlink.Inline");
-            foreach (var part in parts)
-            {
-                if (part.Url is null)
-                {
-                    AddText(window.DetailText.Inlines, part.Text);
-                    continue;
-                }
-
-                var url = part.Url;
-                var link = new Hyperlink { Style = linkStyle };
-                AddText(link.Inlines, part.Text);
-                link.Click += (_, _) => ExternalLinkOpener.Open(url);
-                window.DetailText.Inlines.Add(link);
-            }
-
+            MessageDetailText.Fill(window.DetailText, parts);
             window.DetailText.Visibility = parts.Any(part => !string.IsNullOrWhiteSpace(part.Text))
                 ? Visibility.Visible
                 : Visibility.Collapsed;
@@ -110,24 +94,6 @@ public partial class MessageWindow : Window
         window.HeaderText.Text = title;
         window.MessageText.Text = message;
         return window;
-    }
-
-    /// <summary>改行を <see cref="LineBreak"/> にして足す。</summary>
-    private static void AddText(InlineCollection inlines, string text)
-    {
-        var lines = text.Replace("\r\n", "\n").Split('\n');
-        for (var i = 0; i < lines.Length; i++)
-        {
-            if (i > 0)
-            {
-                inlines.Add(new LineBreak());
-            }
-
-            if (lines[i].Length > 0)
-            {
-                inlines.Add(new Run(lines[i]));
-            }
-        }
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

@@ -411,6 +411,9 @@ Restart VOICEVOX.</value>
   <data name="Settings_Startup_LaunchAtWindowsStartup" xml:space="preserve">
     <value>Launch app when Windows starts</value>
   </data>
+  <data name="Settings_Startup_CheckForUpdates" xml:space="preserve">
+    <value>Check for updates at startup</value>
+  </data>
   <data name="Settings_Startup_StartHotkeyHelper" xml:space="preserve">
     <value>Launch hotkey helper at app startup</value>
   </data>
@@ -606,6 +609,113 @@ Its settings will also be deleted.</value>
   </data>
   <data name="Help_Copyright" xml:space="preserve">
     <value>Copyright © 2026 kokoukohiro (GNU GPL v3)</value>
+  </data>
+  <data name="Help_VersionWithStatus" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="Update_Status_Checking" xml:space="preserve">
+    <value>checking</value>
+  </data>
+  <data name="Update_Status_UpToDate" xml:space="preserve">
+    <value>latest</value>
+  </data>
+  <data name="Update_Status_Available" xml:space="preserve">
+    <value>new version available</value>
+  </data>
+  <data name="Update_Status_NoRelease" xml:space="preserve">
+    <value>no published version</value>
+  </data>
+  <data name="Update_Status_Failed" xml:space="preserve">
+    <value>could not check</value>
+  </data>
+  <data name="Update_Title" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Update_Confirm_Message" xml:space="preserve">
+    <value>Update to version {0}?</value>
+  </data>
+  <data name="Update_Confirm_Detail" xml:space="preserve">
+    <value>The app will close, update, and restart.
+Your settings and history are kept.</value>
+  </data>
+  <data name="Update_Confirm_ReleaseNotes" xml:space="preserve">
+    <value>Open the release notes</value>
+  </data>
+  <data name="Update_Progress_Downloading" xml:space="preserve">
+    <value>Downloading</value>
+  </data>
+  <data name="Update_Progress_Extracting" xml:space="preserve">
+    <value>Extracting</value>
+  </data>
+  <data name="Update_Progress_WaitingForExit" xml:space="preserve">
+    <value>Waiting for the app to close</value>
+  </data>
+  <data name="Update_Progress_WaitingForFiles" xml:space="preserve">
+    <value>Waiting for files in use to be released</value>
+  </data>
+  <data name="Update_Progress_Replacing" xml:space="preserve">
+    <value>Replacing files</value>
+  </data>
+  <data name="Update_Progress_Size" xml:space="preserve">
+    <value>{0:0.0} / {1:0.0} MB</value>
+  </data>
+  <data name="Update_Completed_Title" xml:space="preserve">
+    <value>Update Complete</value>
+  </data>
+  <data name="Update_Completed_Message" xml:space="preserve">
+    <value>Updated to version {0}.</value>
+  </data>
+  <data name="Update_Error_Title" xml:space="preserve">
+    <value>Update Error</value>
+  </data>
+  <data name="Update_CheckError_Message" xml:space="preserve">
+    <value>Could not check for updates.</value>
+  </data>
+  <data name="Update_Error_Message" xml:space="preserve">
+    <value>Could not update.</value>
+  </data>
+  <data name="Update_Error_Network" xml:space="preserve">
+    <value>Check your internet connection and try again.</value>
+  </data>
+  <data name="Update_Error_RateLimit" xml:space="preserve">
+    <value>Access to GitHub is temporarily limited.
+Try again later.</value>
+  </data>
+  <data name="Update_Error_InvalidRelease" xml:space="preserve">
+    <value>Could not read the release information.
+Download the zip from the releases page and overwrite the app folder.</value>
+  </data>
+  <data name="Update_Error_NotFromZip" xml:space="preserve">
+    <value>This copy was not installed from a release zip, so it cannot update itself.
+Download the zip from the releases page.</value>
+  </data>
+  <data name="Update_Error_Corrupt" xml:space="preserve">
+    <value>The downloaded file was corrupted.
+Try again.</value>
+  </data>
+  <data name="Update_Error_Write" xml:space="preserve">
+    <value>Check the free disk space and that the app folder is writable.</value>
+  </data>
+  <data name="Update_Error_Start" xml:space="preserve">
+    <value>Could not start the new version.
+Check that security software is not blocking it and try again.</value>
+  </data>
+  <data name="Update_Error_Replace" xml:space="preserve">
+    <value>Files could not be replaced, so the previous version was restored.
+Close other apps using the app folder and try again.</value>
+  </data>
+  <data name="Update_Error_RestoreFailed" xml:space="preserve">
+    <value>The previous version could not be restored.
+Download the zip from the releases page and overwrite the app folder.</value>
+  </data>
+  <data name="Update_OpenReleasesPage" xml:space="preserve">
+    <value>Open the releases page</value>
+  </data>
+  <data name="Update_RestartFailed_Message" xml:space="preserve">
+    <value>Updated, but the app could not restart.</value>
+  </data>
+  <data name="Update_RestartFailed_Detail" xml:space="preserve">
+    <value>Start StarResonanceDps.exe in the app folder.</value>
   </data>
   <data name="Help_LicenseInformation" xml:space="preserve">
     <value>License</value>
@@ -1167,6 +1277,9 @@ Wait a moment and copy again.</value>
   </data>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>Debuff List</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Cancel</value>
   </data>
   <data name="Common_Insert" xml:space="preserve">
     <value>Insert</value>

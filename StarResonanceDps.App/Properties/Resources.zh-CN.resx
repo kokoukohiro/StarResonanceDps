@@ -411,6 +411,9 @@
   <data name="Settings_Startup_LaunchAtWindowsStartup" xml:space="preserve">
     <value>Windows启动时运行应用</value>
   </data>
+  <data name="Settings_Startup_CheckForUpdates" xml:space="preserve">
+    <value>启动时检查更新</value>
+  </data>
   <data name="Settings_Startup_StartHotkeyHelper" xml:space="preserve">
     <value>应用启动时运行快捷键辅助程序</value>
   </data>
@@ -606,6 +609,113 @@
   </data>
   <data name="Help_Copyright" xml:space="preserve">
     <value>Copyright © 2026 kokoukohiro(GNU GPL v3)</value>
+  </data>
+  <data name="Help_VersionWithStatus" xml:space="preserve">
+    <value>{0}({1})</value>
+  </data>
+  <data name="Update_Status_Checking" xml:space="preserve">
+    <value>检查中</value>
+  </data>
+  <data name="Update_Status_UpToDate" xml:space="preserve">
+    <value>最新</value>
+  </data>
+  <data name="Update_Status_Available" xml:space="preserve">
+    <value>有新版本</value>
+  </data>
+  <data name="Update_Status_NoRelease" xml:space="preserve">
+    <value>暂无已发布的版本</value>
+  </data>
+  <data name="Update_Status_Failed" xml:space="preserve">
+    <value>无法检查</value>
+  </data>
+  <data name="Update_Title" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Update_Confirm_Message" xml:space="preserve">
+    <value>要更新到版本{0}吗？</value>
+  </data>
+  <data name="Update_Confirm_Detail" xml:space="preserve">
+    <value>将关闭应用进行更新，然后重新启动。
+设置和历史记录会保留。</value>
+  </data>
+  <data name="Update_Confirm_ReleaseNotes" xml:space="preserve">
+    <value>打开更新日志</value>
+  </data>
+  <data name="Update_Progress_Downloading" xml:space="preserve">
+    <value>正在下载</value>
+  </data>
+  <data name="Update_Progress_Extracting" xml:space="preserve">
+    <value>正在解压</value>
+  </data>
+  <data name="Update_Progress_WaitingForExit" xml:space="preserve">
+    <value>正在等待应用关闭</value>
+  </data>
+  <data name="Update_Progress_WaitingForFiles" xml:space="preserve">
+    <value>正在等待占用的文件释放</value>
+  </data>
+  <data name="Update_Progress_Replacing" xml:space="preserve">
+    <value>正在替换文件</value>
+  </data>
+  <data name="Update_Progress_Size" xml:space="preserve">
+    <value>{0:0.0} / {1:0.0} MB</value>
+  </data>
+  <data name="Update_Completed_Title" xml:space="preserve">
+    <value>更新完成</value>
+  </data>
+  <data name="Update_Completed_Message" xml:space="preserve">
+    <value>已更新到版本{0}。</value>
+  </data>
+  <data name="Update_Error_Title" xml:space="preserve">
+    <value>更新错误</value>
+  </data>
+  <data name="Update_CheckError_Message" xml:space="preserve">
+    <value>无法检查更新。</value>
+  </data>
+  <data name="Update_Error_Message" xml:space="preserve">
+    <value>无法更新。</value>
+  </data>
+  <data name="Update_Error_Network" xml:space="preserve">
+    <value>请检查网络连接后重试。</value>
+  </data>
+  <data name="Update_Error_RateLimit" xml:space="preserve">
+    <value>GitHub访问暂时受限。
+请稍后重试。</value>
+  </data>
+  <data name="Update_Error_InvalidRelease" xml:space="preserve">
+    <value>无法读取发行版信息。
+请从发行版页面下载zip并覆盖到应用文件夹。</value>
+  </data>
+  <data name="Update_Error_NotFromZip" xml:space="preserve">
+    <value>此应用不是通过发行版zip安装的，无法在应用内更新。
+请从发行版页面下载zip。</value>
+  </data>
+  <data name="Update_Error_Corrupt" xml:space="preserve">
+    <value>下载的文件已损坏。
+请重试。</value>
+  </data>
+  <data name="Update_Error_Write" xml:space="preserve">
+    <value>请检查磁盘可用空间以及应用文件夹的写入权限。</value>
+  </data>
+  <data name="Update_Error_Start" xml:space="preserve">
+    <value>无法启动新版本。
+请确认安全软件没有拦截，然后重试。</value>
+  </data>
+  <data name="Update_Error_Replace" xml:space="preserve">
+    <value>无法替换文件，已恢复到原来的版本。
+请关闭正在使用应用文件夹的其他应用后重试。</value>
+  </data>
+  <data name="Update_Error_RestoreFailed" xml:space="preserve">
+    <value>无法恢复到原来的版本。
+请从发行版页面下载zip并覆盖到应用文件夹。</value>
+  </data>
+  <data name="Update_OpenReleasesPage" xml:space="preserve">
+    <value>打开发行版页面</value>
+  </data>
+  <data name="Update_RestartFailed_Message" xml:space="preserve">
+    <value>已更新，但无法重新启动。</value>
+  </data>
+  <data name="Update_RestartFailed_Detail" xml:space="preserve">
+    <value>请启动应用文件夹中的StarResonanceDps.exe。</value>
   </data>
   <data name="Help_LicenseInformation" xml:space="preserve">
     <value>许可证信息</value>
@@ -1168,6 +1278,9 @@
   </data>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>减益列表</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>取消</value>
   </data>
   <data name="Common_Insert" xml:space="preserve">
     <value>插入</value>

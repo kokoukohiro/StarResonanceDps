@@ -9,8 +9,6 @@ namespace StarResonanceDps.Core.CombatRuntime;
 
 public static class Utils
 {
-    public static Version AppVersion { get; set; } = typeof(Utils).Assembly.GetName().Version ?? new Version(0, 0);
-
     public static string BytesToString<T>(T number)
     {
         string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };

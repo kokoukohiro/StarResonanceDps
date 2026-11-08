@@ -52,6 +52,9 @@ public sealed class SettingsConfig
     /// <summary>Windows にサインインしたときにアプリを起動する。反映は <c>WindowsStartupRegistration</c>(保存時とアプリの起動時)。</summary>
     public bool LaunchAtWindowsStartup { get; set; }
 
+    /// <summary>アプリの起動時に新しいバージョンがあるかを確かめる。次の起動から効く。</summary>
+    public bool CheckForUpdatesOnStartup { get; set; } = true;
+
     /// <summary>アプリの起動時にホットキーの補助を起動する。オフなら補助を起動せず、ホットキーは無効。次の起動から効く。</summary>
     public bool StartHotkeyHelperOnLaunch { get; set; } = true;
 
@@ -124,6 +127,7 @@ public sealed class SettingsConfig
             GameCapturePreference = GameCapturePreference,
             GameCaptureCustomExeName = GameCaptureCustomExeName,
             LaunchAtWindowsStartup = LaunchAtWindowsStartup,
+            CheckForUpdatesOnStartup = CheckForUpdatesOnStartup,
             StartHotkeyHelperOnLaunch = StartHotkeyHelperOnLaunch,
             LaunchVoicevoxOnLaunch = LaunchVoicevoxOnLaunch,
             VoicevoxInstallFolder = VoicevoxInstallFolder,

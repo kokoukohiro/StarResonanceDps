@@ -274,10 +274,14 @@
     <RemoveDir Directories="$(OutDir)zh-CN" Condition="'@(_OtherChineseCultureFiles)' == ''" />
   </Target>
 
-  <!-- 同梱プラグインと補助は版を付けない net10.0-windows のまま(WinRT を引き込まない)。App の TargetFramework から組まない。 -->
+  <!--
+    同梱プラグインと補助は版を付けない net10.0-windows のまま(WinRT を引き込まない)。App の TargetFramework から組まない。
+    -r を付けた公開では、Exe の補助だけ RID のフォルダに出て、ライブラリのプラグインは RID なしのフォルダに出る。
+  -->
   <PropertyGroup>
     <BundledPluginOutputSubdirectory>net10.0-windows</BundledPluginOutputSubdirectory>
-    <BundledPluginOutputSubdirectory Condition="'$(RuntimeIdentifier)' != ''">net10.0-windows\$(RuntimeIdentifier)</BundledPluginOutputSubdirectory>
+    <HotkeyHostOutputSubdirectory>net10.0-windows</HotkeyHostOutputSubdirectory>
+    <HotkeyHostOutputSubdirectory Condition="'$(RuntimeIdentifier)' != ''">net10.0-windows\$(RuntimeIdentifier)</HotkeyHostOutputSubdirectory>
     <KeybindPluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.KeybindTool\bin\$(Configuration)\$(BundledPluginOutputSubdirectory)\KeybindTool.dll</KeybindPluginAssembly>
     <ModulePluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.ModuleTool\bin\$(Configuration)\$(BundledPluginOutputSubdirectory)\ModuleTool.dll</ModulePluginAssembly>
   </PropertyGroup>
@@ -301,7 +305,7 @@
 
   <!-- ホットキーの補助(管理者権限で動く別の実行ファイル)は実行フォルダの直下に置く。 -->
   <PropertyGroup>
-    <HotkeyHostOutputDirectory>$(MSBuildProjectDirectory)\..\StarResonanceDps.HotkeyHost\bin\$(Configuration)\$(BundledPluginOutputSubdirectory)\</HotkeyHostOutputDirectory>
+    <HotkeyHostOutputDirectory>$(MSBuildProjectDirectory)\..\StarResonanceDps.HotkeyHost\bin\$(Configuration)\$(HotkeyHostOutputSubdirectory)\</HotkeyHostOutputDirectory>
   </PropertyGroup>
 
   <ItemGroup>
@@ -350,5 +354,16 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </None>
   </ItemGroup>
-  
+
+  <!-- 更新で置き換えるファイルの一覧(AppUpdateApplier.FileListName)。公開の出力が全部そろってから書く。 -->
+  <Target Name="WriteUpdateFileList" AfterTargets="Publish" DependsOnTargets="CopyBundledPluginAssembliesToPublish;CopyHotkeyHostToPublish">
+    <ItemGroup>
+      <_UpdateListedFile Include="$(PublishDir)**\*" Exclude="$(PublishDir)update-files.txt" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(PublishDir)update-files.txt"
+                      Lines="@(_UpdateListedFile->'%(RecursiveDir)%(Filename)%(Extension)')"
+                      Overwrite="true" />
+  </Target>
+
 </Project>

@@ -1,6 +1,6 @@
 namespace StarResonanceDps.App.Services;
 
-/// <summary>アプリの外で開くプロジェクトのページ(GitHubのリポジトリとWiki)。</summary>
+/// <summary>プロジェクトのページ(GitHubのリポジトリとWiki)と、更新の確認に使うGitHubのAPI。</summary>
 public static class ProjectLinks
 {
     public const string RepositoryUrl = "https://github.com/kokoukohiro/StarResonanceDps";
@@ -13,4 +13,7 @@ public static class ProjectLinks
     public const string ReleasesUrl = RepositoryUrl + "/releases";
 
     public const string LicenseUrl = RepositoryUrl + "/blob/main/LICENSING.md";
+
+    /// <summary>公開された最新のリリース。下書きとプレリリースは返らない。リリースが1つも無ければ404。</summary>
+    public const string LatestReleaseApiUrl = "https://api.github.com/repos/kokoukohiro/StarResonanceDps/releases/latest";
 }

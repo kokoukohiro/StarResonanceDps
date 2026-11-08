@@ -29,6 +29,11 @@ public partial class MessagePreviewWindow : Window
     private const uint SampleControllerInputType = 0x00000003u;
     private const uint SampleStateValue = 0u;
 
+    // 更新の進み具合の窓を出すための試しの値。
+    private const double SampleUpdateRatio = 0.4;
+    private const double SampleUpdateDoneMegabytes = 21.8;
+    private const double SampleUpdateTotalMegabytes = 54.6;
+
     private const string KeybindAssemblyName = "KeybindTool";
     private const string KeybindResourceBaseName = "StarResonanceDps.Plugins.KeybindTool.Properties.Resources";
     private const string KeybindLayoutFileName = "keybind_config.json";
@@ -93,6 +98,46 @@ public partial class MessagePreviewWindow : Window
     private void VoicevoxLaunchFailed_Click(object sender, RoutedEventArgs e)
     {
         VoicevoxLaunchFailureMessage.Show(this);
+    }
+
+    // 本物: 新しいバージョンがあるとき(起動時・ヘルプタブの「更新を確認」)。バージョンは今のもの。
+    private void UpdateConfirm_Click(object sender, RoutedEventArgs e)
+    {
+        _ = UpdateConfirmMessage.Show(this, AppUpdateService.CurrentVersion, ProjectLinks.ReleasesUrl);
+    }
+
+    // 本物: 更新の取得と置き換えの進み具合。キャンセルで閉じる。
+    private void UpdateProgress_Click(object sender, RoutedEventArgs e)
+    {
+        var window = UpdateProgressWindow.Create(this);
+        window.CancelRequested += (_, _) => window.CloseNow();
+        window.ShowStatus("Update_Progress_Downloading");
+        window.ShowProgress(SampleUpdateRatio, Localization.Format("Update_Progress_Size", SampleUpdateDoneMegabytes, SampleUpdateTotalMegabytes));
+        OwnerModalWindow.Show(window, this);
+    }
+
+    // 本物: 更新の置き換えが済んだ後の起動
+    private void UpdateCompleted_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateCompletedMessage.Show(this);
+    }
+
+    // 本物: ヘルプタブの「更新を確認」(確認できなかったとき)
+    private void UpdateCheckError_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateFailureMessage.ShowCheckFailed(this, AppUpdateFailure.Network);
+    }
+
+    // 本物: 更新の取得と置き換え(失敗したとき)。理由はボタンの Tag。
+    private void UpdateError_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateFailureMessage.Show(this, (AppUpdateFailure)((FrameworkElement)sender).Tag);
+    }
+
+    // 本物: 更新のモード(置き換えは済んだが起動し直せなかったとき)
+    private void UpdateRestartFailed_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateFailureMessage.ShowRestartFailed(this);
     }
 
     // 本物: メイン画面のプラグインの一覧の「＋」(選んだファイルがプラグインでない・版が合わないとき)

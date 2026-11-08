@@ -132,6 +132,7 @@ public static class AppConfigDefaults
             GameCapturePreference = EGameCapturePreference.Auto,
             GameCaptureCustomExeName = string.Empty,
             LaunchAtWindowsStartup = false,
+            CheckForUpdatesOnStartup = true,
             StartHotkeyHelperOnLaunch = true,
             LaunchVoicevoxOnLaunch = false,
             VoicevoxInstallFolder = string.Empty,

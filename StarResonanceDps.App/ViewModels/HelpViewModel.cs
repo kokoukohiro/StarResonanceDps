@@ -1,3 +1,4 @@
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Localization;
@@ -5,14 +6,13 @@ using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
-/// <summary>ヘルプタブ。アプリの版と、プロジェクトのページ(<see cref="ProjectLinks"/>)を開く命令。</summary>
+/// <summary>ヘルプタブ。アプリのバージョンと更新の確認の結果、更新の確認、プロジェクトのページ(<see cref="ProjectLinks"/>)を開く命令。</summary>
 public sealed partial class HelpViewModel : ObservableObject
 {
-    /// <summary>アプリの版。実行ファイルの版(csprojのVersion)の先頭3つの数字。</summary>
-    private readonly string _version = (typeof(HelpViewModel).Assembly.GetName().Version
-        ?? throw new InvalidOperationException("The application assembly has no version.")).ToString(3);
-
-    /// <summary>上の欄の版の行(「バージョン 4.0.0」の形)。言語を切り替えたら<see cref="RefreshTexts"/>で入れ直す。</summary>
+    /// <summary>
+    /// 上の欄のバージョンの行(「バージョン 4.0.0(最新)」の形)。
+    /// 言語を切り替えたときと更新の確認の状態が変わったときに<see cref="RefreshTexts"/>で入れ直す。
+    /// </summary>
     [ObservableProperty]
     private string _versionText = string.Empty;
 
@@ -23,7 +23,36 @@ public sealed partial class HelpViewModel : ObservableObject
 
     public void RefreshTexts()
     {
-        VersionText = LocalizationManager.Instance.Format("Help_Version", _version);
+        var localization = LocalizationManager.Instance;
+        var version = localization.Format("Help_Version", AppUpdateService.CurrentVersion.ToString(3));
+        var statusKey = AppUpdateService.Status switch
+        {
+            AppUpdateStatus.Checking => "Update_Status_Checking",
+            AppUpdateStatus.UpToDate => "Update_Status_UpToDate",
+            AppUpdateStatus.Available => "Update_Status_Available",
+            AppUpdateStatus.NoRelease => "Update_Status_NoRelease",
+            AppUpdateStatus.Failed => "Update_Status_Failed",
+            _ => null
+        };
+
+        VersionText = statusKey is null
+            ? version
+            : localization.Format("Help_VersionWithStatus", version, localization.GetString(statusKey));
+        CheckForUpdatesCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool CanCheckForUpdates()
+    {
+        return !AppUpdateService.IsBusy;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanCheckForUpdates))]
+    private async Task CheckForUpdatesAsync()
+    {
+        if (Application.Current?.MainWindow is { } owner)
+        {
+            await AppUpdateService.CheckManuallyAsync(owner);
+        }
     }
 
     [RelayCommand]

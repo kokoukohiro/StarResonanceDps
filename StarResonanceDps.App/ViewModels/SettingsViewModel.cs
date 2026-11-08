@@ -71,6 +71,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     private bool _launchAtWindowsStartup;
 
     [ObservableProperty]
+    private bool _checkForUpdatesOnStartup = true;
+
+    [ObservableProperty]
     private bool _startHotkeyHelperOnLaunch = true;
 
     [ObservableProperty]
@@ -364,6 +367,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             WindowColorIndex = WindowColors.SelectedIndex,
             WindowColors = [.. WindowColors.GetHexColors()],
             LaunchAtWindowsStartup = LaunchAtWindowsStartup,
+            CheckForUpdatesOnStartup = CheckForUpdatesOnStartup,
             StartHotkeyHelperOnLaunch = StartHotkeyHelperOnLaunch,
             LaunchVoicevoxOnLaunch = LaunchVoicevoxOnLaunch,
             VoicevoxInstallFolder = VoicevoxInstallFolder,
@@ -416,6 +420,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             WidgetDataStatusDisplayModeIndex = settings.WidgetDataStatusDisplayModeIndex;
             WindowColors.Load(settings.WindowColors, settings.WindowColorIndex);
             LaunchAtWindowsStartup = settings.LaunchAtWindowsStartup;
+            CheckForUpdatesOnStartup = settings.CheckForUpdatesOnStartup;
             StartHotkeyHelperOnLaunch = settings.StartHotkeyHelperOnLaunch;
             LaunchVoicevoxOnLaunch = settings.LaunchVoicevoxOnLaunch;
             VoicevoxInstallFolder = settings.VoicevoxInstallFolder;
@@ -575,6 +580,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         // ON / OFF は言語で変わるので、開いたまま切り替えられても追従させる
         // (言語の選択肢はこの画面の中にあるので、開いたままの切り替えが普通に起きる)。
         OnPropertyChanged(nameof(LaunchAtWindowsStartupStateText));
+        OnPropertyChanged(nameof(CheckForUpdatesOnStartupStateText));
         OnPropertyChanged(nameof(StartHotkeyHelperOnLaunchStateText));
         OnPropertyChanged(nameof(LaunchVoicevoxOnLaunchStateText));
         OnPropertyChanged(nameof(StopAggregationInNonCombatAreasStateText));
@@ -694,6 +700,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             && left.WidgetDataStatusDisplayModeIndex == right.WidgetDataStatusDisplayModeIndex
             && left.WindowColorIndex == right.WindowColorIndex
             && left.LaunchAtWindowsStartup == right.LaunchAtWindowsStartup
+            && left.CheckForUpdatesOnStartup == right.CheckForUpdatesOnStartup
             && left.StartHotkeyHelperOnLaunch == right.StartHotkeyHelperOnLaunch
             && left.LaunchVoicevoxOnLaunch == right.LaunchVoicevoxOnLaunch
             && string.Equals(left.VoicevoxInstallFolder, right.VoicevoxInstallFolder, StringComparison.OrdinalIgnoreCase)
@@ -765,6 +772,12 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
+    partial void OnCheckForUpdatesOnStartupChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CheckForUpdatesOnStartupStateText));
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
     partial void OnStartHotkeyHelperOnLaunchChanged(bool value)
     {
         OnPropertyChanged(nameof(StartHotkeyHelperOnLaunchStateText));
@@ -783,6 +796,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     }
 
     public string LaunchAtWindowsStartupStateText => GetSwitchStateText(LaunchAtWindowsStartup);
+
+    public string CheckForUpdatesOnStartupStateText => GetSwitchStateText(CheckForUpdatesOnStartup);
 
     public string StartHotkeyHelperOnLaunchStateText => GetSwitchStateText(StartHotkeyHelperOnLaunch);
 

@@ -132,11 +132,11 @@
                                            Text="{Binding VersionText}" />
                             </StackPanel>
 
-                            <!-- 「更新を確認」。押しても今は何も起きない。 -->
                             <Button Grid.Column="2"
                                     Margin="16,0,0,0"
                                     VerticalAlignment="Center"
-                                    Style="{StaticResource Help.UpdateButton}">
+                                    Style="{StaticResource Help.UpdateButton}"
+                                    Command="{Binding CheckForUpdatesCommand}">
                                 <StackPanel Orientation="Horizontal">
                                     <Path Width="14"
                                           Height="14"

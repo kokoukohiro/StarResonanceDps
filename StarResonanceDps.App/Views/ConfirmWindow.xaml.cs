@@ -24,6 +24,17 @@ public partial class ConfirmWindow : Window
 
     public static bool ShowText(Window owner, string title, string message, string detail)
     {
+        return ShowWindow(owner, title, message, window => window.DetailText.Text = detail);
+    }
+
+    /// <summary>詳細の欄にリンクを含めて出す。リンクは <c>Hyperlink.Inline</c> で描き、押したら開く。</summary>
+    public static bool ShowText(Window owner, string title, string message, IReadOnlyList<MessageDetailPart> detail)
+    {
+        return ShowWindow(owner, title, message, window => MessageDetailText.Fill(window.DetailText, detail));
+    }
+
+    private static bool ShowWindow(Window owner, string title, string message, Action<ConfirmWindow> fillDetail)
+    {
         var window = new ConfirmWindow
         {
             Owner = owner
@@ -31,7 +42,7 @@ public partial class ConfirmWindow : Window
 
         window.HeaderText.Text = title;
         window.MessageText.Text = message;
-        window.DetailText.Text = detail;
+        fillDetail(window);
 
         // ShowDialog はアプリのウィンドウを全部止めるので、ウィジェットも操作できなくなる。止めるのはオーナーだけにする。
         OwnerModalWindow.ShowAndWait(window, owner);
