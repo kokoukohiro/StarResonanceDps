@@ -122,7 +122,13 @@ public partial class MessagePreviewWindow : Window
     // 本物: 更新のモード(置き換えは済んだが起動し直せなかったとき)
     private void UpdateRestartFailed_Click(object sender, RoutedEventArgs e)
     {
-        UpdateFailureMessage.ShowRestartFailed(this);
+        UpdateFailureMessage.ShowRestartFailed(this, isUpdated: true);
+    }
+
+    // 本物: 更新のモード(置き換えなかった元のバージョンを起動し直せなかったとき)
+    private void UpdateRestartFailedNotUpdated_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateFailureMessage.ShowRestartFailed(this, isUpdated: false);
     }
 
     // 本物: メイン画面のプラグインの一覧の「＋」(選んだファイルがプラグインでない・版が合わないとき)

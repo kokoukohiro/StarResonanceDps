@@ -710,11 +710,11 @@ VOICEVOXを起動し直してください。</value>
   </data>
   <data name="Update_Error_InvalidRelease" xml:space="preserve">
     <value>リリースの情報を読み取れませんでした。
-リリースノートからzipを取得して、アプリのフォルダへ上書きしてください。</value>
+{0}からzipを取得して、アプリのフォルダへ上書きしてください。</value>
   </data>
   <data name="Update_Error_NotFromZip" xml:space="preserve">
     <value>リリースのzipから入れたアプリではないので、アプリの中から更新できません。
-リリースノートからzipを取得してください。</value>
+{0}からzipを取得してください。</value>
   </data>
   <data name="Update_Error_Corrupt" xml:space="preserve">
     <value>ダウンロードしたファイルが壊れていました。
@@ -733,13 +733,16 @@ VOICEVOXを起動し直してください。</value>
   </data>
   <data name="Update_Error_RestoreFailed" xml:space="preserve">
     <value>元のバージョンに戻せませんでした。
-リリースノートからzipを取得して、アプリのフォルダへ上書きしてください。</value>
+{0}からzipを取得して、アプリのフォルダへ上書きしてください。</value>
   </data>
-  <data name="Update_OpenReleaseNotes" xml:space="preserve">
-    <value>リリースノートを開く</value>
+  <data name="Update_ReleaseNotesLink" xml:space="preserve">
+    <value>リリースノート</value>
   </data>
   <data name="Update_RestartFailed_Message" xml:space="preserve">
     <value>更新しましたが、起動し直せませんでした。</value>
+  </data>
+  <data name="Update_RestartFailedNotUpdated_Message" xml:space="preserve">
+    <value>元のバージョンを起動し直せませんでした。</value>
   </data>
   <data name="Update_RestartFailed_Detail" xml:space="preserve">
     <value>アプリのフォルダのStarResonanceDps.exeを起動してください。</value>

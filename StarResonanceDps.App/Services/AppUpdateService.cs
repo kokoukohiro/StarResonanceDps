@@ -114,7 +114,7 @@ public static class AppUpdateService
         return CheckAsync(owner, isManual: true);
     }
 
-    /// <summary>確認をやめる。ヘルプタブの行は確認する前の表示に戻る。</summary>
+    /// <summary>確認をやめる。ヘルプタブの行は確認していない表示に戻る。</summary>
     public static void CancelCheck()
     {
         _checkCancellation?.Cancel();

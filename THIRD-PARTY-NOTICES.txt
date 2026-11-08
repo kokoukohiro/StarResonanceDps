@@ -283,6 +283,12 @@ System.IO.Hashing 10.0.0
   Source: https://github.com/dotnet/runtime
   License text: [MIT-dotnet-runtime], [TPN-dotnet-runtime]
 
+System.Reflection.MetadataLoadContext 10.0.9
+  License: MIT
+  © Microsoft Corporation. All rights reserved.
+  Source: https://github.com/dotnet/runtime
+  License text: [MIT-dotnet-runtime], [TPN-dotnet-runtime]
+
 ZLinq 1.5.4
   License: MIT
   Copyright (c) Yoshifumi Kawai, Copyright (c) Cysharp, Inc.
@@ -772,7 +778,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ================================================================================
-[TPN-dotnet-runtime] Third-party notices included in the Microsoft.Extensions packages (except ObjectPool) and System.IO.Hashing
+[TPN-dotnet-runtime] Third-party notices included in the Microsoft.Extensions packages (except ObjectPool), System.IO.Hashing and System.Reflection.MetadataLoadContext
 ================================================================================
 
 .NET Runtime uses third-party libraries or other resources that may be

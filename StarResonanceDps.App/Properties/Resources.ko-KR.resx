@@ -709,11 +709,11 @@ VOICEVOX를 다시 시작하세요.</value>
   </data>
   <data name="Update_Error_InvalidRelease" xml:space="preserve">
     <value>릴리스 정보를 읽지 못했습니다.
-릴리스 노트에서 zip을 받아 앱 폴더에 덮어쓰세요.</value>
+{0}에서 zip을 받아 앱 폴더에 덮어쓰세요.</value>
   </data>
   <data name="Update_Error_NotFromZip" xml:space="preserve">
     <value>릴리스 zip으로 설치한 앱이 아니므로 앱 안에서 업데이트할 수 없습니다.
-릴리스 노트에서 zip을 받으세요.</value>
+{0}에서 zip을 받으세요.</value>
   </data>
   <data name="Update_Error_Corrupt" xml:space="preserve">
     <value>다운로드한 파일이 손상되었습니다.
@@ -732,13 +732,16 @@ VOICEVOX를 다시 시작하세요.</value>
   </data>
   <data name="Update_Error_RestoreFailed" xml:space="preserve">
     <value>이전 버전으로 되돌리지 못했습니다.
-릴리스 노트에서 zip을 받아 앱 폴더에 덮어쓰세요.</value>
+{0}에서 zip을 받아 앱 폴더에 덮어쓰세요.</value>
   </data>
-  <data name="Update_OpenReleaseNotes" xml:space="preserve">
-    <value>릴리스 노트 열기</value>
+  <data name="Update_ReleaseNotesLink" xml:space="preserve">
+    <value>릴리스 노트</value>
   </data>
   <data name="Update_RestartFailed_Message" xml:space="preserve">
     <value>업데이트했지만 다시 시작하지 못했습니다.</value>
+  </data>
+  <data name="Update_RestartFailedNotUpdated_Message" xml:space="preserve">
+    <value>원래 버전을 다시 시작하지 못했습니다.</value>
   </data>
   <data name="Update_RestartFailed_Detail" xml:space="preserve">
     <value>앱 폴더의 StarResonanceDps.exe를 실행해 주세요.</value>

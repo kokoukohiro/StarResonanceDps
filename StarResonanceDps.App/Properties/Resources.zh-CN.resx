@@ -709,11 +709,11 @@
   </data>
   <data name="Update_Error_InvalidRelease" xml:space="preserve">
     <value>无法读取发行版信息。
-请从更新日志下载zip并覆盖到应用文件夹。</value>
+请从{0}下载zip并覆盖到应用文件夹。</value>
   </data>
   <data name="Update_Error_NotFromZip" xml:space="preserve">
     <value>此应用不是通过发行版zip安装的，无法在应用内更新。
-请从更新日志下载zip。</value>
+请从{0}下载zip。</value>
   </data>
   <data name="Update_Error_Corrupt" xml:space="preserve">
     <value>下载的文件已损坏。
@@ -732,13 +732,16 @@
   </data>
   <data name="Update_Error_RestoreFailed" xml:space="preserve">
     <value>无法恢复到原来的版本。
-请从更新日志下载zip并覆盖到应用文件夹。</value>
+请从{0}下载zip并覆盖到应用文件夹。</value>
   </data>
-  <data name="Update_OpenReleaseNotes" xml:space="preserve">
-    <value>打开更新日志</value>
+  <data name="Update_ReleaseNotesLink" xml:space="preserve">
+    <value>更新日志</value>
   </data>
   <data name="Update_RestartFailed_Message" xml:space="preserve">
     <value>已更新，但无法重新启动。</value>
+  </data>
+  <data name="Update_RestartFailedNotUpdated_Message" xml:space="preserve">
+    <value>无法重新启动原版本。</value>
   </data>
   <data name="Update_RestartFailed_Detail" xml:space="preserve">
     <value>请启动应用文件夹中的StarResonanceDps.exe。</value>
