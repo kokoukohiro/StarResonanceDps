@@ -47,7 +47,7 @@ public partial class App : Application
         RegisterUnhandledExceptionHandlers();
         ManagerTraceOutput.Configure();
 
-        // 設定・履歴は実行フォルダの Data、ログは Logs に書く。Data に書けなければ動かせない(ログも同じ実行フォルダなので書けない)。
+        // 設定・履歴・ログは実行フォルダの Data に書く。Data に書けなければ動かせない。
         // 窓の言語とテーマは、設定を読むだけ読んで当てる。
         if (!TryEnsureWritableDataDirectory())
         {
@@ -56,7 +56,7 @@ public partial class App : Application
             return;
         }
 
-        // ログはここから。これより後の失敗(設定・言語・テーマ・Npcap・初期化・受け手の無い例外)は全部 Logs\CombatRuntime.log に残る。
+        // ログはここから。これより後の失敗(設定・言語・テーマ・Npcap・初期化・受け手の無い例外)は全部 Data\CombatRuntime.log に残る。
         CombatRuntimeHost.ConfigureLogging();
         if (ResidentDetectionStore.Load(AppUpdateService.CurrentVersion.ToString(3)))
         {

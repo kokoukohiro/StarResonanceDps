@@ -27,7 +27,7 @@ public enum ResidentDetectionKind
 /// <param name="DetectedAt">最初に検知した時刻。</param>
 /// <param name="Server">検知したときのゲームのサーバー。</param>
 /// <param name="Details">報告の本文に入れる文字。公開されるので、ほかのプレイヤーの番号(charId・uuid)を入れない。</param>
-/// <param name="IsReported">同じ報告がIssueにあった。検索の結果だけで決める(投稿画面を開いただけでは付けない)。</param>
+/// <param name="IsReported">最後に確かめたときに同じ報告がIssueにあった。検索の結果だけで決める(投稿画面を開いただけでは付けない)。</param>
 public sealed record ResidentDetection(
     ResidentDetectionKind Kind,
     string Id,
@@ -104,23 +104,41 @@ public static class ResidentDetectionStore
         Changed?.Invoke(null, EventArgs.Empty);
     }
 
-    public static void MarkReported(IReadOnlyCollection<ResidentDetection> detections)
+    /// <summary>
+    /// 検索の結果で報告済みの印を決め直す。報告済みだった項目でも、同じ報告が無くなっていれば(Issueが消された)外す。
+    /// 確かめなかった項目はそのまま。変わったときだけ保存して知らせる。
+    /// </summary>
+    public static void ApplyReportCheck(IReadOnlyCollection<ResidentDetection> reported, IReadOnlyCollection<ResidentDetection> notReported)
     {
         lock (Sync)
         {
+            var isChanged = false;
             for (var index = 0; index < Items.Count; index++)
             {
                 var item = Items[index];
-                if (detections.Any(detection => detection.Kind == item.Kind && detection.Id == item.Id))
+                var isReported = reported.Any(detection => IsSameItem(detection, item))
+                    || (item.IsReported && !notReported.Any(detection => IsSameItem(detection, item)));
+                if (isReported != item.IsReported)
                 {
-                    Items[index] = item with { IsReported = true };
+                    Items[index] = item with { IsReported = isReported };
+                    isChanged = true;
                 }
+            }
+
+            if (!isChanged)
+            {
+                return;
             }
 
             Save();
         }
 
         Changed?.Invoke(null, EventArgs.Empty);
+    }
+
+    private static bool IsSameItem(ResidentDetection detection, ResidentDetection item)
+    {
+        return detection.Kind == item.Kind && detection.Id == item.Id;
     }
 
     private static SavedDetections? ReadFile()

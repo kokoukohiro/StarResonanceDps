@@ -902,6 +902,15 @@ Download the zip from the {0} and overwrite the app folder.</value>
   <data name="NumberDisplay_Wan" xml:space="preserve">
     <value>Wan (East Asian)</value>
   </data>
+  <data name="NumberUnit_TenThousand" xml:space="preserve">
+    <value>万</value>
+  </data>
+  <data name="NumberUnit_HundredMillion" xml:space="preserve">
+    <value>億</value>
+  </data>
+  <data name="NumberUnit_Trillion" xml:space="preserve">
+    <value>兆</value>
+  </data>
   <data name="Settings_Display_PlayerName" xml:space="preserve">
     <value>Player name</value>
   </data>
@@ -2536,6 +2545,12 @@ Change the settings again if needed.</value>
   <data name="Feedback_Detections_Title" xml:space="preserve">
     <value>Detected issues</value>
   </data>
+  <data name="Feedback_Detections_Check" xml:space="preserve">
+    <value>Check report status</value>
+  </data>
+  <data name="Feedback_Detections_CancelCheck" xml:space="preserve">
+    <value>Cancel check</value>
+  </data>
   <data name="Feedback_Detections_Report" xml:space="preserve">
     <value>Report selected</value>
   </data>
@@ -2551,6 +2566,9 @@ Change the settings again if needed.</value>
   <data name="Feedback_Detection_SpecConflict" xml:space="preserve">
     <value>Class detection mismatch</value>
   </data>
+  <data name="Feedback_Detection_ItemFormat" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
   <data name="Plugins_Empty" xml:space="preserve">
     <value>No installed plugins</value>
   </data>
@@ -2561,19 +2579,29 @@ Change the settings again if needed.</value>
     <value>The selected items have already been reported.</value>
   </data>
   <data name="Feedback_CheckError_Title" xml:space="preserve">
-    <value>Post Check Error</value>
+    <value>Report Status Check Error</value>
   </data>
   <data name="Feedback_CheckError_Message" xml:space="preserve">
-    <value>Could not check whether the items were posted.</value>
+    <value>Could not check whether the items were reported.</value>
   </data>
   <data name="Feedback_Report_Title" xml:space="preserve">
     <value>Detected item report</value>
   </data>
-  <data name="Feedback_Limit_Message" xml:space="preserve">
-    <value>Too many items for one report.</value>
+  <data name="Feedback_Report_IssueTitle" xml:space="preserve">
+    <value>[Version {0}] Detected items: {1}</value>
   </data>
-  <data name="Feedback_Limit_Detail" xml:space="preserve">
-    <value>{0} unreported items remain in the list.
-Press the button again to report them.</value>
+  <data name="Feedback_Opened_Message" xml:space="preserve">
+    <value>The submission page on GitHub has been opened.</value>
+  </data>
+  <data name="Feedback_Opened_Detail" xml:space="preserve">
+    <value>Press "Create" to complete the report.
+Press "Check report status" to see the result of the submission.</value>
+  </data>
+  <data name="Feedback_OpenedMany_Message" xml:space="preserve">
+    <value>{0} submission pages on GitHub have been opened.</value>
+  </data>
+  <data name="Feedback_OpenedMany_Detail" xml:space="preserve">
+    <value>Press "Create" on each page to complete the report.
+Press "Check report status" to see the result of the submission.</value>
   </data>
 </root>

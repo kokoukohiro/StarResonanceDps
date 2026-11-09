@@ -19,8 +19,6 @@ public partial class FeedbackView : UserControl
     /// <summary>まだ読んでいない通知がある。画面のスレッドだけが触る。</summary>
     private bool _needsRefresh = true;
 
-    internal ScrollViewer ContentScrollViewer => FeedbackScrollViewer;
-
     public FeedbackView()
     {
         InitializeComponent();

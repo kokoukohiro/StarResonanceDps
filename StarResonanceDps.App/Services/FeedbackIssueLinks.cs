@@ -16,20 +16,35 @@ internal static class FeedbackIssueLinks
         return ProjectLinks.NewIssueUrl + "&environment=" + Uri.EscapeDataString(CreateEnvironmentText());
     }
 
-    /// <summary>
-    /// 検出された項目の報告のURLを作る。先頭から入る行だけを本文に入れ、入れた行の数を返す。
-    /// 1行だけで入らないときは、その行の末尾を切る。
-    /// </summary>
-    public static DetectionReportLink CreateDetectionReportLink(IReadOnlyList<ResidentDetection> detections)
+    /// <summary>検出された項目の報告のURLを、1つの画面に入る分ずつ作る。項目は渡した順に入れる。</summary>
+    public static IReadOnlyList<DetectionReportLink> CreateDetectionReportLinks(IReadOnlyList<ResidentDetection> detections)
     {
         var environment = CreateEnvironmentText();
+        var links = new List<DetectionReportLink>();
+        var start = 0;
+        while (start < detections.Count)
+        {
+            var (url, count) = CreatePageUrl(detections, start, environment);
+            links.Add(new DetectionReportLink(url, detections.Skip(start).Take(count).ToList()));
+            start += count;
+        }
+
+        return links;
+    }
+
+    /// <summary>
+    /// <paramref name="start"/>の行から、入る行だけを本文に入れたURLと、入れた行の数を作る。
+    /// 1行だけで入らないときは、その行の末尾を切る。
+    /// </summary>
+    private static (string Url, int Count) CreatePageUrl(IReadOnlyList<ResidentDetection> detections, int start, string environment)
+    {
         var content = string.Empty;
         var url = string.Empty;
         var count = 0;
 
-        foreach (var detection in detections)
+        for (var index = start; index < detections.Count; index++)
         {
-            var line = FormatLine(detection);
+            var line = FormatLine(detections[index]);
             var nextContent = count == 0 ? line : content + "\n" + line;
             var nextUrl = CreateDetectionUrl(count + 1, environment, nextContent);
             if (nextUrl.Length > MaxUrlLength)
@@ -43,8 +58,8 @@ internal static class FeedbackIssueLinks
         }
 
         return count > 0
-            ? new DetectionReportLink(url, count)
-            : new DetectionReportLink(CreateTruncatedUrl(environment, FormatLine(detections[0])), 1);
+            ? (url, count)
+            : (CreateTruncatedUrl(environment, FormatLine(detections[start])), 1);
     }
 
     private static string CreateTruncatedUrl(string environment, string line)
@@ -77,8 +92,9 @@ internal static class FeedbackIssueLinks
 
     private static string CreateDetectionUrl(int count, string environment, string content)
     {
+        var title = LocalizationManager.Instance.Format("Feedback_Report_IssueTitle", AppUpdateService.CurrentVersion.ToString(3), count);
         return ProjectLinks.NewIssueUrl
-            + "&title=" + Uri.EscapeDataString($"[検出された項目] {count}件")
+            + "&title=" + Uri.EscapeDataString(title)
             + "&environment=" + Uri.EscapeDataString(environment)
             + "&content=" + Uri.EscapeDataString(content);
     }
@@ -110,5 +126,5 @@ internal static class FeedbackIssueLinks
     }
 }
 
-/// <summary>検出された項目の報告のURLと、本文に入れた行の数。</summary>
-internal readonly record struct DetectionReportLink(string Url, int ReportedCount);
+/// <summary>検出された項目の報告の1つの画面のURLと、本文に入れた項目。</summary>
+internal readonly record struct DetectionReportLink(string Url, IReadOnlyList<ResidentDetection> Detections);

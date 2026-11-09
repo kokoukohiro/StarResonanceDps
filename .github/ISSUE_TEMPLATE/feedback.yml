@@ -12,5 +12,5 @@ body:
     id: environment
     attributes:
       label: 環境 / Environment
-      description: アプリの「フィードバック」タブから開くと入力済みになります。 / Filled in when opened from the Feedback tab in the app.
+      description: アプリの「フィードバック」から開くと入力済みになります。 / Filled in when opened from "Feedback" in the app.
       render: text

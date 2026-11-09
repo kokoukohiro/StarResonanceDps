@@ -15,20 +15,6 @@
         </Style>
 
         <!--
-            「更新を確認」。大きさと中身の並べ方は「プラグインを追加」(Button.AggregationAction)、
-            色はウィジェットタブの三点ボタン(Input.IconOnlySelectBox)と同じ。乗せたときの地の色はもとのスタイルが持つ。
-        -->
-        <Style x:Key="Help.UpdateButton" TargetType="{x:Type Button}" BasedOn="{StaticResource Button.AggregationAction}">
-            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-            <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <!--
             いちばん下の「ライセンス情報」。地も下線も無く、乗せると文字と右の印が明るくなる。
             地(透明)は、文字と印のあいだも押せるように置く。
         -->
@@ -102,7 +88,7 @@
                             <Button Grid.Column="2"
                                     Margin="16,0,0,0"
                                     VerticalAlignment="Center"
-                                    Style="{StaticResource Help.UpdateButton}"
+                                    Style="{StaticResource Button.InputAction}"
                                     Command="{Binding CheckForUpdatesCommand}">
                                 <StackPanel Orientation="Horizontal">
                                     <Path Width="14"

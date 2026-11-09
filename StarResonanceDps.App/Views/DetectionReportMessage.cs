@@ -7,15 +7,18 @@ namespace StarResonanceDps.App.Views;
 /// <summary>フィードバックタブの「選んだ項目を報告」の結果を窓で出す。</summary>
 public static class DetectionReportMessage
 {
-    /// <summary>選んだ項目が1回の報告に入りきらなかった。</summary>
-    public static void ShowLimit(Window? owner, int remainingCount)
+    /// <summary>投稿画面を開いた。<paramref name="pageCount"/>は開いた画面の数。</summary>
+    public static void ShowOpened(Window? owner, int pageCount)
     {
         var localization = LocalizationManager.Instance;
+        var isSinglePage = pageCount == 1;
         MessageWindow.Show(
             owner,
             localization.GetString("Feedback_Report_Title"),
-            localization.GetString("Feedback_Limit_Message"),
-            localization.Format("Feedback_Limit_Detail", remainingCount));
+            isSinglePage
+                ? localization.GetString("Feedback_Opened_Message")
+                : localization.Format("Feedback_OpenedMany_Message", pageCount),
+            localization.GetString(isSinglePage ? "Feedback_Opened_Detail" : "Feedback_OpenedMany_Detail"));
     }
 
     /// <summary>選んだ項目は全部、同じ報告がIssueにあった。</summary>

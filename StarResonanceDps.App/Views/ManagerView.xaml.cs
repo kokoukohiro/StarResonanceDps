@@ -21,8 +21,6 @@ public partial class ManagerView : UserControl
         AggregationContent.ContentScrollViewer.SizeChanged += ContentScrollViewer_SizeChanged;
         PluginsContent.ContentScrollViewer.ScrollChanged += ContentScrollViewer_ScrollChanged;
         PluginsContent.ContentScrollViewer.SizeChanged += ContentScrollViewer_SizeChanged;
-        FeedbackContent.ContentScrollViewer.ScrollChanged += ContentScrollViewer_ScrollChanged;
-        FeedbackContent.ContentScrollViewer.SizeChanged += ContentScrollViewer_SizeChanged;
         HelpContent.ContentScrollViewer.ScrollChanged += ContentScrollViewer_ScrollChanged;
         HelpContent.ContentScrollViewer.SizeChanged += ContentScrollViewer_SizeChanged;
         Loaded += ManagerView_Loaded;
@@ -216,7 +214,7 @@ public partial class ManagerView : UserControl
         }
     }
 
-    /// <summary>外のバーが追いかけるスクロール。通知タブでは無い(通知タブはパネルごとに自分のバーを持つ)。</summary>
+    /// <summary>外のバーが追いかけるスクロール。通知タブとフィードバックタブでは無い(通知タブはパネルごとに、フィードバックタブは一覧が自分のバーを持つ)。</summary>
     private ScrollViewer? GetActiveScrollViewer()
     {
         if (WidgetContent.Visibility == Visibility.Visible)
@@ -237,11 +235,6 @@ public partial class ManagerView : UserControl
         if (LogsContent.Visibility == Visibility.Visible)
         {
             return LogsContent.ContentScrollViewer;
-        }
-
-        if (FeedbackContent.Visibility == Visibility.Visible)
-        {
-            return FeedbackContent.ContentScrollViewer;
         }
 
         return HelpContent.Visibility == Visibility.Visible

@@ -902,6 +902,15 @@
   <data name="NumberDisplay_Wan" xml:space="preserve">
     <value>四位计数法 (万亿兆)</value>
   </data>
+  <data name="NumberUnit_TenThousand" xml:space="preserve">
+    <value>万</value>
+  </data>
+  <data name="NumberUnit_HundredMillion" xml:space="preserve">
+    <value>亿</value>
+  </data>
+  <data name="NumberUnit_Trillion" xml:space="preserve">
+    <value>兆</value>
+  </data>
   <data name="Settings_Display_PlayerName" xml:space="preserve">
     <value>玩家名称</value>
   </data>
@@ -2539,6 +2548,12 @@
   <data name="Feedback_Detections_Title" xml:space="preserve">
     <value>检测到的问题</value>
   </data>
+  <data name="Feedback_Detections_Check" xml:space="preserve">
+    <value>检查反馈状态</value>
+  </data>
+  <data name="Feedback_Detections_CancelCheck" xml:space="preserve">
+    <value>取消检查</value>
+  </data>
   <data name="Feedback_Detections_Report" xml:space="preserve">
     <value>反馈所选项目</value>
   </data>
@@ -2554,6 +2569,9 @@
   <data name="Feedback_Detection_SpecConflict" xml:space="preserve">
     <value>职业判定不一致</value>
   </data>
+  <data name="Feedback_Detection_ItemFormat" xml:space="preserve">
+    <value>{0}({1})</value>
+  </data>
   <data name="Plugins_Empty" xml:space="preserve">
     <value>没有已安装的插件</value>
   </data>
@@ -2564,19 +2582,29 @@
     <value>所选项目已有人反馈。</value>
   </data>
   <data name="Feedback_CheckError_Title" xml:space="preserve">
-    <value>提交确认错误</value>
+    <value>反馈状态检查错误</value>
   </data>
   <data name="Feedback_CheckError_Message" xml:space="preserve">
-    <value>无法确认是否已提交。</value>
+    <value>无法确认是否已反馈。</value>
   </data>
   <data name="Feedback_Report_Title" xml:space="preserve">
     <value>检测到的项目反馈</value>
   </data>
-  <data name="Feedback_Limit_Message" xml:space="preserve">
-    <value>已超过单次可反馈的数量。</value>
+  <data name="Feedback_Report_IssueTitle" xml:space="preserve">
+    <value>[版本 {0}] 检测到的项目{1}项</value>
   </data>
-  <data name="Feedback_Limit_Detail" xml:space="preserve">
-    <value>未反馈的{0}项保留在列表中。
-再次点击可继续反馈。</value>
+  <data name="Feedback_Opened_Message" xml:space="preserve">
+    <value>已打开GitHub提交页面。</value>
+  </data>
+  <data name="Feedback_Opened_Detail" xml:space="preserve">
+    <value>直接点击“Create”即可完成反馈。
+点击“检查反馈状态”即可确认提交结果。</value>
+  </data>
+  <data name="Feedback_OpenedMany_Message" xml:space="preserve">
+    <value>已打开{0}个GitHub提交页面。</value>
+  </data>
+  <data name="Feedback_OpenedMany_Detail" xml:space="preserve">
+    <value>在每个页面点击“Create”即可完成反馈。
+点击“检查反馈状态”即可确认提交结果。</value>
   </data>
 </root>

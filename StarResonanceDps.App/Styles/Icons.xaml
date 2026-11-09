@@ -583,7 +583,7 @@
     </Geometry>
 
     <!--
-        充填式(元SVGは fill="currentColor")。Icon.Fill と組で使う。メインウィンドウの「集計」タブ。
+        充填式(元SVGは fill="currentColor")。Icon.Fill と組で使う。メインウィンドウの「集計」。
         中抜きは逆回りの内側パスで作ってあるので F1(Nonzero)。元SVGの塗り規則と同じ。
         元SVGの背景 `M0 0h24v24H0z fill="none"` は viewBox の下敷きなので落としてある
         (残すと Nonzero で全面が塗られる)。
@@ -615,7 +615,7 @@
     </Geometry>
 
     <!--
-        輪郭式(元SVGは fill="none" stroke="currentColor")。Icon.Stroke と組で使う。メイン窓の「通知」タブ。
+        輪郭式(元SVGは fill="none" stroke="currentColor")。Icon.Stroke と組で使う。メイン窓の「通知」。
         元SVGの下敷きの矩形(M0 0h24v24H0z)は入れていない。
     -->
     <Geometry x:Key="Icon.Notification">

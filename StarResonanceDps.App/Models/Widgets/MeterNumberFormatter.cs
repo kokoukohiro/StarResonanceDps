@@ -1,4 +1,5 @@
 using System.Globalization;
+using StarResonanceDps.App.Localization;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
@@ -30,9 +31,9 @@ public static class MeterNumberFormatter
     {
         return value switch
         {
-            >= 1_000_000_000_000d => $"{FormatScaled(value / 1_000_000_000_000d)}兆",
-            >= 100_000_000d => $"{FormatScaled(value / 100_000_000d)}億",
-            >= 10_000d => $"{FormatScaled(value / 10_000d)}万",
+            >= 1_000_000_000_000d => $"{FormatScaled(value / 1_000_000_000_000d)}{LocalizationManager.Instance.GetString("NumberUnit_Trillion")}",
+            >= 100_000_000d => $"{FormatScaled(value / 100_000_000d)}{LocalizationManager.Instance.GetString("NumberUnit_HundredMillion")}",
+            >= 10_000d => $"{FormatScaled(value / 10_000d)}{LocalizationManager.Instance.GetString("NumberUnit_TenThousand")}",
             _ => FormatValue(value)
         };
     }

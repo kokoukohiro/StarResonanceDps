@@ -22,13 +22,13 @@ public sealed partial class FeedbackViewModel : ObservableObject
     [ObservableProperty]
     private bool _hasItems;
 
-    /// <summary>報告のボタンの文字。確認の途中は「キャンセル」。</summary>
+    /// <summary>確認のボタンの文字。確認の途中は「確認をキャンセル」。</summary>
     [ObservableProperty]
-    private string _reportButtonText = string.Empty;
+    private string _checkReportStatusText = string.Empty;
 
     public FeedbackViewModel()
     {
-        UpdateReportButton();
+        UpdateButtons();
     }
 
     public ObservableCollection<FeedbackItemViewModel> Items { get; } = [];
@@ -48,7 +48,7 @@ public sealed partial class FeedbackViewModel : ObservableObject
         }
 
         HasItems = Items.Count > 0;
-        ReportSelectedCommand.NotifyCanExecuteChanged();
+        UpdateButtons();
     }
 
     public void RefreshTexts()
@@ -58,7 +58,7 @@ public sealed partial class FeedbackViewModel : ObservableObject
             item.RefreshText();
         }
 
-        UpdateReportButton();
+        UpdateButtons();
     }
 
     private void CollectRows(IReadOnlyList<ResidentDetection> detections, bool isReported)
@@ -91,18 +91,23 @@ public sealed partial class FeedbackViewModel : ObservableObject
         ExternalLinkOpener.Open(FeedbackIssueLinks.CreateNewIssueUrl());
     }
 
+    private bool CanCheckReportStatus()
+    {
+        return _checkCancellation is not null || Items.Count > 0;
+    }
+
     private bool CanReportSelected()
     {
-        return _checkCancellation is not null || Items.Any(item => item.IsSelected);
+        return _checkCancellation is null && Items.Any(item => item.IsSelected);
     }
 
     /// <summary>
-    /// 同じ報告がIssueにある項目を「報告済み」にして、無い項目だけで投稿画面を開く。確認の途中はキャンセルになるので、途中でも押せる。
-    /// 確認できなければ投稿画面を開かない。投稿画面に入れた行は、投稿したか分からないので印を付けず、続きの報告に入らないようチェックだけ外す。
-    /// 入りきらない行はチェックを付けたまま残し、次に押したときに確かめる。
+    /// 一覧の全部の項目で、同じ報告がIssueにあるかを確かめ直す。同じ報告が無くなった報告済みの項目は未報告に戻す。投稿画面は開かない。
+    /// 最後まで確かめたら、全部の行のチェックを既定(報告済みでない行だけ)へ付け直す。確認できなかったときは付け直さない。
+    /// どちらのボタンの確認の途中でもキャンセルになるので、途中でも押せる。
     /// </summary>
-    [RelayCommand(CanExecute = nameof(CanReportSelected), AllowConcurrentExecutions = true)]
-    private async Task ReportSelectedAsync()
+    [RelayCommand(CanExecute = nameof(CanCheckReportStatus), AllowConcurrentExecutions = true)]
+    private async Task CheckReportStatusAsync()
     {
         if (_checkCancellation is { } running)
         {
@@ -110,17 +115,43 @@ public sealed partial class FeedbackViewModel : ObservableObject
             return;
         }
 
-        var selected = Items.Where(item => item.IsSelected).Select(item => item.Detection).ToList();
-        if (await FindReportedAsync(selected) is not { } lookup)
+        var detections = Items.Select(item => item.Detection).ToList();
+        if (await RunCheckAsync(cancellationToken => FeedbackIssueLookup.CheckAllAsync(detections, cancellationToken)) is not { } lookup)
         {
             return;
         }
 
-        if (lookup.Reported.Count > 0)
+        ResidentDetectionStore.ApplyReportCheck(lookup.Reported, lookup.NotReported);
+        Refresh();
+
+        if (lookup.Failure is { } failure)
         {
-            ResidentDetectionStore.MarkReported(lookup.Reported);
-            Refresh();
+            DetectionReportMessage.ShowCheckFailed(Application.Current?.MainWindow, failure);
+            return;
         }
+
+        foreach (var item in Items)
+        {
+            item.ResetSelection();
+        }
+    }
+
+    /// <summary>
+    /// 選んだ項目を全部確かめ、同じ報告がIssueにあるものを「報告済み」にして、無いものを1つの画面に入る分ずつ投稿画面に分けて全部開く。
+    /// 確認できなければ開かない。開けた画面に入れた行は、投稿したか分からないので印を付けず、チェックだけ外す。
+    /// 開けない画面があったらそこで止め、残りの行はチェックを付けたまま残す。
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanReportSelected))]
+    private async Task ReportSelectedAsync()
+    {
+        var selected = Items.Where(item => item.IsSelected).Select(item => item.Detection).ToList();
+        if (await RunCheckAsync(cancellationToken => FeedbackIssueLookup.CheckAllAsync(selected, cancellationToken)) is not { } lookup)
+        {
+            return;
+        }
+
+        ResidentDetectionStore.ApplyReportCheck(lookup.Reported, lookup.NotReported);
+        Refresh();
 
         var owner = Application.Current?.MainWindow;
         if (lookup.Failure is { } failure)
@@ -135,30 +166,33 @@ public sealed partial class FeedbackViewModel : ObservableObject
             return;
         }
 
-        var link = FeedbackIssueLinks.CreateDetectionReportLink(lookup.NotReported);
-        if (!ExternalLinkOpener.Open(link.Url))
+        var openedCount = 0;
+        foreach (var link in FeedbackIssueLinks.CreateDetectionReportLinks(lookup.NotReported))
         {
-            return;
+            if (!ExternalLinkOpener.Open(link.Url))
+            {
+                break;
+            }
+
+            ClearSelection(link.Detections);
+            openedCount++;
         }
 
-        ClearSelection(lookup.NotReported.Take(link.ReportedCount));
-
-        var remainingCount = selected.Count - lookup.Reported.Count - link.ReportedCount;
-        if (remainingCount > 0)
+        if (openedCount > 0)
         {
-            DetectionReportMessage.ShowLimit(owner, remainingCount);
+            DetectionReportMessage.ShowOpened(owner, openedCount);
         }
     }
 
     /// <summary>キャンセルされたら null。</summary>
-    private async Task<FeedbackIssueLookupResult?> FindReportedAsync(IReadOnlyList<ResidentDetection> detections)
+    private async Task<FeedbackIssueLookupResult?> RunCheckAsync(Func<CancellationToken, Task<FeedbackIssueLookupResult>> check)
     {
         using var cancellation = new CancellationTokenSource();
         _checkCancellation = cancellation;
-        UpdateReportButton();
+        UpdateButtons();
         try
         {
-            return await FeedbackIssueLookup.FindReportedAsync(detections, cancellation.Token);
+            return await check(cancellation.Token);
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {
@@ -168,7 +202,7 @@ public sealed partial class FeedbackViewModel : ObservableObject
         finally
         {
             _checkCancellation = null;
-            UpdateReportButton();
+            UpdateButtons();
         }
     }
 
@@ -183,10 +217,11 @@ public sealed partial class FeedbackViewModel : ObservableObject
         }
     }
 
-    private void UpdateReportButton()
+    private void UpdateButtons()
     {
-        ReportButtonText = LocalizationManager.Instance.GetString(
-            _checkCancellation is null ? "Feedback_Detections_Report" : "Common_Cancel");
+        CheckReportStatusText = LocalizationManager.Instance.GetString(
+            _checkCancellation is null ? "Feedback_Detections_Check" : "Feedback_Detections_CancelCheck");
+        CheckReportStatusCommand.NotifyCanExecuteChanged();
         ReportSelectedCommand.NotifyCanExecuteChanged();
     }
 }

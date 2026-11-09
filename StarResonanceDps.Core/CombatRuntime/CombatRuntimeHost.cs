@@ -1,7 +1,6 @@
 ﻿using Serilog;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
 using StarResonanceDps.Core.CombatRuntime.Database;
-using StarResonanceDps.Core.Diagnostics;
 using StarResonanceDps.Core.Logging;
 
 namespace StarResonanceDps.Core.CombatRuntime;
@@ -46,14 +45,14 @@ public sealed class CombatRuntimeHost
             if (!CombatRuntimeSettings.HasBeenApplied)
             {
                 throw new InvalidOperationException(
-                    "CombatRuntimeSettings.Apply を呼んでから CombatRuntimeHost.Initialize を呼ぶこと。");
+                    "Call CombatRuntimeSettings.Apply before CombatRuntimeHost.Initialize.");
             }
 
             // ログの設定は起動の最初に App が行う(ConfigureLogging)。初期化の中で行うと、それより前の失敗が残らない。
             if (!_isLoggingConfigured)
             {
                 throw new InvalidOperationException(
-                    "CombatRuntimeHost.ConfigureLogging を呼んでから CombatRuntimeHost.Initialize を呼ぶこと。");
+                    "Call CombatRuntimeHost.ConfigureLogging before CombatRuntimeHost.Initialize.");
             }
 
             Directory.CreateDirectory(CombatRuntimePaths.DataDirectory);
@@ -115,7 +114,7 @@ public sealed class CombatRuntimeHost
     }
 
     /// <summary>
-    /// ログ(Logs\CombatRuntime.log とログタブ)の設定。起動の最初、Data に書けると確かめた直後に App が呼ぶ。
+    /// ログ(Data\CombatRuntime.log とログタブ)の設定。起動の最初、Data に書けると確かめた直後に App が呼ぶ。
     /// それより前に出る例外はどこにも残らない。
     /// </summary>
     public static void ConfigureLogging()
@@ -131,7 +130,7 @@ public sealed class CombatRuntimeHost
     }
 
     /// <summary>
-    /// 前のバージョンのログ(Logs\CombatRuntime.log と常設の検知ログ)を消す。アプリのバージョンが変わった最初の起動で、<see cref="ConfigureLogging"/> の後に App が呼ぶ。
+    /// 前のバージョンのログ(Data\CombatRuntime.log)を消す。アプリのバージョンが変わった最初の起動で、<see cref="ConfigureLogging"/> の後に App が呼ぶ。
     /// ログのファイルは開いている間は消せないので、閉じて消して開き直す。消せなくてもアプリの処理は止めない。
     /// </summary>
     public static void ClearLogs()
@@ -153,7 +152,5 @@ public sealed class CombatRuntimeHost
         {
             Log.Warning(failure, "Could not delete {Path}", CombatRuntimePaths.LogFilePath);
         }
-
-        DiagnosticSession.ClearResidentLogs();
     }
 }

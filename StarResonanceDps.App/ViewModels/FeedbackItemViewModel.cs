@@ -11,7 +11,7 @@ public sealed partial class FeedbackItemViewModel : ObservableObject
     private readonly Action _selectionChanged;
 
     [ObservableProperty]
-    private string _kindText = string.Empty;
+    private string _itemText = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanSelect))]
@@ -28,39 +28,46 @@ public sealed partial class FeedbackItemViewModel : ObservableObject
         _selectionChanged = selectionChanged;
         Detection = detection;
         IsReported = detection.IsReported;
-        IsSelected = !detection.IsReported;
+        ResetSelection();
         TimeText = detection.DetectedAt.ToLocalTime().ToString("MM/dd HH:mm", CultureInfo.InvariantCulture);
         RefreshText();
     }
 
     public ResidentDetection Detection { get; private set; }
 
-    public string Id => Detection.Id;
-
     public string TimeText { get; }
 
     public bool CanSelect => !IsReported;
 
+    /// <summary>報告済みの状態が変わったら、チェックを既定へ戻す。</summary>
     public void Apply(ResidentDetection detection)
     {
         Detection = detection;
-        if (detection.IsReported && !IsReported)
+        if (detection.IsReported == IsReported)
         {
-            IsSelected = false;
+            return;
         }
 
         IsReported = detection.IsReported;
+        ResetSelection();
+    }
+
+    /// <summary>チェックを既定(報告済みでない行だけ入れる)へ戻す。</summary>
+    public void ResetSelection()
+    {
+        IsSelected = !IsReported;
     }
 
     public void RefreshText()
     {
-        KindText = LocalizationManager.Instance.GetString(Detection.Kind switch
+        var kindText = LocalizationManager.Instance.GetString(Detection.Kind switch
         {
             ResidentDetectionKind.BlankSourceName => "Feedback_Detection_BlankSourceName",
             ResidentDetectionKind.SourceLandingConflict => "Feedback_Detection_SourceLandingConflict",
             ResidentDetectionKind.SpecTalentConflict or ResidentDetectionKind.SpecSkillConflict => "Feedback_Detection_SpecConflict",
             _ => throw new ArgumentOutOfRangeException(nameof(Detection), Detection.Kind, null)
         });
+        ItemText = LocalizationManager.Instance.Format("Feedback_Detection_ItemFormat", kindText, Detection.Id);
     }
 
     partial void OnIsSelectedChanged(bool value)

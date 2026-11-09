@@ -33,7 +33,7 @@ public partial class MessagePreviewWindow : Window
     private const string SamplePluginVersion = "2.0.1";
 
     // 検出された項目の報告の窓を出すための試しの値。
-    private const int SampleUnreportedDetectionCount = 3;
+    private const int SampleOpenedPageCount = 3;
 
     private const string ModuleAssemblyName = "ModuleTool";
     private const string ModuleResourceBaseName = "StarResonanceDps.Plugins.ModuleTool.Properties.Resources";
@@ -134,10 +134,16 @@ public partial class MessagePreviewWindow : Window
         UpdateFailureMessage.ShowRestartFailed(this, isUpdated: false);
     }
 
-    // 本物: フィードバックタブの「選んだ項目を報告」で、選んだ項目が1回の報告に入りきらなかったとき
-    private void FeedbackLimit_Click(object sender, RoutedEventArgs e)
+    // 本物: フィードバックタブの「選んだ項目を報告」で、投稿画面を1つ開いたとき
+    private void FeedbackOpened_Click(object sender, RoutedEventArgs e)
     {
-        DetectionReportMessage.ShowLimit(this, SampleUnreportedDetectionCount);
+        DetectionReportMessage.ShowOpened(this, 1);
+    }
+
+    // 本物: フィードバックタブの「選んだ項目を報告」で、1つの画面に入りきらず投稿画面を分けて開いたとき
+    private void FeedbackOpenedMany_Click(object sender, RoutedEventArgs e)
+    {
+        DetectionReportMessage.ShowOpened(this, SampleOpenedPageCount);
     }
 
     // 本物: フィードバックタブの「選んだ項目を報告」で、選んだ項目が全部Issueにあったとき

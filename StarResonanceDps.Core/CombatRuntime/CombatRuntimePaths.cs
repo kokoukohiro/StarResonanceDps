@@ -48,12 +48,9 @@ public static class CombatRuntimePaths
 
     public static string DatabasePath => Path.Combine(DataDirectory, "CombatHistory.db");
 
-    public static string LogFilePath => Path.Combine(LogsDirectory, "CombatRuntime.log");
+    public static string LogFilePath => Path.Combine(DataDirectory, "CombatRuntime.log");
 
     public static string ResidentDetectionsPath => Path.Combine(DataDirectory, "ResidentDetections.json");
-
-    /// <summary>アプリのログ(<see cref="LogFilePath"/>)と常設の検知ログ(<c>Resident</c>)の置き場。</summary>
-    public static string LogsDirectory => Path.Combine(BaseDirectory, "Logs");
 
     /// <summary>
     /// <see cref="DataDirectory"/> を作り、書けるかを確かめる。書けなければ例外(<see cref="IOException"/> /

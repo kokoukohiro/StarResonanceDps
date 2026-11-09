@@ -1334,7 +1334,7 @@ public static class CombatDataCatalog
         }
 
         var overrides = loadedOverrides
-            ?? throw new InvalidDataException($"{relativePath} が空です。");
+            ?? throw new InvalidDataException($"{relativePath} is empty.");
         var merged = names.ToDictionary(
             pair => pair.Key,
             pair => pair.Value.ToDictionary(),
@@ -1362,7 +1362,7 @@ public static class CombatDataCatalog
                 if (!merged.TryGetValue(culture, out var namesById))
                 {
                     Log.Error(
-                        "{OverridePath}: {Key} に未知の言語 \"{Culture}\"。言語は {Cultures}",
+                        "{OverridePath}: {Key} has an unknown language \"{Culture}\". Languages: {Cultures}",
                         relativePath, key, culture, string.Join(" / ", SupportedCultures));
                     continue;
                 }
@@ -1497,7 +1497,7 @@ public static class CombatDataCatalog
                     if (!SupportedCultures.Contains(name.Key, StringComparer.OrdinalIgnoreCase))
                     {
                         Log.Error(
-                            "RecountRowOverrides: {Key} に未知の言語 \"{Culture}\"。言語は {Cultures}",
+                            "RecountRowOverrides: {Key} has an unknown language \"{Culture}\". Languages: {Cultures}",
                             pair.Key, name.Key, string.Join(" / ", SupportedCultures));
                         continue;
                     }

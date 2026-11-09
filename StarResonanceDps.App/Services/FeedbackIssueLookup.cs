@@ -17,7 +17,7 @@ public enum FeedbackIssueLookupFailure
 
 /// <summary>Issueの検索の結果。</summary>
 /// <param name="Reported">同じ報告があった項目。確認できなかったときも、それより前に見つかった分は入る。</param>
-/// <param name="NotReported">確かめて同じ報告が無かった項目。1回の投稿に入りきらなくなった所で検索を止めるので、それより後の項目はどちらにも入らない。</param>
+/// <param name="NotReported">確かめて同じ報告が無かった項目。確かめなかった項目はどちらにも入らない。</param>
 /// <param name="Failure">確認できなかった理由。</param>
 internal sealed record FeedbackIssueLookupResult(
     IReadOnlyList<ResidentDetection> Reported,
@@ -33,7 +33,7 @@ internal sealed record FeedbackIssueLookupResult(
 /// </para>
 ///
 /// <para>
-/// 検索の回数には上限があるので、1回の投稿に入りきらない項目までは確かめない(続きは次に押したときに確かめる)。
+/// 渡した項目は全部確かめる(報告のときも、確認のときも)。
 /// GitHubが検索を打ち切ったら同じページを送り直し、回数の上限に当たったら解除まで待つ。どちらも時間では諦めず、止めるのは呼び出し元のキャンセル。
 /// </para>
 /// </summary>
@@ -46,7 +46,8 @@ internal static class FeedbackIssueLookup
     // 解除の時刻を過ぎても上限の応答が続いたときに、送り続けないための待ち。
     private static readonly TimeSpan MinimumLimitWait = TimeSpan.FromSeconds(1);
 
-    public static async Task<FeedbackIssueLookupResult> FindReportedAsync(
+    /// <summary>渡した項目を全部確かめる。</summary>
+    public static async Task<FeedbackIssueLookupResult> CheckAllAsync(
         IReadOnlyList<ResidentDetection> detections,
         CancellationToken cancellationToken)
     {
@@ -58,12 +59,6 @@ internal static class FeedbackIssueLookup
             if (failure is not null)
             {
                 return new FeedbackIssueLookupResult(reported, notReported, failure);
-            }
-
-            if (notReported.Count > 0
-                && FeedbackIssueLinks.CreateDetectionReportLink(notReported).ReportedCount < notReported.Count)
-            {
-                break;
             }
         }
 

@@ -903,6 +903,15 @@ VOICEVOXを起動し直してください。</value>
   <data name="NumberDisplay_Wan" xml:space="preserve">
     <value>日本語表記（万億兆）</value>
   </data>
+  <data name="NumberUnit_TenThousand" xml:space="preserve">
+    <value>万</value>
+  </data>
+  <data name="NumberUnit_HundredMillion" xml:space="preserve">
+    <value>億</value>
+  </data>
+  <data name="NumberUnit_Trillion" xml:space="preserve">
+    <value>兆</value>
+  </data>
   <data name="Settings_Display_PlayerName" xml:space="preserve">
     <value>プレイヤー名</value>
   </data>
@@ -2540,6 +2549,12 @@ VOICEVOXを起動し直してください。</value>
   <data name="Feedback_Detections_Title" xml:space="preserve">
     <value>検出された問題</value>
   </data>
+  <data name="Feedback_Detections_Check" xml:space="preserve">
+    <value>報告状況を確認</value>
+  </data>
+  <data name="Feedback_Detections_CancelCheck" xml:space="preserve">
+    <value>確認をキャンセル</value>
+  </data>
   <data name="Feedback_Detections_Report" xml:space="preserve">
     <value>選んだ項目を報告</value>
   </data>
@@ -2555,6 +2570,9 @@ VOICEVOXを起動し直してください。</value>
   <data name="Feedback_Detection_SpecConflict" xml:space="preserve">
     <value>クラス判定の不一致</value>
   </data>
+  <data name="Feedback_Detection_ItemFormat" xml:space="preserve">
+    <value>{0}({1})</value>
+  </data>
   <data name="Plugins_Empty" xml:space="preserve">
     <value>インストール済みのプラグインがありません</value>
   </data>
@@ -2565,19 +2583,29 @@ VOICEVOXを起動し直してください。</value>
     <value>選んだ項目はすでに報告されています。</value>
   </data>
   <data name="Feedback_CheckError_Title" xml:space="preserve">
-    <value>投稿確認エラー</value>
+    <value>報告状況確認エラー</value>
   </data>
   <data name="Feedback_CheckError_Message" xml:space="preserve">
-    <value>投稿済みか確認できませんでした。</value>
+    <value>報告済みか確認できませんでした。</value>
   </data>
   <data name="Feedback_Report_Title" xml:space="preserve">
     <value>検出された項目の報告</value>
   </data>
-  <data name="Feedback_Limit_Message" xml:space="preserve">
-    <value>一度に報告できる件数を超えました。</value>
+  <data name="Feedback_Report_IssueTitle" xml:space="preserve">
+    <value>[バージョン {0}] 検出された項目{1}件</value>
   </data>
-  <data name="Feedback_Limit_Detail" xml:space="preserve">
-    <value>未報告の{0}件は一覧に残ります。
-もう一度押すと続きを報告できます。</value>
+  <data name="Feedback_Opened_Message" xml:space="preserve">
+    <value>GitHubの投稿画面を開きました。</value>
+  </data>
+  <data name="Feedback_Opened_Detail" xml:space="preserve">
+    <value>そのまま「Create」を押すと、報告が完了します。
+「報告状況を確認」を押すと投稿の結果を確認できます。</value>
+  </data>
+  <data name="Feedback_OpenedMany_Message" xml:space="preserve">
+    <value>GitHubの投稿画面を{0}個開きました。</value>
+  </data>
+  <data name="Feedback_OpenedMany_Detail" xml:space="preserve">
+    <value>それぞれの画面で「Create」を押すと、報告が完了します。
+「報告状況を確認」を押すと投稿の結果を確認できます。</value>
   </data>
 </root>

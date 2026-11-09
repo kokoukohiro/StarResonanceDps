@@ -32,24 +32,14 @@ namespace StarResonanceDps.Core.Diagnostics;
 ///
 /// <para>
 /// <b>これは調査用の一時計測ではない。</b> 常設で、プローブ撤去の対象外。
-/// 検知はフィードバックタブの一覧にも出す(<see cref="ResidentDetectionStore"/>)。術者・保持者の uuid は控えに入れない。
-/// </para>
-///
-/// <para>
-/// 出力先は AppContext.BaseDirectory/Logs/<b>Resident</b>/SpecConflictProbe_(起動時刻).log。
-/// <b>食い違いが1件も無ければファイルを作らない</b>ので、存在すること自体が検知の合図になる。
-/// 前の起動のログに同じ番号の行があれば書かない(<see cref="DiagnosticSession.WriteResident"/>)。
+/// 検知はフィードバックタブの一覧(<see cref="ResidentDetectionStore"/>)へ送り、報告の本文になる。本文は公開されるので、術者や保持者の番号は持たない。
+/// 同じ番号は1起動に1回だけ送る(一覧も種類と番号ごとに1件しか持たない)。
 /// </para>
 /// </summary>
 public static class SpecConflictProbe
 {
-    private const string LogNamePrefix = "SpecConflictProbe";
-
-    /// <summary>同じIDを何度も書かない。1回の起動につき最初の数件だけ残す。</summary>
-    private const int MaxRecordsPerId = 3;
-
     private static readonly object Sync = new();
-    private static readonly Dictionary<(char Kind, int Id), int> SeenCounts = [];
+    private static readonly HashSet<(char Kind, int Id)> SeenIds = [];
 
     /// <summary>
     /// タレント由来のバフが、控えてあるマーカーと違う特化を書こうとした回。
@@ -67,9 +57,7 @@ public static class SpecConflictProbe
         int fightSourceType,
         int sourceConfigId,
         int markerBuffId,
-        string markerSpec,
-        long casterUuid,
-        long holderUuid)
+        string markerSpec)
     {
         if (!ShouldRecord('T', observedBuffId))
         {
@@ -80,11 +68,6 @@ public static class SpecConflictProbe
         var details = string.Create(
             CultureInfo.InvariantCulture,
             $"rounded={grantedBuffId} spec={spec} distance={distanceFromRoot} ftype={fightSourceType} src={sourceConfigId} marker={markerBuffId}({markerSpec})");
-        DiagnosticSession.WriteResident(
-            LogNamePrefix,
-            ResidentDetectionKind.SpecTalentConflict,
-            id,
-            string.Create(CultureInfo.InvariantCulture, $"{details} caster={casterUuid} holder={holderUuid}"));
         ResidentDetectionStore.Add(ResidentDetectionKind.SpecTalentConflict, id, details);
     }
 
@@ -95,8 +78,7 @@ public static class SpecConflictProbe
         int skillId,
         string spec,
         int markerBuffId,
-        string markerSpec,
-        long entityUuid)
+        string markerSpec)
     {
         if (!ShouldRecord('S', skillId))
         {
@@ -105,11 +87,6 @@ public static class SpecConflictProbe
 
         var id = skillId.ToString(CultureInfo.InvariantCulture);
         var details = string.Create(CultureInfo.InvariantCulture, $"spec={spec} marker={markerBuffId}({markerSpec})");
-        DiagnosticSession.WriteResident(
-            LogNamePrefix,
-            ResidentDetectionKind.SpecSkillConflict,
-            id,
-            string.Create(CultureInfo.InvariantCulture, $"{details} uuid={entityUuid}"));
         ResidentDetectionStore.Add(ResidentDetectionKind.SpecSkillConflict, id, details);
     }
 
@@ -117,9 +94,7 @@ public static class SpecConflictProbe
     {
         lock (Sync)
         {
-            SeenCounts.TryGetValue((kind, id), out var count);
-            SeenCounts[(kind, id)] = count + 1;
-            return count < MaxRecordsPerId;
+            return SeenIds.Add((kind, id));
         }
     }
 }
