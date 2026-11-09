@@ -3,50 +3,59 @@ using StarResonanceDps.App.Localization;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
+/// <summary>
+/// 大きな数値を、全体設定「数値」の表記で単位つきに縮める。番号 0 は英語表記(K・M・B・T)、1 は日本語表記(万・億・兆。字は表示言語の文言)。
+/// 単位の決め方は、メーターの数値とグラフの軸の数字で同じ。
+/// </summary>
 public static class MeterNumberFormatter
 {
+    /// <summary>メーター・詳細の数値。単位を付けた値は小数点以下2位で固定する(1.20K のように末尾の0も出す)。単位を付けない値は整数に小数を足さない。</summary>
     public static string Format(double value, int formatIndex)
+    {
+        return FormatWithUnit(value, formatIndex, scaledFormat: "F2", unscaledFormat: "0.##");
+    }
+
+    /// <summary>グラフの軸の数字。小数は要る桁だけ出す(1.5M・750K・0)。</summary>
+    public static string FormatCompact(double value, int formatIndex)
+    {
+        return FormatWithUnit(value, formatIndex, scaledFormat: "0.##", unscaledFormat: "0");
+    }
+
+    private static string FormatWithUnit(double value, int formatIndex, string scaledFormat, string unscaledFormat)
     {
         var normalized = double.IsFinite(value)
             ? Math.Max(value, 0d)
             : 0d;
+        var (divisor, unit) = formatIndex == 1
+            ? GetWanUnit(normalized)
+            : GetKmbtUnit(normalized);
 
-        return formatIndex == 1
-            ? FormatWan(normalized)
-            : FormatKmb(normalized);
+        return unit is null
+            ? normalized.ToString(unscaledFormat, CultureInfo.CurrentCulture)
+            : (normalized / divisor).ToString(scaledFormat, CultureInfo.CurrentCulture) + unit;
     }
 
-    private static string FormatKmb(double value)
+    private static (double Divisor, string? Unit) GetKmbtUnit(double value)
     {
         return value switch
         {
-            >= 1_000_000_000d => $"{FormatScaled(value / 1_000_000_000d)}B",
-            >= 1_000_000d => $"{FormatScaled(value / 1_000_000d)}M",
-            >= 1_000d => $"{FormatScaled(value / 1_000d)}K",
-            _ => FormatValue(value)
+            >= 1_000_000_000_000d => (1_000_000_000_000d, "T"),
+            >= 1_000_000_000d => (1_000_000_000d, "B"),
+            >= 1_000_000d => (1_000_000d, "M"),
+            >= 1_000d => (1_000d, "K"),
+            _ => (1d, null)
         };
     }
 
-    private static string FormatWan(double value)
+    private static (double Divisor, string? Unit) GetWanUnit(double value)
     {
+        var localization = LocalizationManager.Instance;
         return value switch
         {
-            >= 1_000_000_000_000d => $"{FormatScaled(value / 1_000_000_000_000d)}{LocalizationManager.Instance.GetString("NumberUnit_Trillion")}",
-            >= 100_000_000d => $"{FormatScaled(value / 100_000_000d)}{LocalizationManager.Instance.GetString("NumberUnit_HundredMillion")}",
-            >= 10_000d => $"{FormatScaled(value / 10_000d)}{LocalizationManager.Instance.GetString("NumberUnit_TenThousand")}",
-            _ => FormatValue(value)
+            >= 1_000_000_000_000d => (1_000_000_000_000d, localization.GetString("NumberUnit_Trillion")),
+            >= 100_000_000d => (100_000_000d, localization.GetString("NumberUnit_HundredMillion")),
+            >= 10_000d => (10_000d, localization.GetString("NumberUnit_TenThousand")),
+            _ => (1d, null)
         };
-    }
-
-    /// <summary>単位を付けて短縮した値。小数点以下2位で固定する(1.20K のように末尾の0も出す)。</summary>
-    private static string FormatScaled(double value)
-    {
-        return value.ToString("F2", CultureInfo.CurrentCulture);
-    }
-
-    /// <summary>単位を付けずそのまま出す値。整数に小数を足さない。</summary>
-    private static string FormatValue(double value)
-    {
-        return value.ToString("0.##", CultureInfo.CurrentCulture);
     }
 }

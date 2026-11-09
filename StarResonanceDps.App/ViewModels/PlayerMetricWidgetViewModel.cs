@@ -79,6 +79,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     private object? _graphMarkerGradeSource;
     private int _graphMarkerNextIndex;
     private int _graphVisibleSeconds = WidgetConfigDefaults.DefaultMetricGraphVisibleSeconds;
+    private int _graphNumberDisplayFormatIndex;
     private bool _graphShowsSkillLog = true;
     private Brush? _graphLineBrush;
     private readonly DispatcherTimer _wheelSaveTimer;
@@ -137,6 +138,13 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     {
         get => _graphVisibleSeconds;
         private set => SetProperty(ref _graphVisibleSeconds, value);
+    }
+
+    /// <summary>推移グラフの縦軸の数字の縮め方。全体設定「数値」の番号。</summary>
+    public int GraphNumberDisplayFormatIndex
+    {
+        get => _graphNumberDisplayFormatIndex;
+        private set => SetProperty(ref _graphNumberDisplayFormatIndex, value);
     }
 
     /// <summary>推移グラフの横軸の下に技のアイコンの行を出すか。設定「スキルログを表示」。</summary>
@@ -303,6 +311,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         {
             GraphVisibleSeconds = graphSettings.VisibleSeconds;
             GraphShowsSkillLog = graphSettings.ShowSkillLog;
+            GraphNumberDisplayFormatIndex = _configManager.CurrentSettings.NumberDisplayFormatIndex;
         }
 
         if (SelectedCharacterId is not { } characterId)
