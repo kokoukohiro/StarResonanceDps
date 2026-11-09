@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 using StarResonanceDps.Core.CombatRuntime;
 
 namespace StarResonanceDps.Core.Diagnostics;
@@ -42,15 +43,16 @@ namespace StarResonanceDps.Core.Diagnostics;
 ///
 /// <para>
 /// <b>これは調査用の一時計測ではない。</b> 常設で、プローブ撤去の対象外。
-/// リリース前に掃除する。
+/// 検知はフィードバックタブの一覧にも出す(<see cref="ResidentDetectionStore"/>)。charId と鎖の中の uuid は控えに入れない。
 /// </para>
 ///
 /// <para>
-/// 出力先は AppContext.BaseDirectory/Logs/<b>Resident</b>/BlankSourceNameProbe_(起動時刻).txt。
+/// 出力先は AppContext.BaseDirectory/Logs/<b>Resident</b>/BlankSourceNameProbe_(起動時刻).log。
 /// <b>空欄が1件も無ければファイルを作らない</b>ので、存在すること自体が検知の合図になる。
+/// 前の起動のログに同じ番号の行があれば書かない(<see cref="DiagnosticSession.WriteResident"/>)。
 /// </para>
 /// </summary>
-public static class BlankSourceNameProbe
+public static partial class BlankSourceNameProbe
 {
     private const string LogNamePrefix = "BlankSourceNameProbe";
 
@@ -96,13 +98,18 @@ public static class BlankSourceNameProbe
             }
         }
 
+        var details = $"type={(isBuffSource ? "buff" : "skill")} table={(isHealing ? "heal" : "damage")} landing={landing}";
         var firstBlankText = firstBlankAt is { } blankAt
-            ? string.Create(CultureInfo.InvariantCulture, $"初回={blankAt.ToLocalTime():HH:mm:ss.fff} ")
+            ? string.Create(CultureInfo.InvariantCulture, $" firstBlank={blankAt.ToLocalTime():HH:mm:ss.fff}")
             : string.Empty;
-        Write(string.Create(
-            CultureInfo.InvariantCulture,
-            $"行={rowKeyText} 種別={(isBuffSource ? "バフ" : "スキル")} 表={(isHealing ? "ヒール" : "与ダメ")} "
-            + $"検知時点 累計={totalValue} ヒット={hitCount} charId={characterId} 着地={landing} {firstBlankText}鎖={trace}"));
+        DiagnosticSession.WriteResident(
+            LogNamePrefix,
+            ResidentDetectionKind.BlankSourceName,
+            rowKeyText,
+            string.Create(
+                CultureInfo.InvariantCulture,
+                $"{details} chain={trace} total={totalValue} hits={hitCount} charId={characterId}{firstBlankText}"));
+        ResidentDetectionStore.Add(ResidentDetectionKind.BlankSourceName, rowKeyText, $"{details} chain={RemoveEntityIds(trace)}");
     }
 
     /// <summary>
@@ -125,32 +132,21 @@ public static class BlankSourceNameProbe
             }
         }
 
-        Write(string.Create(
-            CultureInfo.InvariantCulture,
-            $"着地先が食い違う 行={rowKeyText} 表={(isHealing ? "ヒール" : "与ダメ")} charId={characterId} "
-            + $"決まった先={decided} 今回={other} 鎖={trace}"));
+        var details = $"table={(isHealing ? "heal" : "damage")} decided={decided} other={other}";
+        DiagnosticSession.WriteResident(
+            LogNamePrefix,
+            ResidentDetectionKind.SourceLandingConflict,
+            rowKeyText,
+            string.Create(CultureInfo.InvariantCulture, $"{details} chain={trace} charId={characterId}"));
+        ResidentDetectionStore.Add(ResidentDetectionKind.SourceLandingConflict, rowKeyText, $"{details} chain={RemoveEntityIds(trace)}");
     }
 
-    private static void Write(string message)
+    /// <summary>鎖の中の実体の番号を外す。プレイヤーの uuid が入ることがあり、報告の本文は公開される。</summary>
+    private static string RemoveEntityIds(string trace)
     {
-        try
-        {
-            var line = DateTimeOffset.Now.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture)
-                + "  " + message;
-            var directory = DiagnosticSession.ResidentLogDirectory;
-            // アプリ起動ごとに別ファイル。追記だとどの回の記録か切り分けられない。
-            var path = Path.Combine(directory, $"{LogNamePrefix}_{DiagnosticSession.Stamp}.txt");
-
-            lock (Sync)
-            {
-                Directory.CreateDirectory(directory);
-                DiagnosticSession.EnsureHeader(path);
-                File.AppendAllText(path, line + Environment.NewLine, System.Text.Encoding.UTF8);
-            }
-        }
-        catch
-        {
-            // 診断のみ。本来の処理へは伝播させない。
-        }
+        return EntityIdRegex().Replace(trace, "$1");
     }
+
+    [GeneratedRegex(@"(caster|entity) -?\d+")]
+    private static partial Regex EntityIdRegex();
 }

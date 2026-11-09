@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
 using StarResonanceDps.Core.CombatRuntime.Database;
+using StarResonanceDps.Core.Diagnostics;
 using StarResonanceDps.Core.Logging;
 
 namespace StarResonanceDps.Core.CombatRuntime;
@@ -114,7 +115,7 @@ public sealed class CombatRuntimeHost
     }
 
     /// <summary>
-    /// ログ(Data\CombatRuntime.log とログタブ)の設定。起動の最初、Data に書けると確かめた直後に App が呼ぶ。
+    /// ログ(Logs\CombatRuntime.log とログタブ)の設定。起動の最初、Data に書けると確かめた直後に App が呼ぶ。
     /// それより前に出る例外はどこにも残らない。
     /// </summary>
     public static void ConfigureLogging()
@@ -127,5 +128,32 @@ public sealed class CombatRuntimeHost
 
         Log.Logger = loggerConfiguration.CreateLogger();
         _isLoggingConfigured = true;
+    }
+
+    /// <summary>
+    /// 前のバージョンのログ(Logs\CombatRuntime.log と常設の検知ログ)を消す。アプリのバージョンが変わった最初の起動で、<see cref="ConfigureLogging"/> の後に App が呼ぶ。
+    /// ログのファイルは開いている間は消せないので、閉じて消して開き直す。消せなくてもアプリの処理は止めない。
+    /// </summary>
+    public static void ClearLogs()
+    {
+        Log.CloseAndFlush();
+
+        Exception? failure = null;
+        try
+        {
+            File.Delete(CombatRuntimePaths.LogFilePath);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            failure = exception;
+        }
+
+        ConfigureLogging();
+        if (failure is not null)
+        {
+            Log.Warning(failure, "Could not delete {Path}", CombatRuntimePaths.LogFilePath);
+        }
+
+        DiagnosticSession.ClearResidentLogs();
     }
 }

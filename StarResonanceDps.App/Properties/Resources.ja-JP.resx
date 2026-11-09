@@ -637,7 +637,7 @@ VOICEVOXを起動し直してください。</value>
     <value>Copyright © 2026 kokoukohiro(GNU GPL v3)</value>
   </data>
   <data name="Help_VersionWithStatus" xml:space="preserve">
-    <value>{0}({1})</value>
+    <value>{0} ({1})</value>
   </data>
   <data name="Update_Status_Checking" xml:space="preserve">
     <value>確認中</value>
@@ -649,7 +649,7 @@ VOICEVOXを起動し直してください。</value>
     <value>新しいバージョンがあります</value>
   </data>
   <data name="Update_Status_NoRelease" xml:space="preserve">
-    <value>公開されたバージョンありません</value>
+    <value>公開されたバージョンがありません</value>
   </data>
   <data name="Update_Status_Failed" xml:space="preserve">
     <value>確認できませんでした</value>
@@ -697,14 +697,14 @@ VOICEVOXを起動し直してください。</value>
   <data name="Update_Error_Message" xml:space="preserve">
     <value>更新できませんでした。</value>
   </data>
-  <data name="Update_Error_Network" xml:space="preserve">
+  <data name="GitHub_Error_Network" xml:space="preserve">
     <value>インターネットへの接続を確認して、もう一度お試しください。</value>
   </data>
-  <data name="Update_Error_Server" xml:space="preserve">
+  <data name="GitHub_Error_Server" xml:space="preserve">
     <value>GitHubのサーバーが応答しませんでした。
 しばらくしてから、もう一度お試しください。</value>
   </data>
-  <data name="Update_Error_RateLimit" xml:space="preserve">
+  <data name="GitHub_Error_RateLimit" xml:space="preserve">
     <value>GitHubへのアクセスが一時的に制限されています。
 しばらくしてから、もう一度お試しください。</value>
   </data>
@@ -2524,5 +2524,60 @@ VOICEVOXを起動し直してください。</value>
 {0}
 このファイルは、アプリが次に設定を保存したときに上書きされます。
 必要に応じて、設定をやり直してください。</value>
+  </data>
+  <data name="Navigation_Feedback" xml:space="preserve">
+    <value>フィードバック</value>
+  </data>
+  <data name="Feedback_Issue_Title" xml:space="preserve">
+    <value>不具合報告・機能要望</value>
+  </data>
+  <data name="Feedback_Issue_Description" xml:space="preserve">
+    <value>GitHubの投稿画面を開きます</value>
+  </data>
+  <data name="Feedback_Issue_Note" xml:space="preserve">
+    <value>※報告内容はGitHubで公開され、投稿にはアカウントが必要です</value>
+  </data>
+  <data name="Feedback_Detections_Title" xml:space="preserve">
+    <value>検出された問題</value>
+  </data>
+  <data name="Feedback_Detections_Report" xml:space="preserve">
+    <value>選んだ項目を報告</value>
+  </data>
+  <data name="Feedback_Detections_Empty" xml:space="preserve">
+    <value>検出された問題がありません</value>
+  </data>
+  <data name="Feedback_Detection_BlankSourceName" xml:space="preserve">
+    <value>名前のないスキル</value>
+  </data>
+  <data name="Feedback_Detection_SourceLandingConflict" xml:space="preserve">
+    <value>スキル名判定の不一致</value>
+  </data>
+  <data name="Feedback_Detection_SpecConflict" xml:space="preserve">
+    <value>クラス判定の不一致</value>
+  </data>
+  <data name="Plugins_Empty" xml:space="preserve">
+    <value>インストール済みのプラグインがありません</value>
+  </data>
+  <data name="Feedback_Detection_Reported" xml:space="preserve">
+    <value>報告済み</value>
+  </data>
+  <data name="Feedback_AlreadyReported_Message" xml:space="preserve">
+    <value>選んだ項目はすでに報告されています。</value>
+  </data>
+  <data name="Feedback_CheckError_Title" xml:space="preserve">
+    <value>投稿確認エラー</value>
+  </data>
+  <data name="Feedback_CheckError_Message" xml:space="preserve">
+    <value>投稿済みか確認できませんでした。</value>
+  </data>
+  <data name="Feedback_Report_Title" xml:space="preserve">
+    <value>検出された項目の報告</value>
+  </data>
+  <data name="Feedback_Limit_Message" xml:space="preserve">
+    <value>一度に報告できる件数を超えました。</value>
+  </data>
+  <data name="Feedback_Limit_Detail" xml:space="preserve">
+    <value>未報告の{0}件は一覧に残ります。
+もう一度押すと続きを報告できます。</value>
   </data>
 </root>

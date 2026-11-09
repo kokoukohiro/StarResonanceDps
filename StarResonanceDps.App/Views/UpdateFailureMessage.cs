@@ -60,9 +60,9 @@ public static class UpdateFailureMessage
     {
         return failure switch
         {
-            AppUpdateFailure.Network => "Update_Error_Network",
-            AppUpdateFailure.Server => "Update_Error_Server",
-            AppUpdateFailure.RateLimit => "Update_Error_RateLimit",
+            AppUpdateFailure.Network => "GitHub_Error_Network",
+            AppUpdateFailure.Server => "GitHub_Error_Server",
+            AppUpdateFailure.RateLimit => "GitHub_Error_RateLimit",
             AppUpdateFailure.InvalidRelease => "Update_Error_InvalidRelease",
             AppUpdateFailure.NotFromZip => "Update_Error_NotFromZip",
             AppUpdateFailure.Corrupt => "Update_Error_Corrupt",

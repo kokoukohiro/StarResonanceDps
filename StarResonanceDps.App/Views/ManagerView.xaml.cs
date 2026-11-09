@@ -21,6 +21,8 @@ public partial class ManagerView : UserControl
         AggregationContent.ContentScrollViewer.SizeChanged += ContentScrollViewer_SizeChanged;
         PluginsContent.ContentScrollViewer.ScrollChanged += ContentScrollViewer_ScrollChanged;
         PluginsContent.ContentScrollViewer.SizeChanged += ContentScrollViewer_SizeChanged;
+        FeedbackContent.ContentScrollViewer.ScrollChanged += ContentScrollViewer_ScrollChanged;
+        FeedbackContent.ContentScrollViewer.SizeChanged += ContentScrollViewer_SizeChanged;
         HelpContent.ContentScrollViewer.ScrollChanged += ContentScrollViewer_ScrollChanged;
         HelpContent.ContentScrollViewer.SizeChanged += ContentScrollViewer_SizeChanged;
         Loaded += ManagerView_Loaded;
@@ -56,6 +58,11 @@ public partial class ManagerView : UserControl
         ShowNavigationContent(ManagerContent.Logs);
     }
 
+    private void FeedbackNavigationButton_Checked(object sender, RoutedEventArgs e)
+    {
+        ShowNavigationContent(ManagerContent.Feedback);
+    }
+
     private void HelpNavigationButton_Checked(object sender, RoutedEventArgs e)
     {
         ShowNavigationContent(ManagerContent.Help);
@@ -80,6 +87,9 @@ public partial class ManagerView : UserControl
             ? Visibility.Visible
             : Visibility.Collapsed;
         LogsContent.Visibility = content == ManagerContent.Logs
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        FeedbackContent.Visibility = content == ManagerContent.Feedback
             ? Visibility.Visible
             : Visibility.Collapsed;
         HelpContent.Visibility = content == ManagerContent.Help
@@ -229,6 +239,11 @@ public partial class ManagerView : UserControl
             return LogsContent.ContentScrollViewer;
         }
 
+        if (FeedbackContent.Visibility == Visibility.Visible)
+        {
+            return FeedbackContent.ContentScrollViewer;
+        }
+
         return HelpContent.Visibility == Visibility.Visible
             ? HelpContent.ContentScrollViewer
             : null;
@@ -241,6 +256,7 @@ public partial class ManagerView : UserControl
         Notifications,
         Plugins,
         Logs,
+        Feedback,
         Help
     }
 }

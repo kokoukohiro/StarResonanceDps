@@ -315,12 +315,12 @@
     </Style>
 
     <!--
-        履歴の1行。ヘルプタブのリンクの欄も同じ見た目で使う。
+        履歴の1行。リンクの欄(Button.LinkCard)も同じ見た目で使う。
 
         **選択しても面の色は変えない。** 示すのは左端の帯と、行の右に出る「表示中」のピルの2つ。
 
         選択状態は行の DataContext(EncounterHistoryItem)の IsSelected をそのまま読む。
-        選択があるのは集計タブの履歴の行だけ。ヘルプタブのリンクの欄はDataContextにIsSelectedが無いので、帯は出ない。
+        選択があるのは集計タブの履歴の行だけ。リンクの欄はDataContextにIsSelectedが無いので、帯は出ない。
     -->
     <Style x:Key="Button.AggregationRow" TargetType="{x:Type Button}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -403,6 +403,13 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- リンクの欄(ヘルプタブのリンク、フィードバックタブの投稿画面)。高さはプラグインの行の枠と同じ60(行の68は下の間隔8を含む)。 -->
+    <Style x:Key="Button.LinkCard" TargetType="{x:Type Button}" BasedOn="{StaticResource Button.AggregationRow}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Height" Value="60" />
+        <Setter Property="Padding" Value="14,0,20,0" />
     </Style>
 
     <Style x:Key="Button.ColorSwatchRadioButton" TargetType="{x:Type RadioButton}">

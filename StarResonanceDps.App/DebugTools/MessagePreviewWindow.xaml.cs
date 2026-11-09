@@ -32,6 +32,9 @@ public partial class MessagePreviewWindow : Window
     // プラグインの更新の窓を出すための試しの値。
     private const string SamplePluginVersion = "2.0.1";
 
+    // 検出された項目の報告の窓を出すための試しの値。
+    private const int SampleUnreportedDetectionCount = 3;
+
     private const string ModuleAssemblyName = "ModuleTool";
     private const string ModuleResourceBaseName = "StarResonanceDps.Plugins.ModuleTool.Properties.Resources";
     private const string ModuleConfigFileName = "module_config.json";
@@ -129,6 +132,24 @@ public partial class MessagePreviewWindow : Window
     private void UpdateRestartFailedNotUpdated_Click(object sender, RoutedEventArgs e)
     {
         UpdateFailureMessage.ShowRestartFailed(this, isUpdated: false);
+    }
+
+    // 本物: フィードバックタブの「選んだ項目を報告」で、選んだ項目が1回の報告に入りきらなかったとき
+    private void FeedbackLimit_Click(object sender, RoutedEventArgs e)
+    {
+        DetectionReportMessage.ShowLimit(this, SampleUnreportedDetectionCount);
+    }
+
+    // 本物: フィードバックタブの「選んだ項目を報告」で、選んだ項目が全部Issueにあったとき
+    private void FeedbackAlreadyReported_Click(object sender, RoutedEventArgs e)
+    {
+        DetectionReportMessage.ShowAlreadyReported(this);
+    }
+
+    // 本物: フィードバックタブの「選んだ項目を報告」で、Issueを確認できなかったとき
+    private void FeedbackCheckError_Click(object sender, RoutedEventArgs e)
+    {
+        DetectionReportMessage.ShowCheckFailed(this, (FeedbackIssueLookupFailure)((FrameworkElement)sender).Tag);
     }
 
     // 本物: メイン画面のプラグインの一覧の「＋」(選んだファイルがプラグインでない・版が合わないとき)

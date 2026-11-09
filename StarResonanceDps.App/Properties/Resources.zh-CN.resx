@@ -636,7 +636,7 @@
     <value>Copyright © 2026 kokoukohiro(GNU GPL v3)</value>
   </data>
   <data name="Help_VersionWithStatus" xml:space="preserve">
-    <value>{0}({1})</value>
+    <value>{0} ({1})</value>
   </data>
   <data name="Update_Status_Checking" xml:space="preserve">
     <value>检查中</value>
@@ -696,14 +696,14 @@
   <data name="Update_Error_Message" xml:space="preserve">
     <value>无法更新。</value>
   </data>
-  <data name="Update_Error_Network" xml:space="preserve">
+  <data name="GitHub_Error_Network" xml:space="preserve">
     <value>请检查网络连接后重试。</value>
   </data>
-  <data name="Update_Error_Server" xml:space="preserve">
+  <data name="GitHub_Error_Server" xml:space="preserve">
     <value>GitHub服务器没有响应。
 请稍后重试。</value>
   </data>
-  <data name="Update_Error_RateLimit" xml:space="preserve">
+  <data name="GitHub_Error_RateLimit" xml:space="preserve">
     <value>GitHub访问暂时受限。
 请稍后重试。</value>
   </data>
@@ -2523,5 +2523,60 @@
 {0}
 应用下次保存设置时，此文件将被覆盖。
 如有需要，请重新进行设置。</value>
+  </data>
+  <data name="Navigation_Feedback" xml:space="preserve">
+    <value>反馈</value>
+  </data>
+  <data name="Feedback_Issue_Title" xml:space="preserve">
+    <value>问题反馈与功能建议</value>
+  </data>
+  <data name="Feedback_Issue_Description" xml:space="preserve">
+    <value>打开GitHub提交页面</value>
+  </data>
+  <data name="Feedback_Issue_Note" xml:space="preserve">
+    <value>※反馈内容将在GitHub上公开，提交需要账号</value>
+  </data>
+  <data name="Feedback_Detections_Title" xml:space="preserve">
+    <value>检测到的问题</value>
+  </data>
+  <data name="Feedback_Detections_Report" xml:space="preserve">
+    <value>反馈所选项目</value>
+  </data>
+  <data name="Feedback_Detections_Empty" xml:space="preserve">
+    <value>未检测到问题</value>
+  </data>
+  <data name="Feedback_Detection_BlankSourceName" xml:space="preserve">
+    <value>无名称技能</value>
+  </data>
+  <data name="Feedback_Detection_SourceLandingConflict" xml:space="preserve">
+    <value>技能名称判定不一致</value>
+  </data>
+  <data name="Feedback_Detection_SpecConflict" xml:space="preserve">
+    <value>职业判定不一致</value>
+  </data>
+  <data name="Plugins_Empty" xml:space="preserve">
+    <value>没有已安装的插件</value>
+  </data>
+  <data name="Feedback_Detection_Reported" xml:space="preserve">
+    <value>已反馈</value>
+  </data>
+  <data name="Feedback_AlreadyReported_Message" xml:space="preserve">
+    <value>所选项目已有人反馈。</value>
+  </data>
+  <data name="Feedback_CheckError_Title" xml:space="preserve">
+    <value>提交确认错误</value>
+  </data>
+  <data name="Feedback_CheckError_Message" xml:space="preserve">
+    <value>无法确认是否已提交。</value>
+  </data>
+  <data name="Feedback_Report_Title" xml:space="preserve">
+    <value>检测到的项目反馈</value>
+  </data>
+  <data name="Feedback_Limit_Message" xml:space="preserve">
+    <value>已超过单次可反馈的数量。</value>
+  </data>
+  <data name="Feedback_Limit_Detail" xml:space="preserve">
+    <value>未反馈的{0}项保留在列表中。
+再次点击可继续反馈。</value>
   </data>
 </root>

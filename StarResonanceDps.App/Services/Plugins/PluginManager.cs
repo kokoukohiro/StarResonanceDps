@@ -1060,7 +1060,7 @@ public sealed class PluginManager
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
-            Log.Error(exception, "Failed to delete the partially copied plugin folder: {Folder}", folder);
+            Log.Error(exception, "Failed to delete the temporary plugin folder: {Folder}", folder);
         }
     }
 

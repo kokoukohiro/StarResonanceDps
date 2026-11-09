@@ -696,14 +696,14 @@ Your settings and history are kept.</value>
   <data name="Update_Error_Message" xml:space="preserve">
     <value>Could not update.</value>
   </data>
-  <data name="Update_Error_Network" xml:space="preserve">
+  <data name="GitHub_Error_Network" xml:space="preserve">
     <value>Check your internet connection and try again.</value>
   </data>
-  <data name="Update_Error_Server" xml:space="preserve">
+  <data name="GitHub_Error_Server" xml:space="preserve">
     <value>GitHub's server did not respond.
 Try again later.</value>
   </data>
-  <data name="Update_Error_RateLimit" xml:space="preserve">
+  <data name="GitHub_Error_RateLimit" xml:space="preserve">
     <value>Access to GitHub is temporarily limited.
 Try again later.</value>
   </data>
@@ -2520,5 +2520,60 @@ Reinstall the app, then start it again.</value>
 {0}
 This file will be overwritten the next time the app saves the settings.
 Change the settings again if needed.</value>
+  </data>
+  <data name="Navigation_Feedback" xml:space="preserve">
+    <value>Feedback</value>
+  </data>
+  <data name="Feedback_Issue_Title" xml:space="preserve">
+    <value>Bug reports and feature requests</value>
+  </data>
+  <data name="Feedback_Issue_Description" xml:space="preserve">
+    <value>Opens the submission page on GitHub</value>
+  </data>
+  <data name="Feedback_Issue_Note" xml:space="preserve">
+    <value>Note: Reports are public on GitHub, and posting requires an account.</value>
+  </data>
+  <data name="Feedback_Detections_Title" xml:space="preserve">
+    <value>Detected issues</value>
+  </data>
+  <data name="Feedback_Detections_Report" xml:space="preserve">
+    <value>Report selected</value>
+  </data>
+  <data name="Feedback_Detections_Empty" xml:space="preserve">
+    <value>No issues detected</value>
+  </data>
+  <data name="Feedback_Detection_BlankSourceName" xml:space="preserve">
+    <value>Unnamed skill</value>
+  </data>
+  <data name="Feedback_Detection_SourceLandingConflict" xml:space="preserve">
+    <value>Skill name mismatch</value>
+  </data>
+  <data name="Feedback_Detection_SpecConflict" xml:space="preserve">
+    <value>Class detection mismatch</value>
+  </data>
+  <data name="Plugins_Empty" xml:space="preserve">
+    <value>No installed plugins</value>
+  </data>
+  <data name="Feedback_Detection_Reported" xml:space="preserve">
+    <value>Reported</value>
+  </data>
+  <data name="Feedback_AlreadyReported_Message" xml:space="preserve">
+    <value>The selected items have already been reported.</value>
+  </data>
+  <data name="Feedback_CheckError_Title" xml:space="preserve">
+    <value>Post Check Error</value>
+  </data>
+  <data name="Feedback_CheckError_Message" xml:space="preserve">
+    <value>Could not check whether the items were posted.</value>
+  </data>
+  <data name="Feedback_Report_Title" xml:space="preserve">
+    <value>Detected item report</value>
+  </data>
+  <data name="Feedback_Limit_Message" xml:space="preserve">
+    <value>Too many items for one report.</value>
+  </data>
+  <data name="Feedback_Limit_Detail" xml:space="preserve">
+    <value>{0} unreported items remain in the list.
+Press the button again to report them.</value>
   </data>
 </root>
