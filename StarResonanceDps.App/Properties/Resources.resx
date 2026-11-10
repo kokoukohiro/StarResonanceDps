@@ -620,17 +620,17 @@ Its settings will also be deleted.</value>
   <data name="Help_PluginDevelopment_Description" xml:space="preserve">
     <value>Guide for developers</value>
   </data>
-  <data name="Help_GitHub_Title" xml:space="preserve">
-    <value>GitHub</value>
-  </data>
-  <data name="Help_GitHub_Description" xml:space="preserve">
-    <value>Repository home page</value>
-  </data>
   <data name="Help_ReleaseNotes_Title" xml:space="preserve">
     <value>Release notes</value>
   </data>
   <data name="Help_ReleaseNotes_Description" xml:space="preserve">
     <value>Changes in each version</value>
+  </data>
+  <data name="Help_Sponsor_Title" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="Help_Sponsor_Description" xml:space="preserve">
+    <value>Spare some change…</value>
   </data>
   <data name="Help_Copyright" xml:space="preserve">
     <value>Copyright © 2026 kokoukohiro (GNU GPL v3)</value>

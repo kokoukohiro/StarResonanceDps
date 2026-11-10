@@ -1,3 +1,5 @@
+// This file is part of StarResonanceDps. See LICENSING.md for the license, additional permissions and additional terms.
+
 namespace StarResonanceDps.App.Services;
 
 /// <summary>プラグインの一覧の行の状態。押せるのは <see cref="Openable"/> の行だけ。<see cref="Error"/> と <see cref="PendingDeletion"/> の行は灰色にする。</summary>

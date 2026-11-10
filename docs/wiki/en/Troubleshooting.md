@@ -165,7 +165,7 @@ Skills that have no display name in the game are shown with their internal name 
 
 ## A plugin does not work
 
-Hover over the "Error" mark on the plugin's row in "[Plugins](Plugins)" to see the reason.
+Hover over the "Error" label on the plugin's row in "[Plugins](Plugins)" to see the reason.
 
 ## A history entry cannot be opened
 

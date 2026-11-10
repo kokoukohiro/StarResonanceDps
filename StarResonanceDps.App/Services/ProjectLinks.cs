@@ -1,3 +1,5 @@
+// This file is part of StarResonanceDps. See LICENSING.md for the license, additional permissions and additional terms.
+
 using System.Globalization;
 
 namespace StarResonanceDps.App.Services;
@@ -12,14 +14,16 @@ public enum LocalizedProjectPage
     PluginDevelopment
 }
 
-/// <summary>プロジェクトのページ(GitHubのリポジトリとWiki)と、更新の確認とIssueの検索に使うGitHubのAPI。</summary>
+/// <summary>プロジェクトのページ(GitHubのリポジトリとWiki、GitHub Sponsors)と、更新の確認とIssueの検索に使うGitHubのAPI。</summary>
 public static class ProjectLinks
 {
-    public const string RepositoryUrl = "https://github.com/kokoukohiro/StarResonanceDps";
+    private const string RepositoryUrl = "https://github.com/kokoukohiro/StarResonanceDps";
 
     private const string WikiUrl = RepositoryUrl + "/wiki";
 
     public const string ReleasesUrl = RepositoryUrl + "/releases";
+
+    public const string SponsorsUrl = "https://github.com/sponsors/kokoukohiro";
 
     public const string LicenseUrl = RepositoryUrl + "/blob/main/LICENSING.md";
 

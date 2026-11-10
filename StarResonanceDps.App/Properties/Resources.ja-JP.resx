@@ -621,17 +621,17 @@ VOICEVOXを起動し直してください。</value>
   <data name="Help_PluginDevelopment_Description" xml:space="preserve">
     <value>開発者向けの説明</value>
   </data>
-  <data name="Help_GitHub_Title" xml:space="preserve">
-    <value>GitHub</value>
-  </data>
-  <data name="Help_GitHub_Description" xml:space="preserve">
-    <value>リポジトリのホームページ</value>
-  </data>
   <data name="Help_ReleaseNotes_Title" xml:space="preserve">
     <value>リリースノート</value>
   </data>
   <data name="Help_ReleaseNotes_Description" xml:space="preserve">
     <value>バージョンごとの変更点</value>
+  </data>
+  <data name="Help_Sponsor_Title" xml:space="preserve">
+    <value>支援</value>
+  </data>
+  <data name="Help_Sponsor_Description" xml:space="preserve">
+    <value>お願い、恵んでください…</value>
   </data>
   <data name="Help_Copyright" xml:space="preserve">
     <value>Copyright © 2026 kokoukohiro(GNU GPL v3)</value>

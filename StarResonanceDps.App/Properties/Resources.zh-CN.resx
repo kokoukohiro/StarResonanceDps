@@ -620,17 +620,17 @@
   <data name="Help_PluginDevelopment_Description" xml:space="preserve">
     <value>面向开发者的说明</value>
   </data>
-  <data name="Help_GitHub_Title" xml:space="preserve">
-    <value>GitHub</value>
-  </data>
-  <data name="Help_GitHub_Description" xml:space="preserve">
-    <value>仓库主页</value>
-  </data>
   <data name="Help_ReleaseNotes_Title" xml:space="preserve">
     <value>更新日志</value>
   </data>
   <data name="Help_ReleaseNotes_Description" xml:space="preserve">
     <value>各版本的更改</value>
+  </data>
+  <data name="Help_Sponsor_Title" xml:space="preserve">
+    <value>支持</value>
+  </data>
+  <data name="Help_Sponsor_Description" xml:space="preserve">
+    <value>赏口饭吃吧…</value>
   </data>
   <data name="Help_Copyright" xml:space="preserve">
     <value>Copyright © 2026 kokoukohiro(GNU GPL v3)</value>

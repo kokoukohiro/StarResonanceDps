@@ -620,17 +620,17 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="Help_PluginDevelopment_Description" xml:space="preserve">
     <value>개발자용 설명</value>
   </data>
-  <data name="Help_GitHub_Title" xml:space="preserve">
-    <value>GitHub</value>
-  </data>
-  <data name="Help_GitHub_Description" xml:space="preserve">
-    <value>리포지토리 홈페이지</value>
-  </data>
   <data name="Help_ReleaseNotes_Title" xml:space="preserve">
     <value>릴리스 노트</value>
   </data>
   <data name="Help_ReleaseNotes_Description" xml:space="preserve">
     <value>버전별 변경 사항</value>
+  </data>
+  <data name="Help_Sponsor_Title" xml:space="preserve">
+    <value>후원</value>
+  </data>
+  <data name="Help_Sponsor_Description" xml:space="preserve">
+    <value>한 푼만 주세요…</value>
   </data>
   <data name="Help_Copyright" xml:space="preserve">
     <value>Copyright © 2026 kokoukohiro(GNU GPL v3)</value>

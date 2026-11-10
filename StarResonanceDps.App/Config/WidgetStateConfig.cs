@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿// This file is part of StarResonanceDps. See LICENSING.md for the license, additional permissions and additional terms.
+
+using System.Globalization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;

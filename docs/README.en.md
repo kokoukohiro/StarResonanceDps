@@ -2,19 +2,20 @@
 
 [日本語](https://github.com/kokoukohiro/StarResonanceDps) | [한국어](README.ko.md) | [简体中文](README.zh-CN.md) | [English](README.en.md)
 
-An unofficial tool that shows combat information (such as DPS) for Blue Protocol: Star Resonance (Windows).
+Don't Check My DPS (StarResonanceDps) is an unofficial tool that shows combat information (such as DPS) for the game Blue Protocol: Star Resonance.
 
 ![DPS Meter](wiki/images/en/DpsMeter1.png)
 
-It shows combat in real time and lets you look back on past battles. It also supports notifications for in-combat events and extensions.
+## Features
 
-It does not modify the game client or send combat data anywhere. Do not use the displayed numbers to defame other players or otherwise harm the community.
-
-## Requirements
-
-- Windows (64-bit)
-- [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)
-- [Npcap](https://npcap.com/)
+- Real-time DPS, HPS, and damage taken, with per-skill breakdowns and trend graphs
+- History of past battles and timed benchmarks
+- Lists of nearby players and enemies (HP, buffs, aggro, chanting, and more)
+- Equipment, talents, Deep-Slumber Psychoscope, and modules
+- A timeline of enemy actions and telegraphed skills in chronological order
+- Notifications and read-aloud for telegraphed skills, low HP, and more
+- Extensions through plugins (includes a plugin that finds module combinations)
+- Available in Japanese, Korean, Simplified Chinese, and English
 
 ## Installation
 
@@ -24,37 +25,51 @@ It does not modify the game client or send combat data anywhere. Do not use the 
 
 - Settings and combat history are saved in this folder.
 - The first time you start the app, a Windows warning (SmartScreen) may appear. Clicking "More info" lets you select "Run anyway".
-- A User Account Control prompt appears when the helper program for hotkeys starts. If you do not use hotkeys, turn off "Launch hotkey helper at app startup" in the "Startup" section of Settings.
-- What to do after starting the app is described in [Initial Setup](https://github.com/kokoukohiro/StarResonanceDps/wiki/Initial-Setup).
+- A User Account Control prompt appears when the hotkey helper program starts. If you do not use hotkeys, turn off "Launch hotkey helper at app startup" in the "Startup" section of Settings.
+- When a new version is available, a confirmation window appears at startup. You can also check by clicking "Check for updates" in "Help". For details, see [Installation and Updates](https://github.com/kokoukohiro/StarResonanceDps/wiki/Installation-and-Updates).
+- For the settings after starting the app, see [Initial Setup](https://github.com/kokoukohiro/StarResonanceDps/wiki/Initial-Setup).
 
-## Updates
+### Requirements
 
-You can update to a new version from within the app. When a new version is available, a confirmation window appears at startup. You can also check by clicking "Check for updates" in "Help". For details, see [Installation and Updates](https://github.com/kokoukohiro/StarResonanceDps/wiki/Installation-and-Updates).
+- Windows (64-bit)
+- [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)
+- [Npcap](https://npcap.com/)
+
+## Safety & Privacy
+
+- The app does not modify the game client.
+- Apart from plugins you add, the app connects to external servers only in the following cases. It does not send combat data.
+  - Checking for and downloading updates (GitHub)
+  - Checking in "Feedback" whether items have already been reported (GitHub)
+  - Showing avatar and name card photos in "Player Info" (photo URLs received from the game)
+- Plugins run inside the app and can do the same things as the app. Add only plugins from sources you trust.
 
 ## Usage
 
-The screens and settings are described in the [Wiki](https://github.com/kokoukohiro/StarResonanceDps/wiki/Don't-Check-My-DPS-Wiki).
+The screens and settings are described in the [Wiki](https://github.com/kokoukohiro/StarResonanceDps/wiki/Don't-Check-My-DPS-Wiki), and solutions to common problems in [Troubleshooting](https://github.com/kokoukohiro/StarResonanceDps/wiki/Troubleshooting).
 
-## Plugins
+## Bug reports and feature requests
 
-You can add features with plugins. Plugins run inside the app and can do the same things as the app. Install only plugins from sources you trust.
+You can post to GitHub Issues from "Feedback" in the app. You can also post directly from [Issues](https://github.com/kokoukohiro/StarResonanceDps/issues). Posting requires a GitHub account.
 
-For how to make plugins, see [Plugin Development](https://github.com/kokoukohiro/StarResonanceDps/wiki/Plugin-Development). The SDK package (`.nupkg`) is available in the releases, alongside the app zip.
+## Plugin development
 
-## Bug reports and requests
+You can add features with plugins. For how to make plugins, see [Plugin Development](https://github.com/kokoukohiro/StarResonanceDps/wiki/Plugin-Development). The SDK package (`.nupkg`) is published in the releases, alongside the app zip.
 
-You can post to GitHub Issues from "Feedback" in the app. Posting requires a GitHub account.
+## A request
 
-## Network connections
+As the name says, some players would rather not have their DPS checked. Use the numbers for your own play, and do not use them to defame other players or otherwise harm the community.
 
-Apart from plugins you install, the app connects to external servers only in the following cases. It does not send combat data.
+## Support
 
-- Checking for and downloading updates (GitHub)
-- Checking in "Feedback" whether items have already been reported (GitHub)
-- Showing avatar and name card photos in "Player Info" (photo URLs received from the game)
+You can support development through [GitHub Sponsors](https://github.com/sponsors/kokoukohiro).
 
 ## License
 
-- The app itself is licensed under the GNU GPL v3 (with additional permissions), and the SDK, analyzers, samples, and documentation are licensed under the MIT License. For details, see [LICENSING.md](../LICENSING.md).
-- The licenses of the libraries used are in [THIRD-PARTY-NOTICES.txt](../THIRD-PARTY-NOTICES.txt).
+- The app itself is licensed under the GNU GPL v3 (with additional permissions and additional terms), and the SDK, analyzers, samples, and documentation are licensed under the MIT License. For details, see [LICENSING.md](../LICENSING.md).
+- For the licenses of the libraries used, see [THIRD-PARTY-NOTICES.txt](../THIRD-PARTY-NOTICES.txt).
+
+### Disclaimer
+
 - This tool is unofficial and is not affiliated with the game's developers or operators. The rights to the game's name, data, and images belong to their respective owners.
+- This tool is provided as is, without any warranty. The author is not responsible for any damage resulting from its use.

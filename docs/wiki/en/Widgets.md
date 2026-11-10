@@ -25,7 +25,7 @@ This tab lets you start, stop, and pin the windows (widgets) that are shown over
 - Sort menu: "Default", "Name", "Favorite", "Status", "Pinned", or "Click-Through" (default: "Default"). With "Favorite" through "Click-Through", the cards that have that setting come to the top.
 - Three-dot menu: "Start favorites", "Stop all", "Pin running", "Unpin all", "Make pinned click-through", and "Disable all click-through".
 - Card buttons
-  - Favorite: Marks the widget. Marked widgets are the ones started together by "Start favorites" in the three-dot menu.
+  - Favorite: Adds the widget to your favorites. Favorite widgets are the ones started together by "Start favorites" in the three-dot menu.
   - Pin: The window can no longer be moved or resized. Clicking the window does not make it active, so it does not interfere with playing the game. By default, the header is hidden while the window is pinned.
   - Click-through: The window does not take mouse input and passes it straight to the screen below (such as the game).
   - Settings: Opens the settings window of the widget.
