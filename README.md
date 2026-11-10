@@ -11,6 +11,8 @@
 
 お願い、DPS見ないで…(StarResonanceDps)は、ゲーム『ブループロトコル：スターレゾナンス』の戦闘情報(DPSなど)を表示する非公式のツールです。
 
+このツールは、旧バージョン([anying1073/StarResonanceDps](https://github.com/anying1073/StarResonanceDps))をもとに開発を続けているものです。このツールの完成に必要な情報を提供してくださった、旧バージョンを共に開発した皆さんに感謝します。
+
 ## 🌟 主な機能
 
 - DPS・HPS・被ダメージのリアルタイムの集計と、スキル別の内訳・推移グラフ
@@ -48,7 +50,12 @@
 
 ## 📷 スクリーンショット
 
-![ウィジェット](docs/wiki/images/ja/Widgets1.png)
+### メイン画面(ウィジェット)
+
+![メイン画面(ウィジェット)](docs/wiki/images/ja/Widgets1.png)
+
+### ウィジェット(DPSメーター)
+
 ![DPSメーター](docs/wiki/images/ja/DpsMeter1.png)
 
 ## 👥 不具合報告・機能要望
@@ -78,7 +85,7 @@
 
 ## 📄 ライセンス
 
-- 本体はGNU GPL v3(追加の許可と追加の条件あり)、SDK・解析器・サンプル・文書はMITです。詳しくは[LICENSING.md](LICENSING.md)を参照してください
+- 本体はGNU GPL v3(追加の許可と追加の条件あり)、プラグインSDKとそのアナライザー、プラグインサンプル、ドキュメントはMITです。詳しくは[LICENSING.md](LICENSING.md)を参照してください
 - 使用しているライブラリのライセンスは、[THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt)を参照してください
 
 ## ⚠️ 免責事項

@@ -60,7 +60,7 @@ You can add features with plugins. For how to make plugins, see [Plugin Developm
 
 As the name says, some players would rather not have their DPS checked. Use the numbers for your own play, and do not use them to defame other players or otherwise harm the community.
 
-## Supporting development
+## Sponsorship
 
 You can support development through [GitHub Sponsors](https://github.com/sponsors/kokoukohiro).
 
