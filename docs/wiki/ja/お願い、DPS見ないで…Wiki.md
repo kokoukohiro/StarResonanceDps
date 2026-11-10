@@ -1,5 +1,7 @@
 [日本語](お願い、DPS見ないで…Wiki) | [한국어](내-DPS-조회하지-마-Wiki) | [简体中文](别查我DPS-Wiki) | [English](Don't-Check-My-DPS-Wiki)
 
+<img alt="Icon" src="images/ApplicationIcon.png" width="128">
+
 このWikiでは、お願い、DPS見ないで…の使い方を説明しています。インストールと初期設定をはじめ、各画面と設定の説明、困ったときの対処法、プラグインの作り方などを扱っています。
 
 ## はじめに

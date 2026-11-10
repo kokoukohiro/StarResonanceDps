@@ -1,5 +1,7 @@
 [日本語](お願い、DPS見ないで…Wiki) | [한국어](내-DPS-조회하지-마-Wiki) | [简体中文](别查我DPS-Wiki) | [English](Don't-Check-My-DPS-Wiki)
 
+<img alt="Icon" src="images/ApplicationIcon.png" width="128">
+
 이 Wiki에서는 내 DPS 조회하지 마의 사용 방법을 설명합니다. 설치와 초기 설정을 비롯해 각 화면과 설정의 설명, 문제 해결 방법, 플러그인 만드는 방법 등을 다룹니다.
 
 ## 시작하기
