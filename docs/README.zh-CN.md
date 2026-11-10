@@ -60,7 +60,7 @@
 
 正如本应用的名称，有些玩家不希望别人查看自己的DPS。请将显示的数值用于自己的游戏，切勿用于诽谤中伤其他玩家等破坏社区环境的目的。
 
-## 支持
+## 支持开发
 
 可以通过[GitHub Sponsors](https://github.com/sponsors/kokoukohiro)支持开发。
 
