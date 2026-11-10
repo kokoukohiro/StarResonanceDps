@@ -1,6 +1,6 @@
 # お願い、DPS見ないで…
 
-[日本語](README.md) | [한국어](README.ko.md) | [简体中文](README.zh-CN.md) | [English](README.en.md)
+[日本語](https://github.com/kokoukohiro/StarResonanceDps) | [한국어](docs/README.ko.md) | [简体中文](docs/README.zh-CN.md) | [English](docs/README.en.md)
 
 『ブループロトコル：スターレゾナンス』の戦闘情報(DPSなど)を表示する非公式のツールです(Windows用)。
 
@@ -25,21 +25,21 @@
 - 設定と戦闘の履歴は、このフォルダの中に保存します
 - 最初の起動で、Windowsの警告(SmartScreen)が出ることがあります。「詳細情報」を押すと「実行」を選べます
 - ホットキーを使うための補助プログラムを起動するときに、ユーザーアカウント制御の確認が出ます。使わない場合は、全体設定の起動設定で「アプリ起動時にホットキー補助プログラムを起動」をオフにしてください
-- 起動した後にすることは、[最初の設定](https://github.com/kokoukohiro/StarResonanceDps/wiki/Initial-Setup-ja)にあります
+- 起動した後にすることは、[最初の設定](https://github.com/kokoukohiro/StarResonanceDps/wiki/最初の設定)にあります
 
 ## 更新
 
-アプリの中から、新しいバージョンへ更新できます。新しいバージョンがあると、起動時に確認の窓が出ます。「ヘルプ」の「更新を確認」を押しても確かめられます。詳しくは[入れ方と更新](https://github.com/kokoukohiro/StarResonanceDps/wiki/Installation-and-Updates-ja)にあります。
+アプリの中から、新しいバージョンへ更新できます。新しいバージョンがあると、起動時に確認の窓が出ます。「ヘルプ」の「更新を確認」を押しても確かめられます。詳しくは[入れ方と更新](https://github.com/kokoukohiro/StarResonanceDps/wiki/入れ方と更新)にあります。
 
 ## 使い方
 
-画面と設定の説明は、[Wiki](https://github.com/kokoukohiro/StarResonanceDps/wiki/Home-ja)にあります。
+画面と設定の説明は、[Wiki](https://github.com/kokoukohiro/StarResonanceDps/wiki/お願い、DPS見ないで…Wiki)にあります。
 
 ## プラグイン
 
 プラグインで機能を足せます。プラグインはアプリの中で動き、アプリと同じことができます。入れるのは信頼できる配布元のものだけにしてください。
 
-作り方は[プラグイン開発](https://github.com/kokoukohiro/StarResonanceDps/wiki/Plugin-Development-ja)にあります。SDKのパッケージ(`.nupkg`)は、リリースにアプリのzipと並んでいます。
+作り方は[プラグイン開発](https://github.com/kokoukohiro/StarResonanceDps/wiki/プラグイン開発)にあります。SDKのパッケージ(`.nupkg`)は、リリースにアプリのzipと並んでいます。
 
 ## 不具合の報告と要望
 

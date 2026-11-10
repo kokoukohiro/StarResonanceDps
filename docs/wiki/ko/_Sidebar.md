@@ -1,60 +1,60 @@
-[日本語](Home-ja) | [한국어](Home-ko) | [简体中文](Home-zh-CN) | [English](Home-en)
+[日本語](お願い、DPS見ないで…Wiki) | [한국어](내-DPS-조회하지-마-Wiki) | [简体中文](别查我DPS-Wiki) | [English](Don't-Check-My-DPS-Wiki)
 
-**[Home](Home-ko)**
+**[Home](내-DPS-조회하지-마-Wiki)**
 
 **시작하기**
 
-- [설치와 업데이트](Installation-and-Updates-ko)
-- [초기 설정](Initial-Setup-ko)
+- [설치와 업데이트](설치와-업데이트)
+- [초기 설정](초기-설정)
 
 **메인 화면**
 
-- [위젯](Widgets-ko)
-- [집계](Aggregation-ko)
-- [알림](Notifications-ko)
-- [플러그인](Plugins-ko)
-- [로그](Logs-ko)
-- [피드백](Feedback-ko)
-- [도움말](Help-ko)
+- [위젯](위젯)
+- [집계](집계)
+- [알림](알림)
+- [플러그인](플러그인)
+- [로그](로그)
+- [피드백](피드백)
+- [도움말](도움말)
 
 **설정**
 
-- [설정](Settings-ko)
-- [단축키](Hotkeys-ko)
-- [위젯 공통 설정](Common-Widget-Settings-ko)
+- [설정](설정)
+- [단축키](단축키)
+- [위젯 공통 설정](위젯-공통-설정)
 
 **위젯**
 
-- [플레이어 목록](Player-List-ko)
-- [엔티티 목록](Entity-List-ko)
-- [플레이어 정보](Player-Info-ko)
-- [엔티티 정보](Entity-Info-ko)
-- [능력치 상세 정보](Status-ko)
-- [장비 정보](Equipment-Info-ko)
-- [어빌리티 정보](Talent-Info-ko)
-- [깊은 잠 심상의 정보](Deep-Slumber-Psychoscope-Info-ko)
-- [모듈 정보](Module-Info-ko)
-- [버프 목록](Buff-List-ko)
-- [디버프 목록](Debuff-List-ko)
-- [버프·디버프 카드](Buff-&-Debuff-Card-ko)
-- [버프·디버프 그룹](Buff-&-Debuff-Group-ko)
-- [부활 목록](Revive-List-ko)
-- [타임라인](Timeline-ko)
-- [DPS 미터](DPS-Meter-ko)
-- [HPS 미터](HPS-Meter-ko)
-- [받은 피해 로그](Damage-Taken-Log-ko)
-- [스킬 상세(피해)](Skill-Details-(Damage)-ko)
-- [피해 상세](Damage-Details-ko)
-- [DPS 추이 그래프](DPS-Trend-Graph-ko)
-- [스킬 상세(치유)](Skill-Details-(Healing)-ko)
-- [치유 상세](Healing-Details-ko)
-- [HPS 추이 그래프](HPS-Trend-Graph-ko)
-- [받은 피해 상세](Damage-Taken-Details-ko)
-- [채팅](Chat-ko)
+- [플레이어 목록](플레이어-목록)
+- [엔티티 목록](엔티티-목록)
+- [플레이어 정보](플레이어-정보)
+- [엔티티 정보](엔티티-정보)
+- [능력치 상세 정보](능력치-상세-정보)
+- [장비 정보](장비-정보)
+- [어빌리티 정보](어빌리티-정보)
+- [깊은 잠 심상의 정보](깊은-잠-심상의-정보)
+- [모듈 정보](모듈-정보)
+- [버프 목록](버프-목록)
+- [디버프 목록](디버프-목록)
+- [버프·디버프 카드](버프·디버프-카드)
+- [버프·디버프 그룹](버프·디버프-그룹)
+- [부활 목록](부활-목록)
+- [타임라인](타임라인)
+- [DPS 미터](DPS-미터)
+- [HPS 미터](HPS-미터)
+- [받은 피해 로그](받은-피해-로그)
+- [스킬 상세(피해)](스킬-상세(피해))
+- [피해 상세](피해-상세)
+- [DPS 추이 그래프](DPS-추이-그래프)
+- [스킬 상세(치유)](스킬-상세(치유))
+- [치유 상세](치유-상세)
+- [HPS 추이 그래프](HPS-추이-그래프)
+- [받은 피해 상세](받은-피해-상세)
+- [채팅](채팅)
 
 **기본 제공 플러그인**
 
-- [ただのモジュールツール](Module-Tool-ko)
+- [ただのモジュールツール](ただのモジュールツール(한국어))
 
 **기타 플러그인**
 
@@ -62,12 +62,12 @@
 
 **문제 해결**
 
-- [문제 해결](Troubleshooting-ko)
+- [문제 해결](문제-해결)
 
 **플러그인 개발**
 
-- [플러그인 개발](Plugin-Development-ko)
-- [플러그인 개발(창)](Plugin-Development-(Window)-ko)
-- [플러그인 개발(위젯)](Plugin-Development-(Widget)-ko)
-- [플러그인 개발(알림)](Plugin-Development-(Notification)-ko)
-- [플러그인 개발(데이터)](Plugin-Development-(Data)-ko)
+- [플러그인 개발](플러그인-개발)
+- [플러그인 개발(창)](플러그인-개발(창))
+- [플러그인 개발(위젯)](플러그인-개발(위젯))
+- [플러그인 개발(알림)](플러그인-개발(알림))
+- [플러그인 개발(데이터)](플러그인-개발(데이터))

@@ -5,14 +5,11 @@ namespace StarResonanceDps.App.Services;
 /// <summary>ヘルプのリンクのうち、アプリの言語で開く先が変わるページ。</summary>
 public enum LocalizedProjectPage
 {
-    /// <summary>Wikiのその言語の入口。</summary>
+    /// <summary>Wikiのその言語のHome(題がアプリの名前とWikiのページ)。</summary>
     WikiHome,
 
     /// <summary>Wikiのその言語のプラグイン開発のページ。</summary>
-    PluginDevelopment,
-
-    /// <summary>その言語のREADME。日本語はリポジトリのホームに出るREADME.md。</summary>
-    Readme
+    PluginDevelopment
 }
 
 /// <summary>プロジェクトのページ(GitHubのリポジトリとWiki)と、更新の確認とIssueの検索に使うGitHubのAPI。</summary>
@@ -21,9 +18,6 @@ public static class ProjectLinks
     public const string RepositoryUrl = "https://github.com/kokoukohiro/StarResonanceDps";
 
     private const string WikiUrl = RepositoryUrl + "/wiki";
-
-    /// <summary>日本語の言語の印。READMEだけは印の無いREADME.mdが日本語。</summary>
-    private const string JapaneseSuffix = "ja";
 
     public const string ReleasesUrl = RepositoryUrl + "/releases";
 
@@ -42,27 +36,29 @@ public static class ProjectLinks
     public const string IssueSearchRepository = "repo:kokoukohiro/StarResonanceDps";
 
     /// <summary>
-    /// アプリの言語のページのURL。Wikiのページ名は英語の名前の後ろに言語の印を付けたdocs/wikiのファイル名、
-    /// READMEはリポジトリの直下のファイル名と同じで、ファイル名を変えるとこのリンクが切れる。
+    /// アプリの言語のページのURL。Wikiのページ名はdocs/wikiのファイル名(その言語の名前、空白はハイフン)と同じで、
+    /// ファイル名を変えるとこのリンクが切れる。
     /// </summary>
     public static string GetLocalizedUrl(LocalizedProjectPage page, CultureInfo culture)
     {
-        var suffix = GetLanguageSuffix(culture);
-        return page switch
+        var pages = GetWikiPages(culture);
+        var pageName = page switch
         {
-            LocalizedProjectPage.WikiHome => $"{WikiUrl}/Home-{suffix}",
-            LocalizedProjectPage.PluginDevelopment => $"{WikiUrl}/Plugin-Development-{suffix}",
-            LocalizedProjectPage.Readme => suffix == JapaneseSuffix ? RepositoryUrl : $"{RepositoryUrl}/blob/main/README.{suffix}.md",
+            LocalizedProjectPage.WikiHome => pages.Home,
+            LocalizedProjectPage.PluginDevelopment => pages.PluginDevelopment,
             _ => throw new ArgumentOutOfRangeException(nameof(page), page, null)
         };
+        return $"{WikiUrl}/{Uri.EscapeDataString(pageName)}";
     }
 
-    /// <summary>アプリの言語(<c>LocalizationManager.CurrentCulture</c>)から言語の印。4言語のほかは英語(アプリの文言と同じ)。</summary>
-    private static string GetLanguageSuffix(CultureInfo culture) => culture.Name switch
+    /// <summary>アプリの言語(<c>LocalizationManager.CurrentCulture</c>)のWikiのページ名。4言語のほかは英語(アプリの文言と同じ)。</summary>
+    private static LocalizedWikiPages GetWikiPages(CultureInfo culture) => culture.Name switch
     {
-        "ja-JP" => JapaneseSuffix,
-        "ko-KR" => "ko",
-        "zh-CN" => "zh-CN",
-        _ => "en"
+        "ja-JP" => new("お願い、DPS見ないで…Wiki", "プラグイン開発"),
+        "ko-KR" => new("내-DPS-조회하지-마-Wiki", "플러그인-개발"),
+        "zh-CN" => new("别查我DPS-Wiki", "插件开发"),
+        _ => new("Don't-Check-My-DPS-Wiki", "Plugin-Development")
     };
+
+    private readonly record struct LocalizedWikiPages(string Home, string PluginDevelopment);
 }

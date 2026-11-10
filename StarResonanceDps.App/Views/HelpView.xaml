@@ -197,8 +197,8 @@
                     <Button Grid.Row="1"
                             Grid.Column="0"
                             Style="{StaticResource Button.LinkCard}"
-                            Command="{Binding OpenLocalizedLinkCommand}"
-                            CommandParameter="{x:Static services:LocalizedProjectPage.Readme}">
+                            Command="{Binding OpenLinkCommand}"
+                            CommandParameter="{x:Static services:ProjectLinks.RepositoryUrl}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />

@@ -1,60 +1,60 @@
-[日本語](Home-ja) | [한국어](Home-ko) | [简体中文](Home-zh-CN) | [English](Home-en)
+[日本語](お願い、DPS見ないで…Wiki) | [한국어](내-DPS-조회하지-마-Wiki) | [简体中文](别查我DPS-Wiki) | [English](Don't-Check-My-DPS-Wiki)
 
-**[Home](Home-en)**
+**[Home](Don't-Check-My-DPS-Wiki)**
 
 **Getting Started**
 
-- [Installation and Updates](Installation-and-Updates-en)
-- [Initial Setup](Initial-Setup-en)
+- [Installation and Updates](Installation-and-Updates)
+- [Initial Setup](Initial-Setup)
 
 **Main Window**
 
-- [Widgets](Widgets-en)
-- [Aggregation](Aggregation-en)
-- [Notifications](Notifications-en)
-- [Plugins](Plugins-en)
-- [Logs](Logs-en)
-- [Feedback](Feedback-en)
-- [Help](Help-en)
+- [Widgets](Widgets)
+- [Aggregation](Aggregation)
+- [Notifications](Notifications)
+- [Plugins](Plugins)
+- [Logs](Logs)
+- [Feedback](Feedback)
+- [Help](Help)
 
 **Settings**
 
-- [Settings](Settings-en)
-- [Hotkeys](Hotkeys-en)
-- [Common Widget Settings](Common-Widget-Settings-en)
+- [Settings](Settings)
+- [Hotkeys](Hotkeys)
+- [Common Widget Settings](Common-Widget-Settings)
 
 **Widgets**
 
-- [Player List](Player-List-en)
-- [Entity List](Entity-List-en)
-- [Player Info](Player-Info-en)
-- [Entity Info](Entity-Info-en)
-- [Status](Status-en)
-- [Equipment Info](Equipment-Info-en)
-- [Talent Info](Talent-Info-en)
-- [Deep-Slumber Psychoscope Info](Deep-Slumber-Psychoscope-Info-en)
-- [Module Info](Module-Info-en)
-- [Buff List](Buff-List-en)
-- [Debuff List](Debuff-List-en)
-- [Buff & Debuff Card](Buff-&-Debuff-Card-en)
-- [Buff & Debuff Group](Buff-&-Debuff-Group-en)
-- [Revive List](Revive-List-en)
-- [Timeline](Timeline-en)
-- [DPS Meter](DPS-Meter-en)
-- [HPS Meter](HPS-Meter-en)
-- [Damage Taken Log](Damage-Taken-Log-en)
-- [Skill Details (Damage)](Skill-Details-(Damage)-en)
-- [Damage Details](Damage-Details-en)
-- [DPS Trend Graph](DPS-Trend-Graph-en)
-- [Skill Details (Healing)](Skill-Details-(Healing)-en)
-- [Healing Details](Healing-Details-en)
-- [HPS Trend Graph](HPS-Trend-Graph-en)
-- [Damage Taken Details](Damage-Taken-Details-en)
-- [Chat](Chat-en)
+- [Player List](Player-List)
+- [Entity List](Entity-List)
+- [Player Info](Player-Info)
+- [Entity Info](Entity-Info)
+- [Status](Status)
+- [Equipment Info](Equipment-Info)
+- [Talent Info](Talent-Info)
+- [Deep-Slumber Psychoscope Info](Deep-Slumber-Psychoscope-Info)
+- [Module Info](Module-Info)
+- [Buff List](Buff-List)
+- [Debuff List](Debuff-List)
+- [Buff & Debuff Card](Buff-&-Debuff-Card)
+- [Buff & Debuff Group](Buff-&-Debuff-Group)
+- [Revive List](Revive-List)
+- [Timeline](Timeline)
+- [DPS Meter](DPS-Meter)
+- [HPS Meter](HPS-Meter)
+- [Damage Taken Log](Damage-Taken-Log)
+- [Skill Details (Damage)](Skill-Details-(Damage))
+- [Damage Details](Damage-Details)
+- [DPS Trend Graph](DPS-Trend-Graph)
+- [Skill Details (Healing)](Skill-Details-(Healing))
+- [Healing Details](Healing-Details)
+- [HPS Trend Graph](HPS-Trend-Graph)
+- [Damage Taken Details](Damage-Taken-Details)
+- [Chat](Chat)
 
 **Bundled Plugins**
 
-- [ただのモジュールツール](Module-Tool-en)
+- [ただのモジュールツール](ただのモジュールツール-(English))
 
 **Other Plugins**
 
@@ -62,12 +62,12 @@
 
 **Troubleshooting**
 
-- [Troubleshooting](Troubleshooting-en)
+- [Troubleshooting](Troubleshooting)
 
 **Plugin Development**
 
-- [Plugin Development](Plugin-Development-en)
-- [Plugin Development (Window)](Plugin-Development-(Window)-en)
-- [Plugin Development (Widget)](Plugin-Development-(Widget)-en)
-- [Plugin Development (Notification)](Plugin-Development-(Notification)-en)
-- [Plugin Development (Data)](Plugin-Development-(Data)-en)
+- [Plugin Development](Plugin-Development)
+- [Plugin Development (Window)](Plugin-Development-(Window))
+- [Plugin Development (Widget)](Plugin-Development-(Widget))
+- [Plugin Development (Notification)](Plugin-Development-(Notification))
+- [Plugin Development (Data)](Plugin-Development-(Data))

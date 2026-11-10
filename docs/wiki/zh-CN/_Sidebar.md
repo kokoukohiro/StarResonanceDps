@@ -1,60 +1,60 @@
-[日本語](Home-ja) | [한국어](Home-ko) | [简体中文](Home-zh-CN) | [English](Home-en)
+[日本語](お願い、DPS見ないで…Wiki) | [한국어](내-DPS-조회하지-마-Wiki) | [简体中文](别查我DPS-Wiki) | [English](Don't-Check-My-DPS-Wiki)
 
-**[Home](Home-zh-CN)**
+**[Home](别查我DPS-Wiki)**
 
 **入门**
 
-- [安装与更新](Installation-and-Updates-zh-CN)
-- [初始设置](Initial-Setup-zh-CN)
+- [安装与更新](安装与更新)
+- [初始设置](初始设置)
 
 **主界面**
 
-- [小组件](Widgets-zh-CN)
-- [统计](Aggregation-zh-CN)
-- [通知](Notifications-zh-CN)
-- [插件](Plugins-zh-CN)
-- [日志](Logs-zh-CN)
-- [反馈](Feedback-zh-CN)
-- [帮助](Help-zh-CN)
+- [小组件](小组件)
+- [统计](统计)
+- [通知](通知(简体中文))
+- [插件](插件)
+- [日志](日志)
+- [反馈](反馈)
+- [帮助](帮助)
 
 **设置**
 
-- [设置](Settings-zh-CN)
-- [快捷键](Hotkeys-zh-CN)
-- [小组件通用设置](Common-Widget-Settings-zh-CN)
+- [设置](设置)
+- [快捷键](快捷键)
+- [小组件通用设置](小组件通用设置)
 
 **小组件**
 
-- [玩家列表](Player-List-zh-CN)
-- [实体列表](Entity-List-zh-CN)
-- [玩家信息](Player-Info-zh-CN)
-- [实体信息](Entity-Info-zh-CN)
-- [属性详情](Status-zh-CN)
-- [装备信息](Equipment-Info-zh-CN)
-- [天赋信息](Talent-Info-zh-CN)
-- [深眠心相仪信息](Deep-Slumber-Psychoscope-Info-zh-CN)
-- [模组信息](Module-Info-zh-CN)
-- [增益列表](Buff-List-zh-CN)
-- [减益列表](Debuff-List-zh-CN)
-- [增益减益卡片](Buff-&-Debuff-Card-zh-CN)
-- [增益减益分组](Buff-&-Debuff-Group-zh-CN)
-- [复活列表](Revive-List-zh-CN)
-- [时间轴](Timeline-zh-CN)
-- [DPS计量器](DPS-Meter-zh-CN)
-- [HPS计量器](HPS-Meter-zh-CN)
-- [承伤日志](Damage-Taken-Log-zh-CN)
-- [技能详情(伤害)](Skill-Details-(Damage)-zh-CN)
-- [伤害详情](Damage-Details-zh-CN)
-- [DPS趋势图表](DPS-Trend-Graph-zh-CN)
-- [技能详情(治疗)](Skill-Details-(Healing)-zh-CN)
-- [治疗详情](Healing-Details-zh-CN)
-- [HPS趋势图表](HPS-Trend-Graph-zh-CN)
-- [承伤详情](Damage-Taken-Details-zh-CN)
-- [聊天](Chat-zh-CN)
+- [玩家列表](玩家列表)
+- [实体列表](实体列表)
+- [玩家信息](玩家信息)
+- [实体信息](实体信息)
+- [属性详情](属性详情)
+- [装备信息](装备信息)
+- [天赋信息](天赋信息)
+- [深眠心相仪信息](深眠心相仪信息)
+- [模组信息](模组信息)
+- [增益列表](增益列表)
+- [减益列表](减益列表)
+- [增益减益卡片](增益减益卡片)
+- [增益减益分组](增益减益分组)
+- [复活列表](复活列表)
+- [时间轴](时间轴)
+- [DPS计量器](DPS计量器)
+- [HPS计量器](HPS计量器)
+- [承伤日志](承伤日志)
+- [技能详情(伤害)](技能详情(伤害))
+- [伤害详情](伤害详情)
+- [DPS趋势图表](DPS趋势图表)
+- [技能详情(治疗)](技能详情(治疗))
+- [治疗详情](治疗详情)
+- [HPS趋势图表](HPS趋势图表)
+- [承伤详情](承伤详情)
+- [聊天](聊天)
 
 **内置插件**
 
-- [ただのモジュールツール](Module-Tool-zh-CN)
+- [ただのモジュールツール](ただのモジュールツール(简体中文))
 
 **其他插件**
 
@@ -62,12 +62,12 @@
 
 **疑难解答**
 
-- [疑难解答](Troubleshooting-zh-CN)
+- [疑难解答](疑难解答)
 
 **插件开发**
 
-- [插件开发](Plugin-Development-zh-CN)
-- [插件开发(窗口)](Plugin-Development-(Window)-zh-CN)
-- [插件开发(小组件)](Plugin-Development-(Widget)-zh-CN)
-- [插件开发(通知)](Plugin-Development-(Notification)-zh-CN)
-- [插件开发(数据)](Plugin-Development-(Data)-zh-CN)
+- [插件开发](插件开发)
+- [插件开发(窗口)](插件开发(窗口))
+- [插件开发(小组件)](插件开发(小组件))
+- [插件开发(通知)](插件开发(通知))
+- [插件开发(数据)](插件开发(数据))

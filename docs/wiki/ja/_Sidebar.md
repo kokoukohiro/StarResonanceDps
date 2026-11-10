@@ -1,60 +1,60 @@
-[日本語](Home-ja) | [한국어](Home-ko) | [简体中文](Home-zh-CN) | [English](Home-en)
+[日本語](お願い、DPS見ないで…Wiki) | [한국어](내-DPS-조회하지-마-Wiki) | [简体中文](别查我DPS-Wiki) | [English](Don't-Check-My-DPS-Wiki)
 
-**[Home](Home-ja)**
+**[Home](お願い、DPS見ないで…Wiki)**
 
 **はじめに**
 
-- [入れ方と更新](Installation-and-Updates-ja)
-- [最初の設定](Initial-Setup-ja)
+- [入れ方と更新](入れ方と更新)
+- [最初の設定](最初の設定)
 
 **メイン画面**
 
-- [ウィジェット](Widgets-ja)
-- [集計](Aggregation-ja)
-- [通知](Notifications-ja)
-- [プラグイン](Plugins-ja)
-- [ログ](Logs-ja)
-- [フィードバック](Feedback-ja)
-- [ヘルプ](Help-ja)
+- [ウィジェット](ウィジェット)
+- [集計](集計)
+- [通知](通知)
+- [プラグイン](プラグイン)
+- [ログ](ログ)
+- [フィードバック](フィードバック)
+- [ヘルプ](ヘルプ)
 
 **設定**
 
-- [全体設定](Settings-ja)
-- [ホットキー](Hotkeys-ja)
-- [ウィジェットの共通設定](Common-Widget-Settings-ja)
+- [全体設定](全体設定)
+- [ホットキー](ホットキー)
+- [ウィジェットの共通設定](ウィジェットの共通設定)
 
 **ウィジェット**
 
-- [プレイヤーリスト](Player-List-ja)
-- [エンティティリスト](Entity-List-ja)
-- [プレイヤー情報](Player-Info-ja)
-- [エンティティ情報](Entity-Info-ja)
-- [ステータス詳細](Status-ja)
-- [装備情報](Equipment-Info-ja)
-- [アビリティ情報](Talent-Info-ja)
-- [潜在心相晶情報](Deep-Slumber-Psychoscope-Info-ja)
-- [モジュール情報](Module-Info-ja)
-- [バフリスト](Buff-List-ja)
-- [デバフリスト](Debuff-List-ja)
-- [バフ・デバフカード](Buff-&-Debuff-Card-ja)
-- [バフ・デバフグループ](Buff-&-Debuff-Group-ja)
-- [蘇生リスト](Revive-List-ja)
-- [タイムライン](Timeline-ja)
-- [DPSメーター](DPS-Meter-ja)
-- [HPSメーター](HPS-Meter-ja)
-- [被ダメログ](Damage-Taken-Log-ja)
-- [スキル詳細(与ダメ)](Skill-Details-(Damage)-ja)
-- [与ダメ詳細](Damage-Details-ja)
-- [DPS推移グラフ](DPS-Trend-Graph-ja)
-- [スキル詳細(ヒール)](Skill-Details-(Healing)-ja)
-- [ヒール詳細](Healing-Details-ja)
-- [HPS推移グラフ](HPS-Trend-Graph-ja)
-- [被ダメ詳細](Damage-Taken-Details-ja)
-- [チャット](Chat-ja)
+- [プレイヤーリスト](プレイヤーリスト)
+- [エンティティリスト](エンティティリスト)
+- [プレイヤー情報](プレイヤー情報)
+- [エンティティ情報](エンティティ情報)
+- [ステータス詳細](ステータス詳細)
+- [装備情報](装備情報)
+- [アビリティ情報](アビリティ情報)
+- [潜在心相晶情報](潜在心相晶情報)
+- [モジュール情報](モジュール情報)
+- [バフリスト](バフリスト)
+- [デバフリスト](デバフリスト)
+- [バフ・デバフカード](バフ・デバフカード)
+- [バフ・デバフグループ](バフ・デバフグループ)
+- [蘇生リスト](蘇生リスト)
+- [タイムライン](タイムライン)
+- [DPSメーター](DPSメーター)
+- [HPSメーター](HPSメーター)
+- [被ダメログ](被ダメログ)
+- [スキル詳細(与ダメ)](スキル詳細(与ダメ))
+- [与ダメ詳細](与ダメ詳細)
+- [DPS推移グラフ](DPS推移グラフ)
+- [スキル詳細(ヒール)](スキル詳細(ヒール))
+- [ヒール詳細](ヒール詳細)
+- [HPS推移グラフ](HPS推移グラフ)
+- [被ダメ詳細](被ダメ詳細)
+- [チャット](チャット)
 
 **同梱のプラグイン**
 
-- [ただのモジュールツール](Module-Tool-ja)
+- [ただのモジュールツール](ただのモジュールツール)
 
 **そのほかのプラグイン**
 
@@ -62,12 +62,12 @@
 
 **困ったとき**
 
-- [困ったとき](Troubleshooting-ja)
+- [困ったとき](困ったとき)
 
 **プラグイン開発**
 
-- [プラグイン開発](Plugin-Development-ja)
-- [プラグイン開発(窓)](Plugin-Development-(Window)-ja)
-- [プラグイン開発(ウィジェット)](Plugin-Development-(Widget)-ja)
-- [プラグイン開発(通知)](Plugin-Development-(Notification)-ja)
-- [プラグイン開発(データ)](Plugin-Development-(Data)-ja)
+- [プラグイン開発](プラグイン開発)
+- [プラグイン開発(窓)](プラグイン開発(窓))
+- [プラグイン開発(ウィジェット)](プラグイン開発(ウィジェット))
+- [プラグイン開発(通知)](プラグイン開発(通知))
+- [プラグイン開発(データ)](プラグイン開発(データ))
