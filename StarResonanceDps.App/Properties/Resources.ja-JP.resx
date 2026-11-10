@@ -501,18 +501,39 @@ VOICEVOXを起動し直してください。</value>
     <value>{0}を停止しました。</value>
   </data>
   <data name="PluginStopped_Detail" xml:space="preserve">
-    <value>アプリを再起動すると、もう一度読み込みます。
-直らないときは、プラグインを入れ直すか作者に知らせてください。</value>
+    <value>アプリを再起動すると、再度読み込みます。
+解決しない場合は、プラグインを再インストールするか、作者に連絡してください。</value>
   </data>
   <data name="PluginStoppedPacketBacklog_Detail" xml:space="preserve">
-    <value>{0}が通信の受け取りに追いつかなくなりました。</value>
+    <value>アプリを再起動すると、再度読み込みます。
+解決しない場合は、作者に連絡してください。</value>
   </data>
   <data name="PluginLoadFailed_Message" xml:space="preserve">
     <value>読み込めなかったプラグインがあります。</value>
   </data>
   <data name="PluginLoadFailed_Detail" xml:space="preserve">
-    <value>{0}
-プラグインを入れ直すか作者に知らせてください。</value>
+    <value>プラグインを再インストールするか、作者に連絡してください。</value>
+  </data>
+  <data name="PluginLoadFailed_RestartDetail" xml:space="preserve">
+    <value>アプリを再起動してください。</value>
+  </data>
+  <data name="PluginLoadFailed_Line" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="PluginLoadFailed_MissingFiles" xml:space="preserve">
+    <value>必要なファイル({0})が見つかりません</value>
+  </data>
+  <data name="PluginLoadFailed_Invalid" xml:space="preserve">
+    <value>このアプリのプラグインではないか、アプリとバージョンが一致しません</value>
+  </data>
+  <data name="PluginLoadFailed_InitializationFailed" xml:space="preserve">
+    <value>初期化できませんでした</value>
+  </data>
+  <data name="PluginLoadFailed_DeletionFailed" xml:space="preserve">
+    <value>削除できませんでした</value>
+  </data>
+  <data name="PluginLoadFailed_UpdateFailed" xml:space="preserve">
+    <value>更新できませんでした</value>
   </data>
   <data name="PluginAddFailed_PendingDeletion_Detail" xml:space="preserve">
     <value>同じプラグインが削除を待っています。
@@ -544,33 +565,6 @@ VOICEVOXを起動し直してください。</value>
   </data>
   <data name="PluginStatus_PendingUpdate" xml:space="preserve">
     <value>再起動後に更新</value>
-  </data>
-  <data name="PluginStatus_MissingFiles" xml:space="preserve">
-    <value>必要なファイル({0})が見つかりません</value>
-  </data>
-  <data name="PluginStatus_Invalid" xml:space="preserve">
-    <value>このアプリのプラグインではないか、アプリと版が合っていません</value>
-  </data>
-  <data name="PluginStatus_Stopped" xml:space="preserve">
-    <value>エラーが起きたため停止中、次の起動で再開</value>
-  </data>
-  <data name="PluginStatus_InvalidNotifications" xml:space="preserve">
-    <value>通知の項目の作りに誤りがあります</value>
-  </data>
-  <data name="PluginStatus_InvalidWidgets" xml:space="preserve">
-    <value>ウィジェットの作りに誤りがあります</value>
-  </data>
-  <data name="PluginStatus_PacketBacklog" xml:space="preserve">
-    <value>通信の受け取りに追いつかなくなったため停止中、次の起動で再開</value>
-  </data>
-  <data name="PluginStatus_TerminatedApp" xml:space="preserve">
-    <value>アプリを終了させたため停止中、入れ直すと再開</value>
-  </data>
-  <data name="PluginStatus_DeletionFailed" xml:space="preserve">
-    <value>削除できませんでした、次の起動でもう一度削除します</value>
-  </data>
-  <data name="PluginStatus_UpdateFailed" xml:space="preserve">
-    <value>更新できませんでした、次の起動でもう一度更新します</value>
   </data>
   <data name="Confirm_UninstallPlugin_Title" xml:space="preserve">
     <value>プラグインの削除</value>

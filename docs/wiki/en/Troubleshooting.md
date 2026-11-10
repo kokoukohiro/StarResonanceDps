@@ -48,7 +48,7 @@ This window appears when "Launch app when Windows starts" in the "Startup" secti
 
 ### The "Plugin Error" window appears
 
-Some plugins could not be loaded. Reinstall those plugins or contact their authors ([Plugins](Plugins)).
+Some plugins could not be loaded. The details in the window show the reason and what to do for each plugin ([Plugins](Plugins)).
 
 ## Nothing appears
 
@@ -165,7 +165,7 @@ Skills that have no display name in the game are shown with their internal name 
 
 ## A plugin does not work
 
-Hover over the "Error" label on the plugin's row in "[Plugins](Plugins)" to see the reason.
+When a plugin's row in "[Plugins](Plugins)" shows "Error", the reason is shown in the "Plugin Error" window. If some plugins could not be loaded, this window appears every time the app starts.
 
 ## A history entry cannot be opened
 

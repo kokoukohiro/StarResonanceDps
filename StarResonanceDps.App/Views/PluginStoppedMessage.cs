@@ -17,7 +17,7 @@ public static class PluginStoppedMessage
             localization.GetString("PluginError_Title"),
             localization.Format("PluginStopped_Message", pluginName),
             isPacketBacklog
-                ? localization.Format("PluginStoppedPacketBacklog_Detail", pluginName)
+                ? localization.GetString("PluginStoppedPacketBacklog_Detail")
                 : localization.GetString("PluginStopped_Detail"));
     }
 }

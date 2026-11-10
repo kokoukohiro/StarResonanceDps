@@ -124,10 +124,10 @@ public sealed class PluginManager
     }
 
     /// <summary>
-    /// 読めたプラグインを全部初期化する(起動の処理で1回)。読めなかった・初期化できなかったプラグインの名前を返す。
-    /// 削除・更新できなかったフォルダは返さない(読み込みの失敗ではなく、直し方も違う)。
+    /// 読めたプラグインを全部初期化する(起動の処理で1回)。
+    /// 読めなかった・初期化できなかった・削除や更新ができなかったプラグインを、名前と理由で返す(「プラグインエラー」の窓に出す)。
     /// </summary>
-    public IReadOnlyList<string> InitializeAll()
+    public IReadOnlyList<PluginLoadFailure> InitializeAll()
     {
         DiscoverPlugins();
 
@@ -137,11 +137,9 @@ public sealed class PluginManager
             Initialize(entry);
         }
 
-        var culture = LocalizationManager.Instance.CurrentCulture;
         return entries
-            .Where(entry => entry.State == PluginState.Failed
-                && entry.ErrorReason is not (PluginErrorReason.DeletionFailed or PluginErrorReason.UpdateFailed))
-            .Select(entry => entry.Info.GetDisplayName(culture))
+            .Where(entry => entry.State == PluginState.Failed)
+            .Select(CreateLoadFailure)
             .ToArray();
     }
 
@@ -151,17 +149,13 @@ public sealed class PluginManager
         var entry = _entries[pluginKey];
         return entry.State switch
         {
-            PluginState.PendingDeletion => new PluginStatus(PluginRowState.PendingDeletion, null, [], CanUninstall: false, IsUpdatePending: false),
+            PluginState.PendingDeletion => new PluginStatus(PluginRowState.PendingDeletion, CanUninstall: false, IsUpdatePending: false),
             PluginState.Failed or PluginState.Stopped => new PluginStatus(
                 PluginRowState.Error,
-                entry.ErrorReason ?? throw new InvalidOperationException($"The plugin '{entry.Key}' failed without a reason."),
-                entry.MissingFiles,
                 CanUninstall: !IsAwaitingDeletion(entry),
                 IsUpdatePending: entry.PendingUpdateVersion is not null),
             _ => new PluginStatus(
                 entry.Info.HasWindow ? PluginRowState.Openable : PluginRowState.NoWindow,
-                null,
-                [],
                 CanUninstall: true,
                 IsUpdatePending: entry.PendingUpdateVersion is not null),
         };
@@ -312,7 +306,7 @@ public sealed class PluginManager
 
         if (addedEntry.State == PluginState.Failed)
         {
-            PluginLoadFailureMessage.Show(owner, [addedEntry.Info.GetDisplayName(LocalizationManager.Instance.CurrentCulture)]);
+            PluginLoadFailureMessage.Show(owner, [CreateLoadFailure(addedEntry)]);
         }
 
         PluginRegistered?.Invoke(this, addedEntry.Info);
@@ -1002,6 +996,15 @@ public sealed class PluginManager
         entry.State = PluginState.Failed;
         entry.ErrorReason = reason;
         entry.MissingFiles = missingFiles;
+    }
+
+    /// <summary>「プラグインエラー」の窓の1行(<see cref="PluginState.Failed"/> の行)。</summary>
+    private static PluginLoadFailure CreateLoadFailure(PluginEntry entry)
+    {
+        return new PluginLoadFailure(
+            entry.Info.GetDisplayName(LocalizationManager.Instance.CurrentCulture),
+            entry.ErrorReason ?? throw new InvalidOperationException($"The plugin '{entry.Key}' failed without a reason."),
+            entry.MissingFiles);
     }
 
     /// <summary>アンインストールした(削除を待っている、または削除できず次の起動でまた消す)。</summary>
