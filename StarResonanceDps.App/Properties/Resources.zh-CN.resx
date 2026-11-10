@@ -624,7 +624,7 @@
     <value>GitHub</value>
   </data>
   <data name="Help_GitHub_Description" xml:space="preserve">
-    <value>仓库主页</value>
+    <value>仓库README</value>
   </data>
   <data name="Help_ReleaseNotes_Title" xml:space="preserve">
     <value>更新日志</value>
@@ -897,10 +897,10 @@
     <value>数值</value>
   </data>
   <data name="NumberDisplay_KMB" xml:space="preserve">
-    <value>三位计数法 (KMBT)</value>
+    <value>三位计数法(KMBT)</value>
   </data>
   <data name="NumberDisplay_Wan" xml:space="preserve">
-    <value>四位计数法 (万亿兆)</value>
+    <value>四位计数法(万亿兆)</value>
   </data>
   <data name="NumberUnit_Kmbt_Thousand" xml:space="preserve">
     <value>K</value>
@@ -1405,7 +1405,7 @@
     <value>深眠心相仪</value>
   </data>
   <data name="Settings_PlayerInfo_Field_AbilityScore" xml:space="preserve">
-    <value>战力</value>
+    <value>能力评分</value>
   </data>
   <data name="Settings_PlayerInfo_Field_SeasonStrength" xml:space="preserve">
     <value>赛季强度</value>

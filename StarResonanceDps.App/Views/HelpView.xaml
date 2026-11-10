@@ -137,8 +137,8 @@
                     <Button Grid.Row="0"
                             Grid.Column="0"
                             Style="{StaticResource Button.LinkCard}"
-                            Command="{Binding OpenLinkCommand}"
-                            CommandParameter="{x:Static services:ProjectLinks.WikiUrl}">
+                            Command="{Binding OpenLocalizedLinkCommand}"
+                            CommandParameter="{x:Static services:LocalizedProjectPage.WikiHome}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -167,8 +167,8 @@
                     <Button Grid.Row="0"
                             Grid.Column="2"
                             Style="{StaticResource Button.LinkCard}"
-                            Command="{Binding OpenLinkCommand}"
-                            CommandParameter="{x:Static services:ProjectLinks.PluginDevelopmentUrl}">
+                            Command="{Binding OpenLocalizedLinkCommand}"
+                            CommandParameter="{x:Static services:LocalizedProjectPage.PluginDevelopment}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -197,8 +197,8 @@
                     <Button Grid.Row="1"
                             Grid.Column="0"
                             Style="{StaticResource Button.LinkCard}"
-                            Command="{Binding OpenLinkCommand}"
-                            CommandParameter="{x:Static services:ProjectLinks.RepositoryUrl}">
+                            Command="{Binding OpenLocalizedLinkCommand}"
+                            CommandParameter="{x:Static services:LocalizedProjectPage.Readme}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />

@@ -356,13 +356,13 @@ Restart VOICEVOX.</value>
     <value>Immediately</value>
   </data>
   <data name="TargetedCondition_1" xml:space="preserve">
-    <value>Targeted for 1 s or more</value>
+    <value>Targeted for 1s or more</value>
   </data>
   <data name="TargetedCondition_2" xml:space="preserve">
-    <value>Targeted for 2 s or more</value>
+    <value>Targeted for 2s or more</value>
   </data>
   <data name="TargetedCondition_3" xml:space="preserve">
-    <value>Targeted for 3 s or more</value>
+    <value>Targeted for 3s or more</value>
   </data>
   <data name="TargetedPlayer_PartyMembers" xml:space="preserve">
     <value>Party members</value>
@@ -394,13 +394,13 @@ Restart VOICEVOX.</value>
     <value>On activation</value>
   </data>
   <data name="TelegraphedSkillCondition_1" xml:space="preserve">
-    <value>1 s before activation</value>
+    <value>1s before activation</value>
   </data>
   <data name="TelegraphedSkillCondition_2" xml:space="preserve">
-    <value>2 s before activation</value>
+    <value>2s before activation</value>
   </data>
   <data name="TelegraphedSkillCondition_3" xml:space="preserve">
-    <value>3 s before activation</value>
+    <value>3s before activation</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>General</value>
@@ -624,7 +624,7 @@ Its settings will also be deleted.</value>
     <value>GitHub</value>
   </data>
   <data name="Help_GitHub_Description" xml:space="preserve">
-    <value>Repository home page</value>
+    <value>Repository README</value>
   </data>
   <data name="Help_ReleaseNotes_Title" xml:space="preserve">
     <value>Release notes</value>
@@ -1080,13 +1080,13 @@ Wait a moment and copy again.</value>
     <value>Auto</value>
   </data>
   <data name="GaugeLength_10" xml:space="preserve">
-    <value>10 s</value>
+    <value>10s</value>
   </data>
   <data name="GaugeLength_20" xml:space="preserve">
-    <value>20 s</value>
+    <value>20s</value>
   </data>
   <data name="GaugeLength_30" xml:space="preserve">
-    <value>30 s</value>
+    <value>30s</value>
   </data>
   <data name="Settings_Display_SameBuffs" xml:space="preserve">
     <value>Same Buffs</value>
@@ -1389,7 +1389,7 @@ Wait a moment and copy again.</value>
     <value>Entity1</value>
   </data>
   <data name="Settings_PlayerInfo_Field_Name" xml:space="preserve">
-    <value>PlayerName</value>
+    <value>Player Name</value>
   </data>
   <data name="Settings_EntityInfo_Field_Name" xml:space="preserve">
     <value>Entity Name</value>
@@ -1404,7 +1404,7 @@ Wait a moment and copy again.</value>
     <value>Deep-Slumber Psychoscope</value>
   </data>
   <data name="Settings_PlayerInfo_Field_AbilityScore" xml:space="preserve">
-    <value>Power</value>
+    <value>Ability Score</value>
   </data>
   <data name="Settings_PlayerInfo_Field_SeasonStrength" xml:space="preserve">
     <value>Season Strength</value>
@@ -1484,13 +1484,13 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Drawing interval</value>
   </data>
   <data name="Settings_Graph_AggregationInterval_Option" xml:space="preserve">
-    <value>{0} seconds</value>
+    <value>{0}s</value>
   </data>
   <data name="Settings_Graph_VisibleSeconds" xml:space="preserve">
     <value>X-axis length</value>
   </data>
   <data name="Settings_Graph_VisibleSeconds_Option" xml:space="preserve">
-    <value>{0} seconds</value>
+    <value>{0}s</value>
   </data>
   <data name="Settings_Graph_ShowSkillLog" xml:space="preserve">
     <value>Show Skill Log</value>
@@ -1890,7 +1890,7 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Benchmark Duration</value>
   </data>
   <data name="Settings_Aggregation_BenchmarkDuration_Unit" xml:space="preserve">
-    <value>sec</value>
+    <value>s</value>
   </data>
   <data name="Settings_Aggregation_BenchmarkFirstTargetOnly" xml:space="preserve">
     <value>Measure Only the First Enemy Attacked</value>
@@ -1905,7 +1905,7 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Note: Seconds after combat stops</value>
   </data>
   <data name="Settings_Aggregation_CombatExit_Value" xml:space="preserve">
-    <value>{0} sec</value>
+    <value>{0}s</value>
   </data>
   <data name="Settings_Aggregation_CombatExit_None" xml:space="preserve">
     <value>Don't pause</value>
@@ -1947,13 +1947,13 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Immediately</value>
   </data>
   <data name="HealthLowCondition_1" xml:space="preserve">
-    <value>Low HP for 1 s or more</value>
+    <value>Low HP for 1s or more</value>
   </data>
   <data name="HealthLowCondition_2" xml:space="preserve">
-    <value>Low HP for 2 s or more</value>
+    <value>Low HP for 2s or more</value>
   </data>
   <data name="HealthLowCondition_3" xml:space="preserve">
-    <value>Low HP for 3 s or more</value>
+    <value>Low HP for 3s or more</value>
   </data>
   <data name="CuisinePotionCondition_1" xml:space="preserve">
     <value>1 min or less left</value>

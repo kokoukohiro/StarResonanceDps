@@ -1,6 +1,6 @@
 THIRD-PARTY SOFTWARE NOTICES
 
-StarResonanceDps includes the third-party components listed below. Each component is
+Don't Check My DPS includes the third-party components listed below. Each component is
 licensed under its own terms. The license texts are reproduced after the list.
 
 ================================================================================
