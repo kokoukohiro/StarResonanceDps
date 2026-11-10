@@ -1,6 +1,6 @@
 [日本語](お願い、DPS見ないで…Wiki) | [한국어](내-DPS-조회하지-마-Wiki) | [简体中文](别查我DPS-Wiki) | [English](Don't-Check-My-DPS-Wiki)
 
-这是别查我DPS使用方法的Wiki。本应用是显示《星痕共鸣》战斗信息(DPS等)的非官方工具(Windows版)。
+本Wiki介绍别查我DPS的使用方法，内容包括安装与初始设置、各界面和设置的说明、疑难解答以及插件开发等。
 
 ## 入门
 
