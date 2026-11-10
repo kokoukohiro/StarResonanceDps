@@ -39,7 +39,7 @@ namespace StarResonanceDps.App.Controls;
 ///
 /// <para>
 /// 縦軸の数字は全体設定「数値」の表記で縮める(<see cref="NumberDisplayFormatIndex"/>、<see cref="MeterNumberFormatter"/>)。
-/// 日本語表記の単位の字は表示言語の文言なので、表示している間は言語が変わったら作り直す。
+/// 単位の字は表示言語の文言なので、表示している間は言語が変わったら作り直す。
 /// </para>
 /// </summary>
 public sealed class MetricGraphChart : FrameworkElement

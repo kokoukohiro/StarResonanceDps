@@ -4,7 +4,7 @@ using StarResonanceDps.App.Localization;
 namespace StarResonanceDps.App.Models.Widgets;
 
 /// <summary>
-/// 大きな数値を、全体設定「数値」の表記で単位つきに縮める。番号 0 は英語表記(K・M・B・T)、1 は日本語表記(万・億・兆。字は表示言語の文言)。
+/// 大きな数値を、全体設定「数値」の表記で単位つきに縮める。番号0は英語表記(K・M・B・T)、1は日本語表記(万・億・兆)で、単位の字はどちらも表示言語の文言。
 /// 単位の決め方は、メーターの数値とグラフの軸の数字で同じ。
 /// </summary>
 public static class MeterNumberFormatter
@@ -37,12 +37,13 @@ public static class MeterNumberFormatter
 
     private static (double Divisor, string? Unit) GetKmbtUnit(double value)
     {
+        var localization = LocalizationManager.Instance;
         return value switch
         {
-            >= 1_000_000_000_000d => (1_000_000_000_000d, "T"),
-            >= 1_000_000_000d => (1_000_000_000d, "B"),
-            >= 1_000_000d => (1_000_000d, "M"),
-            >= 1_000d => (1_000d, "K"),
+            >= 1_000_000_000_000d => (1_000_000_000_000d, localization.GetString("NumberUnit_Kmbt_Trillion")),
+            >= 1_000_000_000d => (1_000_000_000d, localization.GetString("NumberUnit_Kmbt_Billion")),
+            >= 1_000_000d => (1_000_000d, localization.GetString("NumberUnit_Kmbt_Million")),
+            >= 1_000d => (1_000d, localization.GetString("NumberUnit_Kmbt_Thousand")),
             _ => (1d, null)
         };
     }
@@ -52,9 +53,9 @@ public static class MeterNumberFormatter
         var localization = LocalizationManager.Instance;
         return value switch
         {
-            >= 1_000_000_000_000d => (1_000_000_000_000d, localization.GetString("NumberUnit_Trillion")),
-            >= 100_000_000d => (100_000_000d, localization.GetString("NumberUnit_HundredMillion")),
-            >= 10_000d => (10_000d, localization.GetString("NumberUnit_TenThousand")),
+            >= 1_000_000_000_000d => (1_000_000_000_000d, localization.GetString("NumberUnit_Wan_Trillion")),
+            >= 100_000_000d => (100_000_000d, localization.GetString("NumberUnit_Wan_HundredMillion")),
+            >= 10_000d => (10_000d, localization.GetString("NumberUnit_Wan_TenThousand")),
             _ => (1d, null)
         };
     }

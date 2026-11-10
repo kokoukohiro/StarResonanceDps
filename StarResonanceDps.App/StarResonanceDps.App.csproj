@@ -12,6 +12,8 @@
     <Version>4.0.0</Version>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\Images\ApplicationIcon.ico</ApplicationIcon>
+    <!-- 参照先の説明の XML(SDK の StarResonanceDps.PluginSdk.xml)は、プラグインを作る人向けのパッケージに入れるもので、アプリの配布物には入れない。 -->
+    <PublishReferencesDocumentationFiles>false</PublishReferencesDocumentationFiles>
   </PropertyGroup>
 
   <ItemGroup>

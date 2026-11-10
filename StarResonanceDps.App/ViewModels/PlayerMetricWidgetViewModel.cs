@@ -20,11 +20,11 @@ public enum PlayerMetricDisplayMode
 
 /// <summary>
 /// スキル詳細の属性列に出すアイコン。クラスアイコンと同じ染め方で、塗りは白(行の色は下のバーが持つ)。
-/// TIPS は欄そのものに1つ付けるので、アイコンは持たない。
+/// TIPSは行に1つ付けるので、アイコンは持たない。
 ///
 /// <para>
 /// 2種類以上の属性を含む行は、枠を中央の縦線で2等分し、
-/// <b>ダメージの多い1位を左、2位を右</b>に切り抜いて重ねる。3つ目以降は出さない(TIPS には出る)。
+/// <b>量の多い1位を左、2位を右</b>に切り抜いて重ねる。3つ目以降は出さない(TIPSには出る)。
 /// </para>
 /// </summary>
 /// <param name="PrimaryMask">1位の属性アイコンの形。2位があるときは左半分に切り抜く。</param>
@@ -37,7 +37,7 @@ public sealed record MetricElementIconSegment(Brush PrimaryMask, Brush? Secondar
 
 public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
 {
-    /// <summary>タイプ列の並び(ユーザー決定)。enum の値の順ではない。</summary>
+    /// <summary>タイプ(書式の{Type}と行のTIPS)の並び。enumの値の順ではない。</summary>
     private static readonly Zproto.EDamageMode[] DamageModeDisplayOrder =
     [
         Zproto.EDamageMode.DamagePhysical,
@@ -170,21 +170,6 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
 
     public ReadOnlyObservableCollection<MetricSkillTableEntry> SkillEntries { get; }
 
-    public string TotalValueHeader => LocalizationManager.Instance.GetString(
-        _kind == MeterSnapshotKind.Damage
-            ? "Metric_Damage"
-            : "Metric_Healing");
-
-    public string EncounterPerSecondHeader => LocalizationManager.Instance.GetString(
-        _kind == MeterSnapshotKind.Damage
-            ? "Metric_EncounterDps"
-            : "Metric_EncounterHps");
-
-    public string ShareHeader => LocalizationManager.Instance.GetString(
-        _kind == MeterSnapshotKind.Damage
-            ? "Metric_DamageShare"
-            : "Metric_HealingShare");
-
     public void Dispose()
     {
         if (_isDisposed)
@@ -293,9 +278,6 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
-        OnPropertyChanged(nameof(TotalValueHeader));
-        OnPropertyChanged(nameof(EncounterPerSecondHeader));
-        OnPropertyChanged(nameof(ShareHeader));
         Refresh();
     }
 
@@ -580,12 +562,12 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     }
 
     /// <summary>
-    /// 属性の内訳。アイコンだけを属性ID順に並べる。<b>割合が 0 の属性は出さない</b>ので、
+    /// 属性の内訳。量の多い上位2つのアイコンを1つの枠に重ねる(<see cref="MetricElementIconSegment"/>)。<b>割合が0の属性は出さない</b>ので、
     /// 混ざっていない行はアイコン1つになる。割合は行の TIPS(<see cref="CreateRowToolTipText"/>)に出す。
     /// </summary>
     private IReadOnlyList<object> CreateElementSegments(MetricSkillTableRowSnapshot entry)
     {
-        // ダメージの多い順に上位2つ。3つ目以降は枠に入らないので出さない(TIPS には全部出る)。
+        // 量の多い順に上位2つ。3つ目以降は枠に入らないので出さない(TIPSには全部出る)。
         var masks = new List<Brush>();
         foreach (var pair in entry.ValueByElement.OrderByDescending(pair => pair.Value))
         {
@@ -670,7 +652,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         return string.Join(ShareSeparator, EnumerateDamageModeParts(entry).Select(part => part.Label));
     }
 
-    /// <summary>種類の欄に出す分だけを、決めた並びで返す。</summary>
+    /// <summary>タイプ(書式の{Type}と行のTIPS)に出す分だけを、決めた並びで返す。</summary>
     private static IEnumerable<(string Label, ulong Value)> EnumerateDamageModeParts(MetricSkillTableRowSnapshot entry)
     {
         var localization = LocalizationManager.Instance;

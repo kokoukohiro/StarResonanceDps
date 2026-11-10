@@ -903,13 +903,25 @@ VOICEVOXを起動し直してください。</value>
   <data name="NumberDisplay_Wan" xml:space="preserve">
     <value>日本語表記（万億兆）</value>
   </data>
-  <data name="NumberUnit_TenThousand" xml:space="preserve">
+  <data name="NumberUnit_Kmbt_Thousand" xml:space="preserve">
+    <value>K</value>
+  </data>
+  <data name="NumberUnit_Kmbt_Million" xml:space="preserve">
+    <value>M</value>
+  </data>
+  <data name="NumberUnit_Kmbt_Billion" xml:space="preserve">
+    <value>B</value>
+  </data>
+  <data name="NumberUnit_Kmbt_Trillion" xml:space="preserve">
+    <value>T</value>
+  </data>
+  <data name="NumberUnit_Wan_TenThousand" xml:space="preserve">
     <value>万</value>
   </data>
-  <data name="NumberUnit_HundredMillion" xml:space="preserve">
+  <data name="NumberUnit_Wan_HundredMillion" xml:space="preserve">
     <value>億</value>
   </data>
-  <data name="NumberUnit_Trillion" xml:space="preserve">
+  <data name="NumberUnit_Wan_Trillion" xml:space="preserve">
     <value>兆</value>
   </data>
   <data name="Settings_Display_PlayerName" xml:space="preserve">
@@ -923,6 +935,9 @@ VOICEVOXを起動し直してください。</value>
   </data>
   <data name="PlayerNameDisplay_HideOthers" xml:space="preserve">
     <value>自分以外非表示</value>
+  </data>
+  <data name="PlayerName_UidFormat" xml:space="preserve">
+    <value>UID:{0}</value>
   </data>
   <data name="Hotkey_PlayerNameShowOrHide" xml:space="preserve">
     <value>プレイヤー名表示/非表示</value>
@@ -1261,6 +1276,9 @@ VOICEVOXを起動し直してください。</value>
   <data name="Widget_PlayerModule" xml:space="preserve">
     <value>モジュール情報</value>
   </data>
+  <data name="PlayerModule_LevelFormat" xml:space="preserve">
+    <value>Lv{0}</value>
+  </data>
   <data name="PlayerInfo_Uid" xml:space="preserve">
     <value>UID</value>
   </data>
@@ -1399,9 +1417,6 @@ VOICEVOXを起動し直してください。</value>
   <data name="Settings_PlayerInfo_Field_PlayerUid" xml:space="preserve">
     <value>プレイヤーUID</value>
   </data>
-  <data name="Metric_No" xml:space="preserve">
-    <value>NO.</value>
-  </data>
   <data name="Metric_Element" xml:space="preserve">
     <value>属性</value>
   </data>
@@ -1423,20 +1438,8 @@ VOICEVOXを起動し直してください。</value>
   <data name="Metric_SkillName" xml:space="preserve">
     <value>スキル名</value>
   </data>
-  <data name="Metric_Damage" xml:space="preserve">
-    <value>与ダメ</value>
-  </data>
-  <data name="Metric_Healing" xml:space="preserve">
-    <value>ヒール</value>
-  </data>
-  <data name="Metric_ActiveDps" xml:space="preserve">
-    <value>aDPS</value>
-  </data>
   <data name="Metric_EncounterDps" xml:space="preserve">
     <value>DPS</value>
-  </data>
-  <data name="Metric_ActiveHps" xml:space="preserve">
-    <value>aHPS</value>
   </data>
   <data name="Metric_EncounterHps" xml:space="preserve">
     <value>HPS</value>
@@ -1446,15 +1449,6 @@ VOICEVOXを起動し直してください。</value>
   </data>
   <data name="Metric_CritRate" xml:space="preserve">
     <value>会心率</value>
-  </data>
-  <data name="Metric_AveragePerHit" xml:space="preserve">
-    <value>平均ヒット</value>
-  </data>
-  <data name="Metric_DamageShare" xml:space="preserve">
-    <value>与ダメ%</value>
-  </data>
-  <data name="Metric_HealingShare" xml:space="preserve">
-    <value>ヒール%</value>
   </data>
   <data name="Confirm_NpcapUpdate_Title" xml:space="preserve">
     <value>Npcap更新</value>
