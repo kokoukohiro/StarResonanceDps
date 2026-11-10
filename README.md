@@ -11,7 +11,7 @@
 
 お願い、DPS見ないで…(StarResonanceDps)は、ゲーム『ブループロトコル：スターレゾナンス』の戦闘情報(DPSなど)を表示する非公式のツールです。
 
-このツールは、旧バージョン([anying1073/StarResonanceDps](https://github.com/anying1073/StarResonanceDps))をもとに開発を続けているものです。このツールの完成に必要な情報を提供してくださった、旧バージョンを共に開発した皆さんに感謝します。
+このツールは、旧バージョン([anying1073/StarResonanceDps](https://github.com/anying1073/StarResonanceDps))をもとに開発を続けているものです。旧バージョンを共に開発し、このツールの完成に必要な情報を提供した皆さんに感謝します。
 
 ## 🌟 主な機能
 
@@ -34,7 +34,7 @@
 
 ### インストール
 
-1. [リリース](https://github.com/kokoukohiro/StarResonanceDps/releases)から`StarResonanceDps-<バージョン>.zip`をダウンロードします
+1. [Releases](https://github.com/kokoukohiro/StarResonanceDps/releases)から`StarResonanceDps-<バージョン>.zip`をダウンロードします
 2. zipを、書き込みできるフォルダに展開します
 3. フォルダの中の`StarResonanceDps.exe`を起動します
 
@@ -64,7 +64,7 @@
 
 ## ⚙️ プラグイン開発
 
-プラグインで機能を追加できます。作り方は[プラグイン開発](https://github.com/kokoukohiro/StarResonanceDps/wiki/プラグイン開発)を参照してください。SDKのパッケージ(`.nupkg`)は、リリースにアプリのzipと並べて公開しています。
+プラグインで機能を追加できます。作り方は[プラグイン開発](https://github.com/kokoukohiro/StarResonanceDps/wiki/プラグイン開発)を参照してください。SDKのパッケージ(`.nupkg`)は、Releasesにアプリのzipと並べて公開しています。
 
 ## ✅ 安全性・プライバシーについて
 
@@ -81,7 +81,7 @@
 
 ## ❤ 開発の支援
 
-[GitHub Sponsors](https://github.com/sponsors/kokoukohiro)から開発を支援できます。
+[GitHub Sponsors](https://github.com/sponsors/kokoukohiro)から開発を支援できます。いただく支援は、開発の継続と、ゲームの更新への対応に大切に使います。
 
 ## 📄 ライセンス
 

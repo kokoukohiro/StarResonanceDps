@@ -13,7 +13,7 @@ This window appears when Npcap is not installed or its version cannot be detecte
 ### The "Startup error" window appears and the app closes
 
 - "Could not start the app.": The app cannot write to `Data` in the app folder. Check the write permissions of the folder shown in the window and your security software settings, or move the whole app folder to a location you can write to.
-- "Initialization failed.": Some of the app's data files may be missing or damaged. Download the zip from the release notes and overwrite the app folder with its contents. Your settings and combat history are kept.
+- "Initialization failed.": Some of the app's data files may be missing or damaged. Download the zip from Releases and overwrite the app folder with its contents. Your settings and combat history are kept.
 
 ### The "Error" window appears and the app closes
 
@@ -161,7 +161,7 @@ Skills that have no display name in the game are shown with their internal name 
 
 - The details in the "Update Error" window show how to fix the problem.
 - If the update stops at "Waiting for files in use to be released…", close File Explorer or any other program that has the app folder open.
-- If the update does not succeed, download the zip from the release notes and overwrite the app folder with its contents ([Installation and Updates](Installation-and-Updates)).
+- If the update does not succeed, download the zip from Releases and overwrite the app folder with its contents ([Installation and Updates](Installation-and-Updates)).
 
 ## A plugin does not work
 

@@ -729,8 +729,8 @@ VOICEVOXを起動し直してください。</value>
     <value>元のバージョンに戻せませんでした。
 {0}からzipを取得して、アプリのフォルダへ上書きしてください。</value>
   </data>
-  <data name="Update_ReleaseNotesLink" xml:space="preserve">
-    <value>リリースノート</value>
+  <data name="Update_ReleasesLink" xml:space="preserve">
+    <value>Releases</value>
   </data>
   <data name="Update_RestartFailed_Message" xml:space="preserve">
     <value>更新しましたが、起動し直せませんでした。</value>

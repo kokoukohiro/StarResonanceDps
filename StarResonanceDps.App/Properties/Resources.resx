@@ -703,11 +703,11 @@ Try again later.</value>
   </data>
   <data name="Update_Error_InvalidRelease" xml:space="preserve">
     <value>Could not read the release information.
-Download the zip from the {0} and overwrite the app folder.</value>
+Download the zip from {0} and overwrite the app folder.</value>
   </data>
   <data name="Update_Error_NotFromZip" xml:space="preserve">
     <value>This copy was not installed from a release zip, so it cannot update itself.
-Download the zip from the {0}.</value>
+Download the zip from {0}.</value>
   </data>
   <data name="Update_Error_Corrupt" xml:space="preserve">
     <value>The downloaded file was corrupted.
@@ -726,10 +726,10 @@ Close other apps using the app folder and try again.</value>
   </data>
   <data name="Update_Error_RestoreFailed" xml:space="preserve">
     <value>The previous version could not be restored.
-Download the zip from the {0} and overwrite the app folder.</value>
+Download the zip from {0} and overwrite the app folder.</value>
   </data>
-  <data name="Update_ReleaseNotesLink" xml:space="preserve">
-    <value>release notes</value>
+  <data name="Update_ReleasesLink" xml:space="preserve">
+    <value>Releases</value>
   </data>
   <data name="Update_RestartFailed_Message" xml:space="preserve">
     <value>Updated, but the app could not restart.</value>

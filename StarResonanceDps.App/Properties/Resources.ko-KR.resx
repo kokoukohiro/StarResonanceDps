@@ -728,8 +728,8 @@ VOICEVOX를 다시 시작하세요.</value>
     <value>이전 버전으로 되돌리지 못했습니다.
 {0}에서 zip을 받아 앱 폴더에 덮어쓰세요.</value>
   </data>
-  <data name="Update_ReleaseNotesLink" xml:space="preserve">
-    <value>릴리스 노트</value>
+  <data name="Update_ReleasesLink" xml:space="preserve">
+    <value>Releases</value>
   </data>
   <data name="Update_RestartFailed_Message" xml:space="preserve">
     <value>업데이트했지만 다시 시작하지 못했습니다.</value>

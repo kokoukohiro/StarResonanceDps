@@ -15,7 +15,7 @@ This page explains how to add windows, widgets, and notification items to this a
 ## What you need
 
 - Windows (64-bit) and the .NET 10 SDK.
-- The SDK package (`StarResonanceDps.PluginSdk.<version>.nupkg`). It is listed in the [release notes](https://github.com/kokoukohiro/StarResonanceDps/releases) alongside the app's zip. It is not on the official NuGet site.
+- The SDK package (`StarResonanceDps.PluginSdk.<version>.nupkg`). It is listed in [Releases](https://github.com/kokoukohiro/StarResonanceDps/releases) alongside the app's zip. It is not on the official NuGet site.
 - The app, for testing. Use the SDK from the same release as the app that will use the plugin (see "SDK version" below).
 
 ## Creating the project

@@ -728,8 +728,8 @@
     <value>无法恢复到原来的版本。
 请从{0}下载zip并覆盖到应用文件夹。</value>
   </data>
-  <data name="Update_ReleaseNotesLink" xml:space="preserve">
-    <value>更新日志</value>
+  <data name="Update_ReleasesLink" xml:space="preserve">
+    <value>Releases</value>
   </data>
   <data name="Update_RestartFailed_Message" xml:space="preserve">
     <value>已更新，但无法重新启动。</value>
