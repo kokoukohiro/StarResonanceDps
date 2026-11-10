@@ -639,7 +639,7 @@
     <value>{0} ({1})</value>
   </data>
   <data name="Update_Status_Checking" xml:space="preserve">
-    <value>检查中</value>
+    <value>正在检查更新</value>
   </data>
   <data name="Update_Status_UpToDate" xml:space="preserve">
     <value>最新</value>
@@ -651,7 +651,7 @@
     <value>暂无已发布的版本</value>
   </data>
   <data name="Update_Status_Failed" xml:space="preserve">
-    <value>无法检查</value>
+    <value>无法检查更新</value>
   </data>
   <data name="Update_Title" xml:space="preserve">
     <value>更新</value>
@@ -1761,10 +1761,10 @@
     <value>[图片]</value>
   </data>
   <data name="Chat_Voice" xml:space="preserve">
-    <value>[语音]</value>
+    <value>[语音消息]</value>
   </data>
   <data name="Chat_VoiceTextFormat" xml:space="preserve">
-    <value>[语音] {0}</value>
+    <value>[语音消息] {0}</value>
   </data>
   <data name="Settings_Section_ChatTextColors_Title" xml:space="preserve">
     <value>文本颜色</value>
