@@ -48,7 +48,7 @@ csproj:
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StarResonanceDps.PluginSdk" Version="0.1.0" />
+    <PackageReference Include="StarResonanceDps.PluginSdk" Version="1.0.0" />
   </ItemGroup>
 </Project>
 ```
@@ -233,6 +233,7 @@ string title = texts["WindowTitle"];
 - The first number of the SDK package version is `PluginSdkVersion.Current`. When features are added, the second and later numbers go up.
 - The app loads a plugin whose `PluginSdkVersion.Current` passed to `PluginRegistration` is the same as the app's, and whose SDK version is the same as or older than the app's SDK. Otherwise, the plugin's row in "Plugins" shows "Error", and the "Plugin Error" window shows "This is not a plugin for this app, or it does not match the app version."
 - Build with the SDK from the same release as the users' app so that their app can load the plugin. A plugin built with a newer SDK cannot be loaded by an older app.
+- To switch to a new SDK, replace the `.nupkg` in `packages` and change `Version` in the csproj to the new version. If `Version` is left unchanged, the build uses the previous SDK from the NuGet cache without any warning.
 
 ## Notes
 
