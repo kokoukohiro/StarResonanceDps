@@ -817,7 +817,7 @@ public sealed class PluginManager
     {
         try
         {
-            var resolver = new PathAssemblyResolver(PluginDependencyScanner.GetHostAssemblyPaths().Concat(scan.ManagedAssemblies));
+            var resolver = new PathAssemblyResolver(PluginDependencyScanner.GetPluginProvidedAssemblyPaths().Concat(scan.ManagedAssemblies));
             using var context = new MetadataLoadContext(resolver);
             var assembly = context.LoadFromAssemblyPath(assemblyPath);
             return CreateRegistration(assembly, Path.GetFileNameWithoutExtension(assemblyPath)).Info;

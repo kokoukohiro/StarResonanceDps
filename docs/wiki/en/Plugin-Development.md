@@ -221,6 +221,7 @@ string title = texts["WindowTitle"];
 
 - Distribute `<assembly name>.dll` and, if it has dependencies, the `.deps.json` and the dependency DLLs (as they are arranged in the output folder). A plugin without dependencies needs only the one DLL.
 - Do not distribute `StarResonanceDps.PluginSdk.dll`. The app's copy is used.
+- Only the SDK, .NET, and WPF are taken from the app. Distribute every other dependency (such as a library added from NuGet) with the plugin, even if the app has the same one.
 - Users choose `<assembly name>.dll` with "Add plugin". It cannot be added if the dependencies are not in the same folder as the chosen DLL.
 - When you distribute a new version, raise `PluginVersion`. When a user chooses the new DLL with "Add plugin", it replaces the old one when the app restarts.
 - The settings files remain after an update. Make sure the new version can read the settings files of the previous version.
