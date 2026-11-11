@@ -11,7 +11,7 @@
 
 お願い、DPS見ないで…(StarResonanceDps)は、ゲーム『ブループロトコル：スターレゾナンス』の戦闘情報(DPSなど)を表示する非公式のツールです。
 
-このツールは、旧バージョン([anying1073/StarResonanceDps](https://github.com/anying1073/StarResonanceDps))をもとに開発を続けているものです。旧バージョンを共に開発し、このツールの完成に必要な情報を提供した皆さんに感謝します。
+このツールは、旧バージョン([anying1073/StarResonanceDps](https://github.com/anying1073/StarResonanceDps))をもとに開発を続けているものです。旧バージョンを共に開発し、このツールの完成に必要な情報を提供した方々に感謝します。
 
 ## 🌟 主な機能
 
