@@ -2034,11 +2034,13 @@ public static class WidgetConfigDefaults
             }
         }
 
-        foreach (var unit in units)
+        // 並びに無い単位(表が増えた・組を分けた)は、既定の順で1つ前の単位のすぐ後ろへ入れる。
+        for (var index = 0; index < units.Count; index++)
         {
+            var unit = units[index];
             if (seen.Add(unit))
             {
-                result.Add(unit);
+                result.Insert(index == 0 ? 0 : result.IndexOf(units[index - 1]) + 1, unit);
             }
         }
 
