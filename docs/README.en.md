@@ -11,7 +11,7 @@
 
 Don't Check My DPS (StarResonanceDps) is an unofficial tool that shows combat information (such as DPS) for the game Blue Protocol: Star Resonance.
 
-This tool is developed as a continuation of the earlier version ([anying1073/StarResonanceDps](https://github.com/anying1073/StarResonanceDps)). Thanks to the fellow developers of the earlier version for providing the information needed to complete this tool.
+This app is developed as a continuation of the earlier version ([anying1073/StarResonanceDps](https://github.com/anying1073/StarResonanceDps)). Thanks to the fellow developers of the earlier version for providing the information needed to complete this app.
 
 ## 🌟 Features
 
@@ -77,7 +77,7 @@ You can add features with plugins. For how to make plugins, see [Plugin Developm
 
 ## ⭐ A request
 
-As the name says, some players would rather not have their DPS checked. Use the numbers for your own play, and do not use them to defame other players or otherwise harm the community.
+Use the displayed numbers for your own play, and do not use them to defame other players or otherwise harm the community.
 
 ## ❤ Sponsorship
 
@@ -90,5 +90,5 @@ You can support development through [GitHub Sponsors](https://github.com/sponsor
 
 ## ⚠️ Disclaimer
 
-- This tool is unofficial and is not affiliated with the game's developers or operators. The rights to the game's name, data, and images belong to their respective owners.
-- This tool is provided as is, without any warranty. The author is not responsible for any damage resulting from its use.
+- This app is unofficial and is not affiliated with the game's developers or operators. The rights to the game's name, data, and images belong to their respective owners.
+- This app is provided as is, without any warranty. The author is not responsible for any damage resulting from its use.
