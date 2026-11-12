@@ -241,7 +241,8 @@
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                     <MenuItem Header="{Binding SummaryMenuText}"
                                               Command="{Binding RequestSummaryCommand}"
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+                                              Visibility="{Binding HasSummary, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                     <MenuItem Header="{Binding GraphMenuText}"
                                               Command="{Binding RequestGraphCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />

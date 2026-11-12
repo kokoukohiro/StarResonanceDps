@@ -986,6 +986,12 @@
   <data name="Widget_HpsMeter" xml:space="preserve">
     <value>HPS计量器</value>
   </data>
+  <data name="Widget_HateMeter" xml:space="preserve">
+    <value>仇恨计量器</value>
+  </data>
+  <data name="Widget_BreakMeter" xml:space="preserve">
+    <value>破韧计量器</value>
+  </data>
   <data name="Widget_Timeline" xml:space="preserve">
     <value>时间轴</value>
   </data>
@@ -1308,8 +1314,20 @@
   <data name="Meter_Total" xml:space="preserve">
     <value>合计</value>
   </data>
+  <data name="Meter_HatePerSecond" xml:space="preserve">
+    <value>TPS</value>
+  </data>
+  <data name="Meter_BreakPerSecond" xml:space="preserve">
+    <value>BPS</value>
+  </data>
   <data name="Widget_HpsGraph" xml:space="preserve">
     <value>HPS趋势图表</value>
+  </data>
+  <data name="Widget_HateGraph" xml:space="preserve">
+    <value>TPS趋势图表</value>
+  </data>
+  <data name="Widget_BreakGraph" xml:space="preserve">
+    <value>BPS趋势图表</value>
   </data>
   <data name="Widget_HealingSummary" xml:space="preserve">
     <value>治疗详情</value>
@@ -1495,6 +1513,18 @@
   </data>
   <data name="Widget_HealingSkillDetail" xml:space="preserve">
     <value>技能详情(治疗)</value>
+  </data>
+  <data name="Widget_HateSkillDetail" xml:space="preserve">
+    <value>技能详情(仇恨值)</value>
+  </data>
+  <data name="Widget_BreakSkillDetail" xml:space="preserve">
+    <value>技能详情(破韧值)</value>
+  </data>
+  <data name="SkillDetail_InitialHate" xml:space="preserve">
+    <value>初始仇恨</value>
+  </data>
+  <data name="SkillDetail_Other" xml:space="preserve">
+    <value>其他</value>
   </data>
   <data name="Metric_SummaryTotal" xml:space="preserve">
     <value>合计</value>

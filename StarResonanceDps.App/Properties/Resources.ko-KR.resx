@@ -986,6 +986,12 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="Widget_HpsMeter" xml:space="preserve">
     <value>HPS 미터</value>
   </data>
+  <data name="Widget_HateMeter" xml:space="preserve">
+    <value>적대 수치 미터</value>
+  </data>
+  <data name="Widget_BreakMeter" xml:space="preserve">
+    <value>내성 파괴 미터</value>
+  </data>
   <data name="Widget_Timeline" xml:space="preserve">
     <value>타임라인</value>
   </data>
@@ -1307,8 +1313,20 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="Meter_Total" xml:space="preserve">
     <value>합계</value>
   </data>
+  <data name="Meter_HatePerSecond" xml:space="preserve">
+    <value>TPS</value>
+  </data>
+  <data name="Meter_BreakPerSecond" xml:space="preserve">
+    <value>BPS</value>
+  </data>
   <data name="Widget_HpsGraph" xml:space="preserve">
     <value>HPS 추이 그래프</value>
+  </data>
+  <data name="Widget_HateGraph" xml:space="preserve">
+    <value>TPS 추이 그래프</value>
+  </data>
+  <data name="Widget_BreakGraph" xml:space="preserve">
+    <value>BPS 추이 그래프</value>
   </data>
   <data name="Widget_HealingSummary" xml:space="preserve">
     <value>치유 상세</value>
@@ -1494,6 +1512,18 @@ VOICEVOX를 다시 시작하세요.</value>
   </data>
   <data name="Widget_HealingSkillDetail" xml:space="preserve">
     <value>스킬 상세(치유)</value>
+  </data>
+  <data name="Widget_HateSkillDetail" xml:space="preserve">
+    <value>스킬 상세(적대 수치)</value>
+  </data>
+  <data name="Widget_BreakSkillDetail" xml:space="preserve">
+    <value>스킬 상세(내성 파괴 수치)</value>
+  </data>
+  <data name="SkillDetail_InitialHate" xml:space="preserve">
+    <value>초기 적대 수치</value>
+  </data>
+  <data name="SkillDetail_Other" xml:space="preserve">
+    <value>기타</value>
   </data>
   <data name="Metric_SummaryTotal" xml:space="preserve">
     <value>합계</value>

@@ -987,6 +987,12 @@ VOICEVOXを起動し直してください。</value>
   <data name="Widget_HpsMeter" xml:space="preserve">
     <value>HPSメーター</value>
   </data>
+  <data name="Widget_HateMeter" xml:space="preserve">
+    <value>ヘイトメーター</value>
+  </data>
+  <data name="Widget_BreakMeter" xml:space="preserve">
+    <value>ブレイクメーター</value>
+  </data>
   <data name="Widget_Timeline" xml:space="preserve">
     <value>タイムライン</value>
   </data>
@@ -1309,8 +1315,20 @@ VOICEVOXを起動し直してください。</value>
   <data name="Meter_Total" xml:space="preserve">
     <value>合計</value>
   </data>
+  <data name="Meter_HatePerSecond" xml:space="preserve">
+    <value>TPS</value>
+  </data>
+  <data name="Meter_BreakPerSecond" xml:space="preserve">
+    <value>BPS</value>
+  </data>
   <data name="Widget_HpsGraph" xml:space="preserve">
     <value>HPS推移グラフ</value>
+  </data>
+  <data name="Widget_HateGraph" xml:space="preserve">
+    <value>TPS推移グラフ</value>
+  </data>
+  <data name="Widget_BreakGraph" xml:space="preserve">
+    <value>BPS推移グラフ</value>
   </data>
   <data name="Widget_HealingSummary" xml:space="preserve">
     <value>ヒール詳細</value>
@@ -1496,6 +1514,18 @@ VOICEVOXを起動し直してください。</value>
   </data>
   <data name="Widget_HealingSkillDetail" xml:space="preserve">
     <value>スキル詳細(ヒール)</value>
+  </data>
+  <data name="Widget_HateSkillDetail" xml:space="preserve">
+    <value>スキル詳細(ヘイト値)</value>
+  </data>
+  <data name="Widget_BreakSkillDetail" xml:space="preserve">
+    <value>スキル詳細(ブレイク値)</value>
+  </data>
+  <data name="SkillDetail_InitialHate" xml:space="preserve">
+    <value>初期ヘイト</value>
+  </data>
+  <data name="SkillDetail_Other" xml:space="preserve">
+    <value>その他</value>
   </data>
   <data name="Metric_SummaryTotal" xml:space="preserve">
     <value>合計</value>

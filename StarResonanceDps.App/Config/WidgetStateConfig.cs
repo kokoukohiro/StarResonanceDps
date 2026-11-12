@@ -1106,6 +1106,10 @@ public static class WidgetConfigDefaults
     private const double PlayerListInitialWindowHeight = 460d;
     private const double MeterInitialWindowWidth = 440d;
     private const double MeterInitialWindowHeight = 460d;
+    private const double HateMeterInitialWindowWidth = 440d;
+    private const double HateMeterInitialWindowHeight = 460d;
+    private const double BreakMeterInitialWindowWidth = 440d;
+    private const double BreakMeterInitialWindowHeight = 460d;
     private const double TimelineInitialWindowWidth = 440d;
     private const double TimelineInitialWindowHeight = 460d;
     private const double PlayerInfoInitialWindowWidth = 406d;
@@ -1135,12 +1139,20 @@ public static class WidgetConfigDefaults
     private const double ChatInitialWindowHeight = 400d;
     private const double SkillDetailInitialWindowWidth = 520d;
     private const double SkillDetailInitialWindowHeight = 460d;
+    private const double HateSkillDetailInitialWindowWidth = 520d;
+    private const double HateSkillDetailInitialWindowHeight = 460d;
+    private const double BreakSkillDetailInitialWindowWidth = 520d;
+    private const double BreakSkillDetailInitialWindowHeight = 460d;
     private const double MetricSummaryInitialWindowWidth = 280d;
     private const double MetricSummaryInitialWindowHeight = 327d;
     private const double DamageTakenSummaryInitialWindowWidth = 280d;
     private const double DamageTakenSummaryInitialWindowHeight = 327d;
     private const double MetricGraphInitialWindowWidth = 440d;
     private const double MetricGraphInitialWindowHeight = 260d;
+    private const double HateGraphInitialWindowWidth = 440d;
+    private const double HateGraphInitialWindowHeight = 260d;
+    private const double BreakGraphInitialWindowWidth = 440d;
+    private const double BreakGraphInitialWindowHeight = 260d;
 
     /// <summary>
     /// バフ・デバフグループの既定の高さ。既定でオンの行(<see cref="DefaultBuffDebuffGroupEntries"/>)がちょうど入る高さで、
@@ -1799,17 +1811,19 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.PlayerList
             or WidgetKind.EntityList
             or WidgetKind.DpsMeter
-            or WidgetKind.HpsMeter;
+            or WidgetKind.HpsMeter
+            or WidgetKind.HateMeter
+            or WidgetKind.BreakMeter;
     }
 
     public static bool UsesMeterClassColorOpacity(WidgetKind kind)
     {
-        return kind is WidgetKind.DpsMeter or WidgetKind.HpsMeter;
+        return kind is WidgetKind.DpsMeter or WidgetKind.HpsMeter or WidgetKind.HateMeter or WidgetKind.BreakMeter;
     }
 
     public static bool SupportsMetricGraphSettings(WidgetKind kind)
     {
-        return kind is WidgetKind.DpsGraph or WidgetKind.HpsGraph;
+        return kind is WidgetKind.DpsGraph or WidgetKind.HpsGraph or WidgetKind.HateGraph or WidgetKind.BreakGraph;
     }
 
     public static bool SupportsBuffCardSettings(WidgetKind kind)
@@ -1831,7 +1845,10 @@ public static class WidgetConfigDefaults
     /// <summary>スキル詳細の表示設定(行名の書式)を持つ種別か。</summary>
     public static bool SupportsSkillDetailSettings(WidgetKind kind)
     {
-        return kind is WidgetKind.DamageSkillDetail or WidgetKind.HealingSkillDetail;
+        return kind is WidgetKind.DamageSkillDetail
+            or WidgetKind.HealingSkillDetail
+            or WidgetKind.HateSkillDetail
+            or WidgetKind.BreakSkillDetail;
     }
 
     /// <summary>装備詳細の表示設定(行の書式)を持つ種別か。</summary>
@@ -1902,6 +1919,10 @@ public static class WidgetConfigDefaults
             or WidgetKind.HealingSkillDetail
             or WidgetKind.HealingSummary
             or WidgetKind.HpsGraph
+            or WidgetKind.HateSkillDetail
+            or WidgetKind.HateGraph
+            or WidgetKind.BreakSkillDetail
+            or WidgetKind.BreakGraph
             or WidgetKind.DamageTakenSummary
             or WidgetKind.EntityInfo
             or WidgetKind.Chat;
@@ -2506,6 +2527,16 @@ public static class WidgetConfigDefaults
                 Width = MeterInitialWindowWidth,
                 Height = MeterInitialWindowHeight
             },
+            WidgetKind.HateMeter => new WidgetWindowConfig
+            {
+                Width = HateMeterInitialWindowWidth,
+                Height = HateMeterInitialWindowHeight
+            },
+            WidgetKind.BreakMeter => new WidgetWindowConfig
+            {
+                Width = BreakMeterInitialWindowWidth,
+                Height = BreakMeterInitialWindowHeight
+            },
             WidgetKind.PlayerInfo => new WidgetWindowConfig
             {
                 Width = PlayerInfoInitialWindowWidth,
@@ -2576,6 +2607,16 @@ public static class WidgetConfigDefaults
                 Width = SkillDetailInitialWindowWidth,
                 Height = SkillDetailInitialWindowHeight
             },
+            WidgetKind.HateSkillDetail => new WidgetWindowConfig
+            {
+                Width = HateSkillDetailInitialWindowWidth,
+                Height = HateSkillDetailInitialWindowHeight
+            },
+            WidgetKind.BreakSkillDetail => new WidgetWindowConfig
+            {
+                Width = BreakSkillDetailInitialWindowWidth,
+                Height = BreakSkillDetailInitialWindowHeight
+            },
             WidgetKind.Timeline => new WidgetWindowConfig
             {
                 Width = TimelineInitialWindowWidth,
@@ -2595,6 +2636,16 @@ public static class WidgetConfigDefaults
             {
                 Width = MetricGraphInitialWindowWidth,
                 Height = MetricGraphInitialWindowHeight
+            },
+            WidgetKind.HateGraph => new WidgetWindowConfig
+            {
+                Width = HateGraphInitialWindowWidth,
+                Height = HateGraphInitialWindowHeight
+            },
+            WidgetKind.BreakGraph => new WidgetWindowConfig
+            {
+                Width = BreakGraphInitialWindowWidth,
+                Height = BreakGraphInitialWindowHeight
             },
             _ => new WidgetWindowConfig()
         };
@@ -2641,14 +2692,18 @@ public static class WidgetConfigDefaults
     }
 
     /// <summary>
-    /// 推移グラフのグラフカラーの既定を引くときの読み替え先。DPS推移グラフは DPS メーター、HPS推移グラフは HPS メーターに合わせる
-    /// (行の並び・色・最初に選ぶ枠)。
+    /// 推移グラフのグラフカラーの既定を引くときの読み替え先。DPS・HPS・TPS・BPS推移グラフは、それぞれ DPS・HPS・ヘイト・ブレイクメーターに合わせる
+    /// (行の並び・色・最初に選ぶ枠)。推移グラフ以外(設定の初期値で種類が分からないとき)は DPS メーター。
     /// </summary>
     public static WidgetKind GetMetricGraphColorDefaultSource(WidgetKind kind)
     {
-        return kind == WidgetKind.HpsGraph
-            ? WidgetKind.HpsMeter
-            : WidgetKind.DpsMeter;
+        return kind switch
+        {
+            WidgetKind.HpsGraph => WidgetKind.HpsMeter,
+            WidgetKind.HateGraph => WidgetKind.HateMeter,
+            WidgetKind.BreakGraph => WidgetKind.BreakMeter,
+            _ => WidgetKind.DpsMeter
+        };
     }
 
     public static BuffCardWidgetSettingsConfig CreateBuffCardSettings()
@@ -3035,14 +3090,18 @@ public static class WidgetConfigDefaults
             or WidgetKind.EntityList
             or WidgetKind.DpsMeter
             or WidgetKind.HpsMeter
+            or WidgetKind.HateMeter
+            or WidgetKind.BreakMeter
             or WidgetKind.DamageTakenLog;
     }
 
-    /// <summary>属性カラーの節を持つウィジェット。スキル詳細の2種・被ダメログ・与ダメ詳細・ヒール詳細・被ダメ詳細。</summary>
+    /// <summary>属性カラーの節を持つウィジェット。スキル詳細の4種・被ダメログ・与ダメ詳細・ヒール詳細・被ダメ詳細。</summary>
     public static bool SupportsElementColorSettings(WidgetKind kind)
     {
         return kind is WidgetKind.DamageSkillDetail
             or WidgetKind.HealingSkillDetail
+            or WidgetKind.HateSkillDetail
+            or WidgetKind.BreakSkillDetail
             or WidgetKind.DamageTakenLog
             or WidgetKind.DamageSummary
             or WidgetKind.HealingSummary
@@ -3344,6 +3403,16 @@ public static class WidgetConfigDefaults
                 config.Window.Height ??= MeterInitialWindowHeight;
                 break;
 
+            case WidgetKind.HateMeter:
+                config.Window.Width ??= HateMeterInitialWindowWidth;
+                config.Window.Height ??= HateMeterInitialWindowHeight;
+                break;
+
+            case WidgetKind.BreakMeter:
+                config.Window.Width ??= BreakMeterInitialWindowWidth;
+                config.Window.Height ??= BreakMeterInitialWindowHeight;
+                break;
+
             case WidgetKind.PlayerInfo:
                 config.Window.Width ??= PlayerInfoInitialWindowWidth;
                 config.Window.Height ??= PlayerInfoInitialWindowHeight;
@@ -3404,6 +3473,14 @@ public static class WidgetConfigDefaults
                 config.Window.Width ??= SkillDetailInitialWindowWidth;
                 config.Window.Height ??= SkillDetailInitialWindowHeight;
                 break;
+            case WidgetKind.HateSkillDetail:
+                config.Window.Width ??= HateSkillDetailInitialWindowWidth;
+                config.Window.Height ??= HateSkillDetailInitialWindowHeight;
+                break;
+            case WidgetKind.BreakSkillDetail:
+                config.Window.Width ??= BreakSkillDetailInitialWindowWidth;
+                config.Window.Height ??= BreakSkillDetailInitialWindowHeight;
+                break;
             case WidgetKind.Timeline:
                 config.Window.Width ??= TimelineInitialWindowWidth;
                 config.Window.Height ??= TimelineInitialWindowHeight;
@@ -3421,6 +3498,14 @@ public static class WidgetConfigDefaults
             case WidgetKind.HpsGraph:
                 config.Window.Width ??= MetricGraphInitialWindowWidth;
                 config.Window.Height ??= MetricGraphInitialWindowHeight;
+                break;
+            case WidgetKind.HateGraph:
+                config.Window.Width ??= HateGraphInitialWindowWidth;
+                config.Window.Height ??= HateGraphInitialWindowHeight;
+                break;
+            case WidgetKind.BreakGraph:
+                config.Window.Width ??= BreakGraphInitialWindowWidth;
+                config.Window.Height ??= BreakGraphInitialWindowHeight;
                 break;
         }
     }

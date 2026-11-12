@@ -220,6 +220,10 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         or WidgetKind.HealingSkillDetail
         or WidgetKind.HealingSummary
         or WidgetKind.HpsGraph
+        or WidgetKind.HateSkillDetail
+        or WidgetKind.HateGraph
+        or WidgetKind.BreakSkillDetail
+        or WidgetKind.BreakGraph
         or WidgetKind.DamageTakenSummary
         or WidgetKind.EntityInfo
         or WidgetKind.Chat;

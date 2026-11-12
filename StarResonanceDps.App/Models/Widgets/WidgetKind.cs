@@ -52,5 +52,23 @@ public enum WidgetKind
     /// <summary>
     /// プラグインが足したウィジェット(1枚だけ開く)。どのウィジェットかは <see cref="WidgetKey"/> で見分け、種別ごとの設定の節は持たない。
     /// </summary>
-    Plugin = 29
+    Plugin = 29,
+
+    /// <summary>ヘイトメーター。プレイヤーごとの、敵のヘイトの一覧の増えの合計と毎秒の値。</summary>
+    HateMeter = 30,
+
+    /// <summary>ブレイクメーター。プレイヤーごとの、敵の強靭(ブレイクゲージ)を削った量の合計と毎秒の値。</summary>
+    BreakMeter = 31,
+
+    /// <summary>スキル詳細(ヘイト値)。1人のヘイトを、増えた差分のその人の被弾にダメージの値の比で分けた技ごとの内訳。</summary>
+    HateSkillDetail = 32,
+
+    /// <summary>スキル詳細(ブレイク値)。1人のブレイク値を、被弾ごとに分けた技ごとの内訳。</summary>
+    BreakSkillDetail = 33,
+
+    /// <summary>TPS推移グラフ。1人のヘイトの1秒ごとの合計を描く。</summary>
+    HateGraph = 34,
+
+    /// <summary>BPS推移グラフ。1人のブレイク値の1秒ごとの合計を描く。</summary>
+    BreakGraph = 35
 }

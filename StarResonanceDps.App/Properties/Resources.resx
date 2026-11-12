@@ -986,6 +986,12 @@ Download the zip from {0} and overwrite the app folder.</value>
   <data name="Widget_HpsMeter" xml:space="preserve">
     <value>HPS Meter</value>
   </data>
+  <data name="Widget_HateMeter" xml:space="preserve">
+    <value>Threat Meter</value>
+  </data>
+  <data name="Widget_BreakMeter" xml:space="preserve">
+    <value>Break Meter</value>
+  </data>
   <data name="Widget_Timeline" xml:space="preserve">
     <value>Timeline</value>
   </data>
@@ -1307,8 +1313,20 @@ Wait a moment and copy again.</value>
   <data name="Meter_Total" xml:space="preserve">
     <value>Total</value>
   </data>
+  <data name="Meter_HatePerSecond" xml:space="preserve">
+    <value>TPS</value>
+  </data>
+  <data name="Meter_BreakPerSecond" xml:space="preserve">
+    <value>BPS</value>
+  </data>
   <data name="Widget_HpsGraph" xml:space="preserve">
     <value>HPS Trend Graph</value>
+  </data>
+  <data name="Widget_HateGraph" xml:space="preserve">
+    <value>TPS Trend Graph</value>
+  </data>
+  <data name="Widget_BreakGraph" xml:space="preserve">
+    <value>BPS Trend Graph</value>
   </data>
   <data name="Widget_HealingSummary" xml:space="preserve">
     <value>Healing Details</value>
@@ -1494,6 +1512,18 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="Widget_HealingSkillDetail" xml:space="preserve">
     <value>Skill Details (Healing)</value>
+  </data>
+  <data name="Widget_HateSkillDetail" xml:space="preserve">
+    <value>Skill Details (Threat)</value>
+  </data>
+  <data name="Widget_BreakSkillDetail" xml:space="preserve">
+    <value>Skill Details (Break)</value>
+  </data>
+  <data name="SkillDetail_InitialHate" xml:space="preserve">
+    <value>Initial Threat</value>
+  </data>
+  <data name="SkillDetail_Other" xml:space="preserve">
+    <value>Other</value>
   </data>
   <data name="Metric_SummaryTotal" xml:space="preserve">
     <value>Total</value>

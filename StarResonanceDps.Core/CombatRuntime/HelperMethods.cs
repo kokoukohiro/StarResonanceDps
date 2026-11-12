@@ -22,5 +22,6 @@ public class HelperMethods
         public static SkillAoyiStarTable SkillAoyiStars = new SkillAoyiStarTable();
         public static ChatStickerTable ChatStickers = new ChatStickerTable();
         public static ProfileImageTable ProfileImages = new ProfileImageTable();
+        public static DamageAttrTable DamageAttrs = new DamageAttrTable();
     }
 }
