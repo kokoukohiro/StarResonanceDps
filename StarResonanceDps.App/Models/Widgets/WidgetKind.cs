@@ -70,5 +70,11 @@ public enum WidgetKind
     HateGraph = 34,
 
     /// <summary>BPS推移グラフ。1人のブレイク値の1秒ごとの合計を描く。</summary>
-    BreakGraph = 35
+    BreakGraph = 35,
+
+    /// <summary>
+    /// マップ。地図の画像の上に、自分・周りのプレイヤー・パーティの人・エンティティリストに載る実体の位置を出す。
+    /// 相手はマップ(自分のいるマップか、パーティの人がいるマップ)で、複数開ける。
+    /// </summary>
+    Map = 36
 }

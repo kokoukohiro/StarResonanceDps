@@ -102,6 +102,7 @@ public sealed partial class MainViewModel : ViewModelBase
 
         _playerListWidget = AddWidget(WidgetKind.PlayerList, "Widget_PlayerList");
         _entityListWidget = AddWidget(WidgetKind.EntityList, "Widget_EntityList");
+        AddWidget(WidgetKind.Map, "Widget_Map");
         AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
         AddWidget(WidgetKind.EntityInfo, "Widget_EntityInfo");
         AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");
@@ -345,7 +346,7 @@ public sealed partial class MainViewModel : ViewModelBase
 
         widget.IsSearchMatch = MatchesSearchText(widget);
         _widgetItems.Add(widget);
-        _widgetWindowManager.RegisterPlayerWindowWidget(widget);
+        _widgetWindowManager.RegisterWidget(widget);
         return widget;
     }
 

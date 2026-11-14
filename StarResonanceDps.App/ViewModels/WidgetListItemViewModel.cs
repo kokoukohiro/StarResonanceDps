@@ -47,6 +47,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private DamageTakenLogWidgetSettingsConfig _damageTakenLog = WidgetConfigDefaults.CreateDamageTakenLogSettings();
     private EntityInfoWidgetSettingsConfig _entityInfo = WidgetConfigDefaults.CreateEntityInfoSettings();
     private ChatWidgetSettingsConfig _chat = WidgetConfigDefaults.CreateChatSettings();
+    private MapWidgetSettingsConfig _map = WidgetConfigDefaults.CreateMapSettings();
     private PluginWidgetSettingsConfig _pluginSettings = new();
 
     /// <summary>エンティティリストの行を組む設定。メーターの設定(<c>_meter</c>)が変わったときに作り直す。</summary>
@@ -135,13 +136,13 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private string _footerCombatLabel = string.Empty;
 
     [ObservableProperty]
-    private string _footerCombatValueText = string.Empty;
+    private FooterValue _footerCombatValue = FooterValue.Empty;
 
     [ObservableProperty]
     private string _footerOverallLabel = string.Empty;
 
     [ObservableProperty]
-    private string _footerOverallValueText = string.Empty;
+    private FooterValue _footerOverallValue = FooterValue.Empty;
 
     [ObservableProperty]
     private int _openPlayerWindowCount;
@@ -225,7 +226,6 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         or WidgetKind.BreakSkillDetail
         or WidgetKind.BreakGraph
         or WidgetKind.DamageTakenSummary
-        or WidgetKind.EntityInfo
         or WidgetKind.Chat;
 
     public bool HasOpenPlayerWindows => IsPlayerWindowWidget && OpenPlayerWindowCount > 0;
@@ -317,6 +317,11 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     public ChatWidgetSettingsConfig GetChatSettingsSnapshot()
     {
         return WidgetConfigDefaults.CloneNormalizedChat(_chat);
+    }
+
+    public MapWidgetSettingsConfig GetMapSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedMap(_map);
     }
 
     /// <summary>バフ・デバフグループに、その鍵の行がオンで入っているか(設定の窓のプレビューを含む今の値)。</summary>
@@ -816,6 +821,8 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     public event EventHandler? ChatSettingsChanged;
 
+    public event EventHandler? MapSettingsChanged;
+
     /// <summary>プラグインのウィジェットの設定が変わった(保存・保存前のプレビュー・破棄・初期化)。</summary>
     public event EventHandler? PluginSettingsChanged;
 
@@ -976,6 +983,9 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
                 : null,
             Chat = WidgetConfigDefaults.SupportsChatSettings(Kind)
                 ? _chat.Clone()
+                : null,
+            Map = WidgetConfigDefaults.SupportsMapSettings(Kind)
+                ? _map.Clone()
                 : null
         };
     }
@@ -1096,6 +1106,12 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         {
             _chat = WidgetConfigDefaults.CloneNormalizedChat(config.Chat);
             ChatSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (WidgetConfigDefaults.SupportsMapSettings(Kind))
+        {
+            _map = WidgetConfigDefaults.CloneNormalizedMap(config.Map);
+            MapSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         if (Kind == WidgetKind.Plugin)
@@ -1283,6 +1299,17 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
         _chat = WidgetConfigDefaults.CloneNormalizedChat(chat);
         ChatSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ApplyMapSettingsPreview(MapWidgetSettingsConfig map)
+    {
+        if (!WidgetConfigDefaults.SupportsMapSettings(Kind))
+        {
+            return;
+        }
+
+        _map = WidgetConfigDefaults.CloneNormalizedMap(map);
+        MapSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyEntityInfoSettingsPreview(EntityInfoWidgetSettingsConfig entityInfo)
@@ -1867,7 +1894,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     ///
     /// <para>
     /// 今の場所が得点を求めている間は得点。交戦中は周りにいる敵(一覧の絞り込みの前)のうち、戦闘状態の敵のアイコンの得点の合計
-    /// (<see cref="EntityListEntry.GetDisplayedScore"/>)、現在は今までに得た得点。
+    /// (<see cref="EntityListEntry.GetCombatScore"/>)、現在は今までに得た得点。
     /// </para>
     ///
     /// <para>
@@ -1881,25 +1908,21 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
         if (_dungeonScore.IsScoreRequested)
         {
-            FooterCombatValueText = EntityListEntry.FormatScore(
-                _nearbyEntities
-                    .Where(entry => entry.IsInCombat)
-                    .Sum(entry => EntityListEntry.GetDisplayedScore(entry, isScoreRequested: true)));
+            FooterCombatValue = EntityListEntry.GetScoreFooterValue(EntityListEntry.GetCombatScore(_nearbyEntities));
             FooterOverallLabel = $"{LocalizationManager.Instance.GetString("EntityList_CurrentScore")}:";
-            FooterOverallValueText = EntityListEntry.FormatScore(_dungeonScore.TotalScore);
+            FooterOverallValue = EntityListEntry.GetScoreFooterValue(_dungeonScore.TotalScore);
             return;
         }
 
-        FooterCombatValueText = FormatEntityCount(visibleEntities.Count(entry => entry.IsInCombat));
+        FooterCombatValue = GetEntityCountFooterValue(visibleEntities.Count(entry => entry.IsInCombat));
         FooterOverallLabel = $"{LocalizationManager.Instance.GetString("ListFooter_Nearby")}:";
-        FooterOverallValueText = FormatEntityCount(visibleEntities.Count);
+        FooterOverallValue = GetEntityCountFooterValue(visibleEntities.Count);
     }
 
-    private static string FormatEntityCount(int count)
+    /// <summary>敵の数(「12体」)を、フッターの数字と単位に分けて返す(エンティティリストとマップ)。</summary>
+    internal static FooterValue GetEntityCountFooterValue(int count)
     {
-        return LocalizationManager.Instance.Format(
-            "EntityList_CountFormat",
-            count.ToString(CultureInfo.InvariantCulture));
+        return FooterValue.FromFormat("EntityList_CountFormat", count.ToString(CultureInfo.InvariantCulture));
     }
 
     /// <summary>
@@ -1909,16 +1932,15 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private void RenderPlayerListFooter(IReadOnlyList<PlayerRosterEntry> visibleRoster)
     {
         FooterCombatLabel = $"{LocalizationManager.Instance.GetString("CombatState_Tip")}:";
-        FooterCombatValueText = FormatPlayerCount(visibleRoster.Count(entry => entry.IsNearby && entry.IsInCombat));
+        FooterCombatValue = GetPlayerCountFooterValue(visibleRoster.Count(entry => entry.IsNearby && entry.IsInCombat));
         FooterOverallLabel = $"{LocalizationManager.Instance.GetString("ListFooter_Nearby")}:";
-        FooterOverallValueText = FormatPlayerCount(visibleRoster.Count(entry => entry.IsNearby));
+        FooterOverallValue = GetPlayerCountFooterValue(visibleRoster.Count(entry => entry.IsNearby));
     }
 
-    private static string FormatPlayerCount(int count)
+    /// <summary>プレイヤーの数(「5人」)を、フッターの数字と単位に分けて返す(プレイヤーリストとマップ)。</summary>
+    internal static FooterValue GetPlayerCountFooterValue(int count)
     {
-        return LocalizationManager.Instance.Format(
-            "PlayerList_CountFormat",
-            count.ToString(CultureInfo.InvariantCulture));
+        return FooterValue.FromFormat("PlayerList_CountFormat", count.ToString(CultureInfo.InvariantCulture));
     }
 
     /// <summary>
@@ -1958,14 +1980,13 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     }
 
     /// <summary>
-    /// 一覧に載せる実体。フィルター「オブジェクト以外」は、さらにプレイヤーに見える HP バーを持つ実体だけを残す
-    /// (名前はあっても HP バーの見えない実体がいる)。
+    /// 一覧に載せる実体(フィルターの決まりは <see cref="EntityListEntry.IsShown"/>)。
     /// </summary>
     private IReadOnlyList<NearbyEntityEntry> GetVisibleNearbyEntities()
     {
-        var hidesObjects = (EntityDisplayMode)_meter.EntityDisplayModeIndex == EntityDisplayMode.HideObjects;
+        var displayMode = (EntityDisplayMode)_meter.EntityDisplayModeIndex;
         var visibleEntities = _nearbyEntities
-            .Where(entry => IsListed(entry) && (!hidesObjects || entry.HasHpBar))
+            .Where(entry => EntityListEntry.IsShown(entry, displayMode))
             .ToArray();
 
         if (!SortsListByName)
@@ -1986,33 +2007,6 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     /// </summary>
     private bool SortsListByName =>
         _meter.ListSortModeIndex == WidgetConfigDefaults.NameListSortModeIndex;
-
-    /// <summary>
-    /// 一覧に載せるか。
-    ///
-    /// <para>
-    /// <c>AttrId</c> が未着(種別IDが 0)の実体は載せる(名前は「未知の敵」。<see cref="EntityListEntry"/>)。
-    /// <c>AttrId</c> は出現の通知でしか届かないので、アプリの起動前から居た実体はずっと種別が分からない。
-    /// 種別IDを UUID の通し番号で代えない(個体の番号なので、表を引くと別のモンスターの名前・判定になる)。
-    /// </para>
-    ///
-    /// <para>
-    /// プレイヤーに見える HP バーを持つ実体は、名前が無くても載せる(名前は「敵」「味方」。<see cref="EntityListEntry"/>)。
-    /// HP バーを持たない実体は、名前があるときだけ載せる。名前は表示と同じ引き方(表示言語、空なら zh-CN)で見る。
-    /// </para>
-    ///
-    /// <para>
-    /// <b>表に行が無い実体は載せる</b>(名前は空欄で、内部ID注記だけ)。行が無いのはアプリの表が古いということで、
-    /// 消すと表の欠けに気付けない。
-    /// </para>
-    /// </summary>
-    private static bool IsListed(NearbyEntityEntry entry)
-    {
-        return entry.EntityId == 0
-            || entry.HasHpBar
-            || !CombatDataCatalog.HasEntityRow(entry.EntityType, entry.EntityId)
-            || CombatDataCatalog.HasEntityName(entry.EntityType, entry.EntityId);
-    }
 
     private void RaisePlayerWindowPresentationChanged()
     {

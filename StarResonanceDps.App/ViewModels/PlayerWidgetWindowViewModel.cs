@@ -148,13 +148,7 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
         }
 
         RenderHeaderText();
-        OnResetToStartup();
         RefreshDataStatus();
-    }
-
-    /// <summary>ログアウトで起動直後の状態へ戻したとき。行が無くても覚えている素性から表示を作る窓だけが上書きする。</summary>
-    protected virtual void OnResetToStartup()
-    {
     }
 
     /// <summary>
@@ -177,12 +171,6 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
 
     /// <summary>最後に確定した相手のUID。名前と対にして保存する。</summary>
     public long LastKnownPlayerUid => _lastKnownPlayerUid;
-
-    /// <summary>最後に確定した相手の NPC の印。</summary>
-    protected bool LastKnownIsNpc => _lastKnownIsNpc;
-
-    /// <summary>最後に確定した相手の職業。</summary>
-    protected int LastKnownProfessionId => _lastKnownProfessionId;
 
     /// <summary>自分を映す窓か。「自分」の指定で開いた窓と、覚えている UID が自分のものの窓。</summary>
     protected bool IsSelfTarget => _requestedCharacterId is null
@@ -222,15 +210,6 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
 
         _lastKnownPlayerUid = playerUid;
         RefreshHeaderText();
-        OnLastKnownPlayerChanged();
-    }
-
-    /// <summary>
-    /// 覚えている相手の素性(名前・UID・NPC の印・職業)を書いたとき。
-    /// 相手が一覧に載る前から素性を表示に使う窓だけが上書きする。
-    /// </summary>
-    protected virtual void OnLastKnownPlayerChanged()
-    {
     }
 
     protected long? SelectedCharacterId => _requestedCharacterId ?? _representedCharacterId;
@@ -495,7 +474,5 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
         {
             SavedTargetInfoResolved?.Invoke(this, EventArgs.Empty);
         }
-
-        OnLastKnownPlayerChanged();
     }
 }

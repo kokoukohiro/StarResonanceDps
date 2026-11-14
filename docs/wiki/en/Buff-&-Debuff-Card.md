@@ -12,7 +12,7 @@ This widget shows one buff or debuff on a player or an enemy, with its name, ico
 - The default item is the first shortcut. With the default settings, it is "Buff Card (Cuisine) - your name".
 - When there is nothing to list, the name field shows only "Buff & Debuff Card". If you click the start button then, the card for the first row of your own Buff List (or Debuff List if there is none) opens. If there is none either, an empty window opens and becomes the card for whatever is applied first.
 - Click a row in the [Buff List](Buff-List) or [Debuff List](Debuff-List), or right-click a row and choose "Buff Card" or "Debuff Card", to open the card for that buff or debuff.
-- You can also open it from the right-click menu of a slot in [Entity Info](Entity-Info) or a row in the [Buff & Debuff Group](Buff-&-Debuff-Group). Clicking a row in the group also opens it.
+- You can also open it from the right-click menu of a slot in [Target Info](Target-Info) or a row in the [Buff & Debuff Group](Buff-&-Debuff-Group). Clicking a row in the group also opens it.
 - A window is opened per pair of target and buff. If a window for the same pair is already open, that window is brought to the front.
 
 ## What it shows

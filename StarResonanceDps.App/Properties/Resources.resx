@@ -1211,6 +1211,9 @@ Wait a moment and copy again.</value>
   <data name="Classes_Boss" xml:space="preserve">
     <value>Boss</value>
   </data>
+  <data name="Classes_Entity" xml:space="preserve">
+    <value>Entity</value>
+  </data>
   <data name="Classes_Unknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
@@ -1751,10 +1754,67 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Revive List</value>
   </data>
   <data name="Widget_EntityInfo" xml:space="preserve">
-    <value>Entity Info</value>
+    <value>Target Info</value>
   </data>
   <data name="Widget_Chat" xml:space="preserve">
     <value>Chat</value>
+  </data>
+  <data name="Widget_Map" xml:space="preserve">
+    <value>Map</value>
+  </data>
+  <data name="Settings_Map_Opacity" xml:space="preserve">
+    <value>Map Opacity</value>
+  </data>
+  <data name="Settings_Map_PlayerFilter" xml:space="preserve">
+    <value>Players</value>
+  </data>
+  <data name="Settings_Map_EntityFilter" xml:space="preserve">
+    <value>Entities</value>
+  </data>
+  <data name="Settings_Map_PlayerName" xml:space="preserve">
+    <value>Player Names</value>
+  </data>
+  <data name="Settings_Map_EntityName" xml:space="preserve">
+    <value>Entity Names</value>
+  </data>
+  <data name="Settings_Map_HideNamesInCombat" xml:space="preserve">
+    <value>Hide Names In Combat</value>
+  </data>
+  <data name="Settings_Map_SimplifyPlayersInCombat" xml:space="preserve">
+    <value>Simplify Players In Combat</value>
+  </data>
+  <data name="Settings_Map_AlwaysSimplifySelf" xml:space="preserve">
+    <value>Always Simplify Self</value>
+  </data>
+  <data name="MapHideNamesTarget_None" xml:space="preserve">
+    <value>Don't Hide</value>
+  </data>
+  <data name="MapInCombatTarget_Players" xml:space="preserve">
+    <value>Players Only</value>
+  </data>
+  <data name="MapInCombatTarget_Entities" xml:space="preserve">
+    <value>Entities Only</value>
+  </data>
+  <data name="MapPlayerNameDisplay_MembersOnly" xml:space="preserve">
+    <value>Show Party Members Only</value>
+  </data>
+  <data name="MapPlayerNameDisplay_NonMembersOnly" xml:space="preserve">
+    <value>Show Non-Party Members</value>
+  </data>
+  <data name="Map_ReturnToCurrentMap" xml:space="preserve">
+    <value>Back to My Map</value>
+  </data>
+  <data name="Map_ClearSharedPosition" xml:space="preserve">
+    <value>Clear Position Marker</value>
+  </data>
+  <data name="EntityInfo_ReturnToTarget" xml:space="preserve">
+    <value>Back to Target</value>
+  </data>
+  <data name="Map_FooterEntities" xml:space="preserve">
+    <value>Entities</value>
+  </data>
+  <data name="Map_FooterPlayers" xml:space="preserve">
+    <value>Players</value>
   </data>
   <data name="Chat_Channel_World" xml:space="preserve">
     <value>World</value>

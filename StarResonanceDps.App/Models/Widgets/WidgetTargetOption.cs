@@ -35,7 +35,9 @@ public sealed class WidgetTargetOption
 {
     public required WidgetTargetOptionKind Kind { get; init; }
 
-    /// <summary>人: 自分(相手の指定なしで開く)。バフ: 相手がいつも自分のカード(ショートカット・「指定なし」とそれが決まった項目)。</summary>
+    /// <summary>
+    /// 人: 自分(相手の指定なしで開く)。バフ: 相手がいつも自分のカード(ショートカット・「指定なし」とそれが決まった項目)。
+    /// </summary>
     public bool IsSelf { get; init; }
 
     /// <summary>人: 相手の UID。自分なら分かっていれば自分のもの(0 はまだ分からない)。チャット: プライベートトークの相手の UID(ほかのチャンネルは 0)。</summary>
@@ -44,10 +46,10 @@ public sealed class WidgetTargetOption
     /// <summary>チャット: チャンネル。</summary>
     public ChitChatChannelType ChatChannel { get; init; }
 
-    /// <summary>敵: 実体の値。実体を捕まえていない窓の項目と、敵を選んでいない項目は null。</summary>
+    /// <summary>敵: 実体の値。実体を捕まえていない窓の項目は null。</summary>
     public EntityTargetInfo? Entity { get; init; }
 
-    /// <summary>敵: 実体を捕まえていない窓(復元直後)の種別ID。0 は敵を選んでいない(<see cref="IsUnselectedEntity"/>)。</summary>
+    /// <summary>敵: 実体を捕まえていない窓(復元直後)の種別ID。</summary>
     public long UnacquiredEntityId { get; init; }
 
     /// <summary>敵: 実体を捕まえていない窓の、実体の種類。種別IDと組で比べる。</summary>
@@ -206,18 +208,6 @@ public sealed class WidgetTargetOption
 
     /// <summary>バフ・デバフカードの「指定なし」か(<see cref="CreateUnspecifiedBuffCard"/>)。</summary>
     public bool IsUnspecifiedBuffCard => Kind == WidgetTargetOptionKind.Buff && BuffKey is null && BuffGroup == BuffGroup.None;
-
-    /// <summary>エンティティ情報で、敵を選んでいない項目(エンティティリストに敵がいないときの既定)。開く窓は敵を待つ空の窓。</summary>
-    public static WidgetTargetOption CreateUnselectedEntity()
-    {
-        return new WidgetTargetOption
-        {
-            Kind = WidgetTargetOptionKind.Entity
-        };
-    }
-
-    /// <summary>敵を選んでいない項目か(<see cref="CreateUnselectedEntity"/>)。</summary>
-    public bool IsUnselectedEntity => Kind == WidgetTargetOptionKind.Entity && Entity is null && UnacquiredEntityId == 0;
 
     /// <summary>プラグインのウィジェットで、相手を選んでいない項目(相手の一覧を読む前と、一覧が空のときの既定)。開く窓は本体が出す空の窓。</summary>
     public static WidgetTargetOption CreateUnselectedPlugin()

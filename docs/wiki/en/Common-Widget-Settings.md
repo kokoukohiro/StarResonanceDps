@@ -5,11 +5,11 @@ These are the window rules and the settings window shared by all widgets. The se
 ## Widget windows
 
 - Header: The top row of the window. From the left, it has the status circle, the title, and the close button (×). Some widgets have action buttons (such as "Benchmark" in the DPS Meter) to the left of the close button.
-- Footer: The bottom row of the window. The Player List, Entity List, DPS Meter, HPS Meter, Threat Meter, Break Meter, and Damage Taken Log have one.
+- Footer: The bottom row of the window. The Player List, Entity List, Map, DPS Meter, HPS Meter, Threat Meter, Break Meter, and Damage Taken Log have one.
 - To move a window: Drag it by the area around the title in the header.
 - To resize a window: Drag its edge.
 - The position and size are saved, and the window appears in the same place the next time it opens. The size of Player Info and the height of Equipment Info are not saved; they open at the default size every time.
-- In Status, Buff & Debuff Group, Damage Details, Healing Details, Damage Taken Details, and Entity Info, the height of the window changes to fit the content when the number of rows changes.
+- In Status, Buff & Debuff Group, Damage Details, Healing Details, Damage Taken Details, and Target Info, the height of the window changes to fit the content when the number of rows changes.
 - Click the close button to close that window. A widget whose windows are all closed is stopped.
 
 ## Status circle

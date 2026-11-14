@@ -323,6 +323,15 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding EntityInfoSettings.ClassColorSectionTitle}" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="MapClassColorsNavButton"
+                                Click="MapClassColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasMapDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding MapSettings.ClassColorSectionTitle}" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="ChatTextColorsNavButton"
                                 Click="ChatTextColorsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
@@ -460,6 +469,15 @@
                                         <ContentControl.ContentTemplate>
                                             <DataTemplate>
                                                 <widgetSettingsViews:EntityInfoWidgetDisplaySettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
+
+                                    <ContentControl Content="{Binding MapSettings}"
+                                                    Visibility="{Binding HasMapDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <widgetSettingsViews:MapWidgetDisplaySettingsView />
                                             </DataTemplate>
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
@@ -814,6 +832,16 @@
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
                                             <widgetSettingsViews:EntityInfoClassColorSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="MapClassColorsHost"
+                                                Content="{Binding MapSettings}"
+                                                Visibility="{Binding HasMapDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:MapClassColorSettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>

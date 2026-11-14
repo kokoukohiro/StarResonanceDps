@@ -39,13 +39,13 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
     private string _partyMetricLabel = string.Empty;
 
     [ObservableProperty]
-    private string _partyMetricValueText = string.Empty;
+    private FooterValue _partyMetricValue = FooterValue.Empty;
 
     [ObservableProperty]
     private string _totalLabel = string.Empty;
 
     [ObservableProperty]
-    private string _totalValueText = string.Empty;
+    private FooterValue _totalValue = FooterValue.Empty;
 
     [ObservableProperty]
     private bool _isBenchmarkActive;
@@ -198,9 +198,9 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
             _ => throw new InvalidOperationException($"No footer label for the meter kind {_kind}.")
         };
         PartyMetricLabel = $"{LocalizationManager.Instance.GetString(partyMetricLabelKey)}:";
-        PartyMetricValueText = MeterNumberFormatter.Format(snapshot.ValuePerSecond, numberDisplayFormatIndex);
+        PartyMetricValue = MeterNumberFormatter.FormatParts(snapshot.ValuePerSecond, numberDisplayFormatIndex);
         TotalLabel = $"{LocalizationManager.Instance.GetString("Meter_Total")}:";
-        TotalValueText = MeterNumberFormatter.Format(snapshot.TotalValue, numberDisplayFormatIndex);
+        TotalValue = MeterNumberFormatter.FormatParts(snapshot.TotalValue, numberDisplayFormatIndex);
 
         var activeCharacterIds = snapshot.Players
             .Select(player => player.CharacterId)

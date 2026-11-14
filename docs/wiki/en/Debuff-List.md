@@ -5,7 +5,7 @@ This widget lists the debuffs on one player or one enemy, one per row, with the 
 ## How to open
 
 - On the "Debuff List" card in "[Widgets](Widgets)", choose the target from the drop-down list in the name field and click the start button. The order is the same as in the Buff List (the default is yourself).
-- You can also open it by right-clicking a row in the [Player List](Player-List), the [Revive List](Revive-List), or the [Entity List](Entity-List) and choosing "Debuff List". It also opens when you click a debuff slot in [Entity Info](Entity-Info).
+- You can also open it by right-clicking a row in the [Player List](Player-List), the [Revive List](Revive-List), or the [Entity List](Entity-List) and choosing "Debuff List". It also opens when you click a debuff slot in [Target Info](Target-Info).
 - A window is opened per target. If a window for the same target is already open, that window is brought to the front.
 
 ## What it shows

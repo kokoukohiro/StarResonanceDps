@@ -1212,6 +1212,9 @@
   <data name="Classes_Boss" xml:space="preserve">
     <value>首领</value>
   </data>
+  <data name="Classes_Entity" xml:space="preserve">
+    <value>实体</value>
+  </data>
   <data name="Classes_Unknown" xml:space="preserve">
     <value>未知职业</value>
   </data>
@@ -1752,10 +1755,67 @@
     <value>复活列表</value>
   </data>
   <data name="Widget_EntityInfo" xml:space="preserve">
-    <value>实体信息</value>
+    <value>目标信息</value>
   </data>
   <data name="Widget_Chat" xml:space="preserve">
     <value>聊天</value>
+  </data>
+  <data name="Widget_Map" xml:space="preserve">
+    <value>地图</value>
+  </data>
+  <data name="Settings_Map_Opacity" xml:space="preserve">
+    <value>地图不透明度</value>
+  </data>
+  <data name="Settings_Map_PlayerFilter" xml:space="preserve">
+    <value>玩家</value>
+  </data>
+  <data name="Settings_Map_EntityFilter" xml:space="preserve">
+    <value>实体</value>
+  </data>
+  <data name="Settings_Map_PlayerName" xml:space="preserve">
+    <value>玩家名称</value>
+  </data>
+  <data name="Settings_Map_EntityName" xml:space="preserve">
+    <value>实体名称</value>
+  </data>
+  <data name="Settings_Map_HideNamesInCombat" xml:space="preserve">
+    <value>交战中隐藏名称</value>
+  </data>
+  <data name="Settings_Map_SimplifyPlayersInCombat" xml:space="preserve">
+    <value>简化显示交战中玩家</value>
+  </data>
+  <data name="Settings_Map_AlwaysSimplifySelf" xml:space="preserve">
+    <value>始终简化显示自己</value>
+  </data>
+  <data name="MapHideNamesTarget_None" xml:space="preserve">
+    <value>不隐藏</value>
+  </data>
+  <data name="MapInCombatTarget_Players" xml:space="preserve">
+    <value>仅玩家</value>
+  </data>
+  <data name="MapInCombatTarget_Entities" xml:space="preserve">
+    <value>仅实体</value>
+  </data>
+  <data name="MapPlayerNameDisplay_MembersOnly" xml:space="preserve">
+    <value>仅显示队伍成员</value>
+  </data>
+  <data name="MapPlayerNameDisplay_NonMembersOnly" xml:space="preserve">
+    <value>显示非队伍成员</value>
+  </data>
+  <data name="Map_ReturnToCurrentMap" xml:space="preserve">
+    <value>返回自己所在的地图</value>
+  </data>
+  <data name="Map_ClearSharedPosition" xml:space="preserve">
+    <value>清除位置标记</value>
+  </data>
+  <data name="EntityInfo_ReturnToTarget" xml:space="preserve">
+    <value>返回目标</value>
+  </data>
+  <data name="Map_FooterEntities" xml:space="preserve">
+    <value>实体</value>
+  </data>
+  <data name="Map_FooterPlayers" xml:space="preserve">
+    <value>玩家</value>
   </data>
   <data name="Chat_Channel_World" xml:space="preserve">
     <value>世界</value>

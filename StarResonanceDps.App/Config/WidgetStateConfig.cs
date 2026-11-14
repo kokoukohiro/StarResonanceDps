@@ -50,6 +50,8 @@ public sealed class WidgetConfig
 
     public ChatWidgetSettingsConfig? Chat { get; set; }
 
+    public MapWidgetSettingsConfig? Map { get; set; }
+
     /// <summary>プラグインのウィジェットの設定(プラグインが定義した設定の値)。プラグインのウィジェットだけ持つ。</summary>
     public PluginWidgetSettingsConfig? Plugin { get; set; }
 
@@ -98,6 +100,7 @@ public sealed class WidgetConfig
             DamageTakenLog = DamageTakenLog?.Clone(),
             EntityInfo = EntityInfo?.Clone(),
             Chat = Chat?.Clone(),
+            Map = Map?.Clone(),
             Plugin = Plugin?.Clone(),
             PlayerStatusRowOrder = PlayerStatusRowOrder is null ? null : [.. PlayerStatusRowOrder],
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList()
@@ -465,7 +468,8 @@ public sealed class BuffDebuffGroupWidgetSettingsConfig
 ///
 /// <para>
 /// プレイヤーとエンティティリストの実体(モンスター)とチャットのチャンネルとプラグインの相手を1つの型で表す。
-/// <see cref="PluginTargetId"/> があればプラグインの相手、<see cref="ChatChannel"/> があればチャット、<see cref="EntityId"/> が 0 以外なら実体、そうでなければプレイヤー
+/// <see cref="PluginTargetId"/> があればプラグインの相手、<see cref="ChatChannel"/> があればチャット、
+/// <see cref="EntityId"/> が 0 以外なら実体、そうでなければプレイヤー
 /// (エンティティ情報にプレイヤーの窓は無いので、エンティティ情報でそうなら敵を待つ空の窓)。
 /// </para>
 /// </summary>
@@ -970,6 +974,68 @@ public sealed class ChatWidgetSettingsConfig
     }
 }
 
+/// <summary>
+/// マップの設定。印のフィルター(プレイヤーとエンティティ)、印の名前を出す相手(プレイヤーとエンティティ)、地図の画像の不透明度と、
+/// アイコンカラー(エンティティ全部の1色とプレイヤーのクラス。鍵は <see cref="WidgetConfigDefaults.MapClassColorKeys"/>)。
+/// </summary>
+public sealed class MapWidgetSettingsConfig
+{
+    /// <summary>プレイヤーの印のフィルター(<c>PartyDisplayMode</c>)。値と決まりはプレイヤーリストのフィルターと同じ。</summary>
+    public int PartyDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultPartyDisplayModeIndex;
+
+    /// <summary>実体の印のフィルター(<c>EntityDisplayMode</c>)。値と決まりはエンティティリストのフィルターと同じ。</summary>
+    public int EntityDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultEntityDisplayModeIndex;
+
+    /// <summary>名前を出すプレイヤーの印(<c>PartyDisplayMode</c>)。値と決まりはフィルター「プレイヤー」と同じ。出さない印はアイコンだけ。</summary>
+    public int PlayerNamePartyDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultMapPlayerNamePartyDisplayModeIndex;
+
+    /// <summary>実体の印の名前を出すか(0 表示 / 1 非表示)。出さない印はアイコンだけ。</summary>
+    public int EntityNameDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultMapEntityNameDisplayModeIndex;
+
+    /// <summary>戦闘状態の相手の印の名前を出さない対象(0 すべて / 1 プレイヤーのみ / 2 エンティティのみ / 3 非表示しない)。</summary>
+    public int HideNamesInCombatModeIndex { get; set; } = WidgetConfigDefaults.DefaultMapHideNamesInCombatModeIndex;
+
+    /// <summary>
+    /// 戦闘状態のプレイヤーの印を簡略化するか(小さい円で、自分は向きを指す矢先)。偽ならクラスアイコンのまま。
+    /// 戦闘状態でないプレイヤーはいつもクラスアイコン(自分は <see cref="AlwaysSimplifiesSelf"/> も見る)。
+    /// </summary>
+    public bool SimplifiesPlayersInCombat { get; set; } = WidgetConfigDefaults.DefaultMapSimplifiesPlayersInCombat;
+
+    /// <summary>自分の印を、戦闘状態に関係なくいつも簡略化するか(向きを指す矢先)。</summary>
+    public bool AlwaysSimplifiesSelf { get; set; } = WidgetConfigDefaults.DefaultMapAlwaysSimplifiesSelf;
+
+    /// <summary>地図の濃さ(%)。窓の不透明度に関係なく、地図はこの濃さで見える。印(アイコンと名前)には掛けない。</summary>
+    public int MapOpacity { get; set; } = WidgetConfigDefaults.DefaultMapOpacity;
+
+    public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.Map);
+
+    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.Map);
+
+    public MapWidgetSettingsConfig Clone()
+    {
+        return new MapWidgetSettingsConfig
+        {
+            PartyDisplayModeIndex = PartyDisplayModeIndex,
+            EntityDisplayModeIndex = EntityDisplayModeIndex,
+            PlayerNamePartyDisplayModeIndex = PlayerNamePartyDisplayModeIndex,
+            EntityNameDisplayModeIndex = EntityNameDisplayModeIndex,
+            HideNamesInCombatModeIndex = HideNamesInCombatModeIndex,
+            SimplifiesPlayersInCombat = SimplifiesPlayersInCombat,
+            AlwaysSimplifiesSelf = AlwaysSimplifiesSelf,
+            MapOpacity = MapOpacity,
+            ClassColorIndexes = ClassColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.Map)
+                : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
+            ClassColorPalettes = ClassColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.Map)
+                : ClassColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}
+
 public sealed class PlayerStatusWidgetSettingsConfig
 {
     /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultHideInactiveStatusEffects"/>。</remarks>
@@ -1137,6 +1203,8 @@ public static class WidgetConfigDefaults
     private const double EntityInfoInitialWindowHeight = 240d;
     private const double ChatInitialWindowWidth = 360d;
     private const double ChatInitialWindowHeight = 400d;
+    private const double MapInitialWindowWidth = 400d;
+    private const double MapInitialWindowHeight = 400d;
     private const double SkillDetailInitialWindowWidth = 520d;
     private const double SkillDetailInitialWindowHeight = 460d;
     private const double HateSkillDetailInitialWindowWidth = 520d;
@@ -1264,6 +1332,16 @@ public static class WidgetConfigDefaults
         "Monster",
         "Elite",
         "Boss",
+        .. ClassColorKeys.Where(key => key != "Unknown"),
+        "Unknown"
+    ];
+
+    /// <summary>
+    /// マップのアイコンカラーの鍵。エンティティ全部を塗る1行、プレイヤーのクラス、最後に不明(クラスの分からないプレイヤー)。
+    /// </summary>
+    public static readonly string[] MapClassColorKeys =
+    [
+        MapEntityColorKey,
         .. ClassColorKeys.Where(key => key != "Unknown"),
         "Unknown"
     ];
@@ -1510,6 +1588,39 @@ public static class WidgetConfigDefaults
     /// <summary>エンティティ情報の「同種バフの表示」の既定(まとめない)。</summary>
     public const int DefaultEntityInfoSameBuffGroupingIndex = EntityInfoSameBuffUngroupedIndex;
 
+    public const int MinMapOpacity = 0;
+    public const int MaxMapOpacity = 100;
+
+    /// <summary>マップの「マップの不透明度」の既定。</summary>
+    public const int DefaultMapOpacity = 100;
+
+    /// <summary>マップの「プレイヤー名」の既定(すべて表示)。</summary>
+    public const int DefaultMapPlayerNamePartyDisplayModeIndex = (int)PartyDisplayMode.All;
+
+    public const int MapEntityNameShownIndex = 0;
+    public const int MapEntityNameHiddenIndex = 1;
+
+    /// <summary>マップの「エンティティ名」の既定(非表示)。</summary>
+    public const int DefaultMapEntityNameDisplayModeIndex = MapEntityNameHiddenIndex;
+
+    /// <summary>マップの「交戦中の名前非表示」の対象。最後が「非表示しない」。</summary>
+    public const int MapInCombatTargetAllIndex = 0;
+    public const int MapInCombatTargetPlayersIndex = 1;
+    public const int MapInCombatTargetEntitiesIndex = 2;
+    public const int MapInCombatTargetNoneIndex = 3;
+
+    /// <summary>マップの「交戦中の名前非表示」の既定(すべて)。</summary>
+    public const int DefaultMapHideNamesInCombatModeIndex = MapInCombatTargetAllIndex;
+
+    /// <summary>マップの「交戦中のプレイヤーを簡略化表示」の既定(オン)。</summary>
+    public const bool DefaultMapSimplifiesPlayersInCombat = true;
+
+    /// <summary>マップの「自分を常に簡略化表示」の既定(オフ)。</summary>
+    public const bool DefaultMapAlwaysSimplifiesSelf = false;
+
+    /// <summary>マップのアイコンカラーの、エンティティ全部を塗る行の鍵(アイコンはボスの印の絵 <c>Icon.Profession.Entity</c>)。</summary>
+    public const string MapEntityColorKey = "Entity";
+
     /// <summary>バフ・デバフ一覧の行のバフ名の書式の既定。付与者が出ないときは空になった括弧ごと消える。</summary>
     public const string DefaultBuffListBuffInfoFormatString = "{BuffName}({CasterName})";
 
@@ -1659,6 +1770,9 @@ public static class WidgetConfigDefaults
         ["DamageMagical"] = ["#A369E7", "#674292"],
         ["DamageNormal"] = ["#B8B8B8", "#747474"]
     };
+
+    /// <summary>マップのアイコンカラーの「エンティティ」の既定の色。2枠目はエンティティリストの狙われる印の色(<c>HateBadgeImages</c>)。</summary>
+    private static readonly string[] MapDefaultEntityColorHexes = ["#FFFFFF", "#FF7D4B"];
 
     private static readonly Dictionary<string, string[]> EntityListDefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -1893,6 +2007,12 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.Chat;
     }
 
+    /// <summary>マップの設定(マップの不透明度・アイコンカラー)を持つ種別か。</summary>
+    public static bool SupportsMapSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.Map;
+    }
+
     /// <summary>自分だけを出す、1枚だけ開くプレイヤーの窓の種別か(ステータス詳細・バフ・デバフグループ)。</summary>
     public static bool IsSelfOnlyPlayerWindowKind(WidgetKind kind)
     {
@@ -1924,7 +2044,6 @@ public static class WidgetConfigDefaults
             or WidgetKind.BreakSkillDetail
             or WidgetKind.BreakGraph
             or WidgetKind.DamageTakenSummary
-            or WidgetKind.EntityInfo
             or WidgetKind.Chat;
     }
 
@@ -1952,6 +2071,7 @@ public static class WidgetConfigDefaults
             DamageTakenLog = SupportsDamageTakenLogSettings(kind) ? CreateDamageTakenLogSettings() : null,
             EntityInfo = SupportsEntityInfoSettings(kind) ? CreateEntityInfoSettings() : null,
             Chat = SupportsChatSettings(kind) ? CreateChatSettings() : null,
+            Map = SupportsMapSettings(kind) ? CreateMapSettings() : null,
             Plugin = kind == WidgetKind.Plugin ? new PluginWidgetSettingsConfig() : null
         };
     }
@@ -2513,6 +2633,58 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
+    /// <summary>マップの設定の既定。</summary>
+    public static MapWidgetSettingsConfig CreateMapSettings()
+    {
+        return new MapWidgetSettingsConfig
+        {
+            PartyDisplayModeIndex = DefaultPartyDisplayModeIndex,
+            EntityDisplayModeIndex = DefaultEntityDisplayModeIndex,
+            PlayerNamePartyDisplayModeIndex = DefaultMapPlayerNamePartyDisplayModeIndex,
+            EntityNameDisplayModeIndex = DefaultMapEntityNameDisplayModeIndex,
+            HideNamesInCombatModeIndex = DefaultMapHideNamesInCombatModeIndex,
+            SimplifiesPlayersInCombat = DefaultMapSimplifiesPlayersInCombat,
+            AlwaysSimplifiesSelf = DefaultMapAlwaysSimplifiesSelf,
+            MapOpacity = DefaultMapOpacity,
+            ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.Map),
+            ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.Map)
+        };
+    }
+
+    /// <summary>
+    /// 保存値を正規化して写す。フィルター・名前を出す相手・不透明度は範囲に収め、クラスの色は一覧に無い鍵を捨てて足りない鍵を既定で埋める。
+    /// </summary>
+    public static MapWidgetSettingsConfig CloneNormalizedMap(MapWidgetSettingsConfig? map)
+    {
+        var normalized = (map ?? CreateMapSettings()).Clone();
+        normalized.PartyDisplayModeIndex = Math.Clamp(
+            normalized.PartyDisplayModeIndex,
+            DefaultPartyDisplayModeIndex,
+            MaxPartyDisplayModeIndex);
+        normalized.EntityDisplayModeIndex = Math.Clamp(
+            normalized.EntityDisplayModeIndex,
+            MinEntityDisplayModeIndex,
+            MaxEntityDisplayModeIndex);
+        normalized.PlayerNamePartyDisplayModeIndex = Math.Clamp(
+            normalized.PlayerNamePartyDisplayModeIndex,
+            DefaultPartyDisplayModeIndex,
+            MaxPartyDisplayModeIndex);
+        normalized.EntityNameDisplayModeIndex = Math.Clamp(
+            normalized.EntityNameDisplayModeIndex,
+            MapEntityNameShownIndex,
+            MapEntityNameHiddenIndex);
+        normalized.HideNamesInCombatModeIndex = Math.Clamp(
+            normalized.HideNamesInCombatModeIndex,
+            MapInCombatTargetAllIndex,
+            MapInCombatTargetNoneIndex);
+        normalized.MapOpacity = Math.Clamp(normalized.MapOpacity, MinMapOpacity, MaxMapOpacity);
+        (normalized.ClassColorIndexes, normalized.ClassColorPalettes) = NormalizeClassColors(
+            WidgetKind.Map,
+            normalized.ClassColorIndexes,
+            normalized.ClassColorPalettes);
+        return normalized;
+    }
+
     private static WidgetWindowConfig CreateDefaultWindowConfig(WidgetKind kind)
     {
         return kind switch
@@ -2576,6 +2748,11 @@ public static class WidgetConfigDefaults
             {
                 Width = ChatInitialWindowWidth,
                 Height = ChatInitialWindowHeight
+            },
+            WidgetKind.Map => new WidgetWindowConfig
+            {
+                Width = MapInitialWindowWidth,
+                Height = MapInitialWindowHeight
             },
             WidgetKind.DamageTakenLog => new WidgetWindowConfig
             {
@@ -2975,6 +3152,7 @@ public static class WidgetConfigDefaults
         return kind switch
         {
             WidgetKind.EntityList or WidgetKind.EntityInfo => EntityClassColorKeys,
+            WidgetKind.Map => MapClassColorKeys,
             WidgetKind.PlayerList => PlayerListClassColorKeys,
             WidgetKind.PlayerInfo => PlayerInfoClassColorKeys,
             _ => ClassColorKeys
@@ -2983,11 +3161,13 @@ public static class WidgetConfigDefaults
 
     /// <summary>
     /// クラスカラーで最初に選ばれている枠。プレイヤーリストの潜在心相晶(不明を含む)と、
-    /// プレイヤー情報の潜在心相晶(無効を含む)とシーズンだけ2枠目。
+    /// プレイヤー情報の潜在心相晶(無効を含む)とシーズンと、マップのエンティティだけ2枠目。
     /// </summary>
     public static int GetDefaultClassColorIndex(WidgetKind kind, string key)
     {
-        return (kind == WidgetKind.PlayerList
+        return (kind == WidgetKind.Map
+                && string.Equals(key, MapEntityColorKey, StringComparison.OrdinalIgnoreCase))
+            || (kind == WidgetKind.PlayerList
                 && PlayerListDefaultSeasonTalentColorHexes.ContainsKey(key))
             || (kind == WidgetKind.PlayerInfo
                 && (PlayerListDefaultSeasonTalentColorHexes.ContainsKey(key)
@@ -3245,13 +3425,18 @@ public static class WidgetConfigDefaults
             return [.. seasonTalentColors];
         }
 
+        if (kind == WidgetKind.Map && string.Equals(key, MapEntityColorKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return [.. MapDefaultEntityColorHexes];
+        }
+
         var source = kind switch
         {
             // タイムライン・プレイヤー情報・蘇生リスト・被ダメログのクラスアイコンは、プレイヤーリストと同じ既定の色で始める。
             WidgetKind.PlayerList or WidgetKind.Timeline or WidgetKind.PlayerInfo or WidgetKind.ReviveList or WidgetKind.DamageTakenLog
                 => PlayerListDefaultClassColorHexes,
-            // エンティティリスト・エンティティ情報のプレイヤーのクラスの行(ヘイトの枠)は、プレイヤーリストと同じ既定の色で始める。
-            WidgetKind.EntityList or WidgetKind.EntityInfo => EntityListDefaultClassColorHexes.ContainsKey(key)
+            // エンティティリスト・エンティティ情報・マップのプレイヤーのクラスの行は、プレイヤーリストと同じ既定の色で始める(不明はエンティティリストの色)。
+            WidgetKind.EntityList or WidgetKind.EntityInfo or WidgetKind.Map => EntityListDefaultClassColorHexes.ContainsKey(key)
                 ? EntityListDefaultClassColorHexes
                 : PlayerListDefaultClassColorHexes,
             WidgetKind.HpsMeter => HpsMeterDefaultClassColorHexes,
@@ -3381,6 +3566,9 @@ public static class WidgetConfigDefaults
         config.Chat = SupportsChatSettings(kind)
             ? CloneNormalizedChat(config.Chat)
             : null;
+        config.Map = SupportsMapSettings(kind)
+            ? CloneNormalizedMap(config.Map)
+            : null;
         config.Plugin = kind == WidgetKind.Plugin
             ? CloneNormalizedPlugin(config.Plugin)
             : null;
@@ -3447,6 +3635,10 @@ public static class WidgetConfigDefaults
             case WidgetKind.Chat:
                 config.Window.Width ??= ChatInitialWindowWidth;
                 config.Window.Height ??= ChatInitialWindowHeight;
+                break;
+            case WidgetKind.Map:
+                config.Window.Width ??= MapInitialWindowWidth;
+                config.Window.Height ??= MapInitialWindowHeight;
                 break;
             case WidgetKind.DamageTakenLog:
                 config.Window.Width ??= DamageTakenLogInitialWindowWidth;

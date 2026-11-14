@@ -154,6 +154,15 @@ public static class CombatDataCatalog
         FrozenDictionary<(int ProfessionId, int SubProfessionId), TalentTreeDefinition>.Empty;
 
     /// <summary>
+    /// シーンの番号 → 地図。<c>Data/Generated/Maps.json</c>。
+    /// 同じ名前の地図の画像はアプリに1枚しか無いので、地図の表もサーバーで分けない(画像と範囲は同じ表のものを組で使う)。
+    /// </summary>
+    private static FrozenDictionary<int, SceneMapDefinition> _sceneMaps = FrozenDictionary<int, SceneMapDefinition>.Empty;
+
+    /// <summary>エリアの番号 → 階層。階層が 0 でないエリアだけ。<c>Data/Generated/Maps.json</c>。</summary>
+    private static FrozenDictionary<int, int> _sceneAreaLayers = FrozenDictionary<int, int>.Empty;
+
+    /// <summary>
     /// バフを付けないアビリティの節の技の置き換えに出てくる技(元の技と置き換え後の技)→ 元の技。両方のサーバーの木から作る。
     /// ほかのプレイヤーがその節を取っているかを、最後に使った技で決めるのに使う。
     /// </summary>
@@ -447,6 +456,8 @@ public static class CombatDataCatalog
 
     private static string RootBuffsPath => Path.Combine(CombatRuntimePaths.GeneratedDirectory, "RootBuffs.json");
 
+    private static string SceneMapsPath => Path.Combine(CombatRuntimePaths.GeneratedDirectory, "Maps.json");
+
     /// <summary>
     /// <see cref="Load"/> が読むファイルを、先に解き始める。読む側と同じパスと型で始める
     /// (食い違うと、受け取る側がエラーログを出してその場で読む)。
@@ -470,6 +481,7 @@ public static class CombatDataCatalog
         reads.Start<Dictionary<string, DbmTableRow>>(DbmTablePath);
         reads.Start<EquipmentFile>(EquipmentsPath);
         reads.Start<RootBuffFile>(RootBuffsPath);
+        reads.Start<SceneMapFile>(SceneMapsPath);
     }
 
     /// <summary>
@@ -502,6 +514,7 @@ public static class CombatDataCatalog
             _moduleEffectNames = LoadLocalizedText(reads, "ModuleEffectNames", out _);
             _talentNames = LoadLocalizedText(reads, "TalentNames", out _);
             LoadRootBuffs(reads);
+            LoadSceneMaps(reads);
             _imagineSkillIdByPassiveRoot = BuildImagineSkillIdByPassiveRoot();
             _seasonTalentNames = LoadLocalizedText(reads, "SeasonTalentNames", out var seasonTalentRootBuffIds);
             _seasonTalentRootBuffIds = seasonTalentRootBuffIds;
@@ -830,6 +843,22 @@ public static class CombatDataCatalog
         return items.TryGetValue(itemId, out var item) && item.BuffId > 0
             ? AppendInternalId(name, InternalIdDisplayMode.BuffOnly, item.BuffId)
             : name;
+    }
+
+    /// <summary>
+    /// シーンの地図(<c>Maps.json</c>)。サーバーでは分けない。地図の無いシーン(表に無い番号を含む)なら <c>null</c>。
+    /// </summary>
+    public static SceneMapDefinition? GetSceneMap(int sceneId)
+    {
+        return _sceneMaps.TryGetValue(sceneId, out var map) ? map : null;
+    }
+
+    /// <summary>
+    /// エリアの階層(<c>Maps.json</c> の <c>AreaLayers</c>)。地上は 0 で、表に無いエリア(届いていない 0 を含む)も 0。
+    /// </summary>
+    public static int GetSceneAreaLayer(int sceneAreaId)
+    {
+        return _sceneAreaLayers.TryGetValue(sceneAreaId, out var layer) ? layer : 0;
     }
 
     /// <summary>因子のアイテムの絵の全体のパス(表の値のまま)。そのサーバーの表に無いアイテムは空。</summary>
@@ -2888,6 +2917,120 @@ public static class CombatDataCatalog
     }
 
     /// <summary>
+    /// 地図の表 <c>Data/Generated/Maps.json</c> を読む。<c>DataTools/Core/gen_maps.py</c> が生成する。
+    ///
+    /// <para>
+    /// ファイルが無い・形が合わないときはエラーログを出して全部空のまま続ける(マップは地図の画像を出さない)。
+    /// 読めたところまでで続けることはしない。
+    /// </para>
+    /// </summary>
+    private static void LoadSceneMaps(JsonDataFileReads reads)
+    {
+        const string relativePath = "Generated/Maps.json";
+        var path = SceneMapsPath;
+
+        FrozenDictionary<int, SceneMapDefinition> sceneMaps;
+        FrozenDictionary<int, int> areaLayers;
+        try
+        {
+            // 解けなかったときの例外は受け取るときに出るので、受け取りもこの try の中。
+            if (!reads.TryTake<SceneMapFile>(path, out var loadedFile))
+            {
+                Log.Error("{FileName} is missing. Map images cannot be shown path={Path}", relativePath, path);
+                return;
+            }
+
+            var file = loadedFile
+                ?? throw new InvalidDataException("the file is empty");
+            (sceneMaps, areaLayers) = ReadSceneMaps(file);
+        }
+        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            Log.Error(ex, "{FileName} could not be read. Map images cannot be shown path={Path}", relativePath, path);
+            return;
+        }
+
+        _sceneMaps = sceneMaps;
+        _sceneAreaLayers = areaLayers;
+        Log.Information(
+            "Loaded {FileName}: {Scenes} scenes with a map / {Areas} areas on another layer",
+            relativePath, sceneMaps.Count, areaLayers.Count);
+    }
+
+    /// <summary>
+    /// 地図の表を読む。地図は幅が正で画像の名前を持ち、階層の画像は階層が 0 でなく重ならず、
+    /// シーンは表にある地図を指し、エリアの階層は 0 でない。合わなければ形の誤りとして止める。
+    /// </summary>
+    private static (FrozenDictionary<int, SceneMapDefinition> SceneMaps, FrozenDictionary<int, int> AreaLayers) ReadSceneMaps(
+        SceneMapFile source)
+    {
+        var maps = new Dictionary<string, SceneMapDefinition>(source.Maps.Count, StringComparer.Ordinal);
+        foreach (var (key, entry) in source.Maps)
+        {
+            var itemPath = $"Maps[{key}]";
+            if (entry is null)
+            {
+                throw new InvalidDataException($"{itemPath} is null");
+            }
+
+            if (!(entry.Width > 0d) || !(entry.Depth > 0d))
+            {
+                throw new InvalidDataException($"{itemPath} has an invalid size {entry.Width} x {entry.Depth}");
+            }
+
+            if (string.IsNullOrWhiteSpace(entry.Image.File))
+            {
+                throw new InvalidDataException($"{itemPath} has no image file name");
+            }
+
+            var layerImageNames = new Dictionary<int, string>(entry.Layers.Count);
+            for (var index = 0; index < entry.Layers.Count; index++)
+            {
+                var layer = entry.Layers[index] ?? throw new InvalidDataException($"{itemPath}.Layers[{index}] is null");
+                if (layer.Layer == 0 || string.IsNullOrWhiteSpace(layer.File) || !layerImageNames.TryAdd(layer.Layer, layer.File))
+                {
+                    throw new InvalidDataException($"{itemPath}.Layers[{index}] has an invalid layer {layer.Layer} / file {layer.File}");
+                }
+            }
+
+            maps.Add(key, new SceneMapDefinition(
+                key,
+                entry.X0,
+                entry.Z0,
+                entry.Width,
+                entry.Depth,
+                entry.Image.File,
+                layerImageNames.ToFrozenDictionary()));
+        }
+
+        var sceneMaps = new Dictionary<int, SceneMapDefinition>(source.Scenes.Count);
+        foreach (var (sceneKey, mapKey) in source.Scenes)
+        {
+            if (!int.TryParse(sceneKey, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var sceneId)
+                || !maps.TryGetValue(mapKey, out var map))
+            {
+                throw new InvalidDataException($"Scenes[{sceneKey}] points to an unknown map {mapKey}");
+            }
+
+            sceneMaps.Add(sceneId, map);
+        }
+
+        var areaLayers = new Dictionary<int, int>(source.AreaLayers.Count);
+        foreach (var (areaKey, layer) in source.AreaLayers)
+        {
+            if (!int.TryParse(areaKey, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var areaId)
+                || layer == 0)
+            {
+                throw new InvalidDataException($"AreaLayers[{areaKey}] has an invalid layer {layer}");
+            }
+
+            areaLayers.Add(areaId, layer);
+        }
+
+        return (sceneMaps.ToFrozenDictionary(), areaLayers.ToFrozenDictionary());
+    }
+
+    /// <summary>
     /// タレントの木を読む。線は節のつなぎ(<c>Next</c>)から作る。節のバフはタレントの根のバフで、バフのある節はアビリティの節でなければならず、
     /// つなぎの先は同じ木の節、クラスR2 の木(特化の番号が 0 でない)だけが根の節を持ち、役割のタグは 1〜3、技の置き換えは2つの正の技の番号。
     /// 合わなければ形の誤りとして止める。
@@ -3187,6 +3330,56 @@ public static class CombatDataCatalog
         public Dictionary<string, int> SeasonTalentAdvancedEffects { get; set; } = null!;
 
         public TalentTreeFile TalentTrees { get; set; } = null!;
+    }
+
+    /// <summary>
+    /// <c>Maps.json</c> の形。<c>Scenes</c> はシーンの番号 → 地図のキー、<c>Maps</c> は地図のキー → 地図、
+    /// <c>AreaLayers</c> はエリアの番号 → 階層(0 でないものだけ)。項目はどれも省略できない。
+    /// </summary>
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class SceneMapFile
+    {
+        public Dictionary<string, string> Scenes { get; set; } = null!;
+
+        public Dictionary<string, SceneMapEntry?> Maps { get; set; } = null!;
+
+        public Dictionary<string, int> AreaLayers { get; set; } = null!;
+    }
+
+    /// <summary>
+    /// 地図1枚。<c>X0</c> / <c>Z0</c> は左端の x と下端の z、<c>Width</c> / <c>Depth</c> は x / z の幅、
+    /// <c>Image</c> は基本の画像、<c>Layers</c> は階層ごとの画像。
+    /// </summary>
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class SceneMapEntry
+    {
+        public double X0 { get; set; }
+
+        public double Z0 { get; set; }
+
+        public double Width { get; set; }
+
+        public double Depth { get; set; }
+
+        public SceneMapImageEntry Image { get; set; } = null!;
+
+        public List<SceneMapLayerEntry?> Layers { get; set; } = null!;
+    }
+
+    /// <summary>地図の基本の画像。<c>File</c> はアプリの画像のファイルの名前(拡張子なし)。</summary>
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class SceneMapImageEntry
+    {
+        public string File { get; set; } = null!;
+    }
+
+    /// <summary>地図の階層の画像。<c>Layer</c> は階層(0 でない)。</summary>
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class SceneMapLayerEntry
+    {
+        public int Layer { get; set; }
+
+        public string File { get; set; } = null!;
     }
 
     /// <summary>因子のアイテムを出所(サーバーの表)ごとに。項目はどれも省略できない。</summary>

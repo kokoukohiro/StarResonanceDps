@@ -25,8 +25,9 @@
 
 - [Player List](Player-List)
 - [Entity List](Entity-List)
+- [Map](Map)
 - [Player Info](Player-Info)
-- [Entity Info](Entity-Info)
+- [Target Info](Target-Info)
 - [Status](Status)
 - [Equipment Info](Equipment-Info)
 - [Talent Info](Talent-Info)

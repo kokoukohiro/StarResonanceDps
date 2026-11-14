@@ -62,6 +62,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.DamageTakenLogPreviewChanged += _widget.ApplyDamageTakenLogSettingsPreview;
         _viewModel.EntityInfoPreviewChanged += _widget.ApplyEntityInfoSettingsPreview;
         _viewModel.ChatPreviewChanged += _widget.ApplyChatSettingsPreview;
+        _viewModel.MapPreviewChanged += _widget.ApplyMapSettingsPreview;
         _widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
         _widget.EntityInfoHiddenBuffsChanged += Widget_EntityInfoHiddenBuffsChanged;
         _widget.BuffListPriorityBuffChangedFromWidget += Widget_BuffListPriorityBuffChangedFromWidget;
@@ -116,6 +117,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.DamageTakenLogPreviewChanged -= _widget.ApplyDamageTakenLogSettingsPreview;
         _viewModel.EntityInfoPreviewChanged -= _widget.ApplyEntityInfoSettingsPreview;
         _viewModel.ChatPreviewChanged -= _widget.ApplyChatSettingsPreview;
+        _viewModel.MapPreviewChanged -= _widget.ApplyMapSettingsPreview;
         _widget.BuffListHiddenBuffsChanged -= Widget_BuffListHiddenBuffsChanged;
         _widget.EntityInfoHiddenBuffsChanged -= Widget_EntityInfoHiddenBuffsChanged;
         _widget.BuffListPriorityBuffChangedFromWidget -= Widget_BuffListPriorityBuffChangedFromWidget;
@@ -441,6 +443,11 @@ public partial class WidgetSettingsWindow : Window
     private void EntityInfoClassColorsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(EntityInfoClassColorsHost);
+    }
+
+    private void MapClassColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(MapClassColorsHost);
     }
 
     private void ChatTextColorsNavButton_Click(object sender, RoutedEventArgs e)

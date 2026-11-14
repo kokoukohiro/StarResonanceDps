@@ -198,16 +198,25 @@ public partial class MainWindow : Window
     }
 
 #if DEBUG
-    // Ctrl+Shift+D でデバッグ用の確認画面(DebugTools、Debug の構成でだけビルドされる)を開く。
+    // デバッグ用の道具(DebugTools、Debug の構成でだけビルドされる)。
+    // Ctrl+Shift+D で確認画面を開き、Ctrl+Shift+M で開いているマップの窓を Wiki の画像として撮る。
     private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key != Key.D || Keyboard.Modifiers != (ModifierKeys.Control | ModifierKeys.Shift))
+        if (Keyboard.Modifiers != (ModifierKeys.Control | ModifierKeys.Shift))
         {
             return;
         }
 
-        e.Handled = true;
-        new MessagePreviewWindow { Owner = this }.Show();
+        if (e.Key == Key.D)
+        {
+            e.Handled = true;
+            new MessagePreviewWindow { Owner = this }.Show();
+        }
+        else if (e.Key == Key.M)
+        {
+            e.Handled = true;
+            WikiMapImageCapture.Capture();
+        }
     }
 #endif
 

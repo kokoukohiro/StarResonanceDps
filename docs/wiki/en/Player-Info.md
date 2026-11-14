@@ -20,6 +20,7 @@ This widget shows one player's level, location, ability score, season strength, 
 ## Controls
 
 - Right-click your own avatar or namecard photo to choose "Save Image As…" or "Copy Image". This is available only while a photo is shown.
+- When the location is underlined, click it to open the [Map](Map) widget centered on that player. If the player is on another map, that map is shown.
 
 ## Settings
 

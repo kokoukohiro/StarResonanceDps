@@ -1211,6 +1211,9 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="Classes_Boss" xml:space="preserve">
     <value>보스</value>
   </data>
+  <data name="Classes_Entity" xml:space="preserve">
+    <value>엔티티</value>
+  </data>
   <data name="Classes_Unknown" xml:space="preserve">
     <value>알 수 없음</value>
   </data>
@@ -1751,10 +1754,67 @@ VOICEVOX를 다시 시작하세요.</value>
     <value>부활 목록</value>
   </data>
   <data name="Widget_EntityInfo" xml:space="preserve">
-    <value>엔티티 정보</value>
+    <value>타겟 정보</value>
   </data>
   <data name="Widget_Chat" xml:space="preserve">
     <value>채팅</value>
+  </data>
+  <data name="Widget_Map" xml:space="preserve">
+    <value>맵</value>
+  </data>
+  <data name="Settings_Map_Opacity" xml:space="preserve">
+    <value>맵 불투명도</value>
+  </data>
+  <data name="Settings_Map_PlayerFilter" xml:space="preserve">
+    <value>플레이어</value>
+  </data>
+  <data name="Settings_Map_EntityFilter" xml:space="preserve">
+    <value>엔티티</value>
+  </data>
+  <data name="Settings_Map_PlayerName" xml:space="preserve">
+    <value>플레이어 이름</value>
+  </data>
+  <data name="Settings_Map_EntityName" xml:space="preserve">
+    <value>엔티티 이름</value>
+  </data>
+  <data name="Settings_Map_HideNamesInCombat" xml:space="preserve">
+    <value>교전 중 이름 숨기기</value>
+  </data>
+  <data name="Settings_Map_SimplifyPlayersInCombat" xml:space="preserve">
+    <value>교전 중 플레이어 간략 표시</value>
+  </data>
+  <data name="Settings_Map_AlwaysSimplifySelf" xml:space="preserve">
+    <value>본인 항상 간략 표시</value>
+  </data>
+  <data name="MapHideNamesTarget_None" xml:space="preserve">
+    <value>숨기지 않음</value>
+  </data>
+  <data name="MapInCombatTarget_Players" xml:space="preserve">
+    <value>플레이어만</value>
+  </data>
+  <data name="MapInCombatTarget_Entities" xml:space="preserve">
+    <value>엔티티만</value>
+  </data>
+  <data name="MapPlayerNameDisplay_MembersOnly" xml:space="preserve">
+    <value>파티 멤버만 표시</value>
+  </data>
+  <data name="MapPlayerNameDisplay_NonMembersOnly" xml:space="preserve">
+    <value>파티 멤버 외 표시</value>
+  </data>
+  <data name="Map_ReturnToCurrentMap" xml:space="preserve">
+    <value>내가 있는 맵으로 돌아가기</value>
+  </data>
+  <data name="Map_ClearSharedPosition" xml:space="preserve">
+    <value>위치 마커 지우기</value>
+  </data>
+  <data name="EntityInfo_ReturnToTarget" xml:space="preserve">
+    <value>타겟으로 돌아가기</value>
+  </data>
+  <data name="Map_FooterEntities" xml:space="preserve">
+    <value>엔티티</value>
+  </data>
+  <data name="Map_FooterPlayers" xml:space="preserve">
+    <value>플레이어</value>
   </data>
   <data name="Chat_Channel_World" xml:space="preserve">
     <value>월드</value>

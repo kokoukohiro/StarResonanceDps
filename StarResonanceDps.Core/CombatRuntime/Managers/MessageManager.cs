@@ -251,6 +251,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             PendingEnemyBuffLogs.Clear();
             NearbyMonsterIndex.Instance.Clear();
             EnemyContributionBaseline.Instance.Clear();
+            EntityPositionStore.Instance.Clear();
+            FieldMarkStore.Instance.Clear();
+            SelfTargetStore.Instance.Clear();
             EntityOriginIndex.Instance.Clear();
             BossDbmBarStore.Instance.Clear();
             WarningSkillCastStore.Instance.Clear();
@@ -2461,6 +2464,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <param name="arrivalUtc">属性が届いたメッセージの到着時刻。技の発動(CD の推定・発動の数)と死亡数に使う。</param>
         public static void ProcessAttrs(long uuid, RepeatedField<Attr> attrs, DateTime arrivalUtc)
         {
+            var hasSelfSkillStart = false;
             foreach (var attr in attrs)
             {
                 if (attr.Id == 0 || attr.RawData == null)
@@ -2489,6 +2493,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                             if (skillId > 0)
                             {
                                 EncounterManager.Current.RegisterSkillActivation(uuid, skillId, arrivalUtc);
+                                hasSelfSkillStart |= IsSelfPlayer(uuid);
                             }
 
                             break;
@@ -2506,10 +2511,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                     case EAttrType.AttrProfessionId:
                         {
                             var incomingProfessionId = isNoValue ? 0 : reader.ReadInt32();
-                            if (IsSelfPlayer(uuid))
-                            {
-                            }
-
                             UpdateProfessionId(uuid, incomingProfessionId);
                             break;
                         }
@@ -2572,8 +2573,24 @@ namespace StarResonanceDps.Core.CombatRuntime
                     case EAttrType.AttrMdefense:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0L : reader.ReadInt64());
                         break;
+                    case EAttrType.AttrDir:
+                        {
+                            // 向きも位置と同じ扱いで、実体の属性に入れず控えへ書く(動くたびに届き、読むのはマップだけ)。
+                            EncounterManager.Current.GetOrCreateEntity(uuid);
+                            EntityPositionStore.Instance.SetDirection(uuid, isNoValue ? 0 : reader.ReadInt32());
+                            break;
+                        }
                     case EAttrType.AttrPos:
-                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? new Vec3() : Vec3.Parser.ParseFrom(reader));
+                        {
+                            // 位置は実体の属性に入れず、位置の控えへ書く。実体は作っておく(回を作り直した後、位置だけの差分で実体が戻る)。
+                            EncounterManager.Current.GetOrCreateEntity(uuid);
+                            var position = isNoValue ? new Vec3() : Vec3.Parser.ParseFrom(reader);
+                            EntityPositionStore.Instance.SetPosition(uuid, position.X, position.Y, position.Z);
+                            break;
+                        }
+                    case EAttrType.AttrSceneAreaId:
+                        EncounterManager.Current.GetOrCreateEntity(uuid);
+                        EntityPositionStore.Instance.SetSceneAreaId(uuid, isNoValue ? 0 : reader.ReadInt32());
                         break;
                     case EAttrType.AttrTargetPos:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? new Vec3() : Vec3.Parser.ParseFrom(reader));
@@ -2653,8 +2670,16 @@ namespace StarResonanceDps.Core.CombatRuntime
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0L : reader.ReadInt64());
                         break;
                     case EAttrType.AttrTargetId:
-                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0L : reader.ReadInt64());
-                        break;
+                        {
+                            var targetId = isNoValue ? 0L : reader.ReadInt64();
+                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, targetId);
+                            if (IsSelfPlayer(uuid))
+                            {
+                                SelfTargetStore.Instance.ApplyTargetId(targetId);
+                            }
+
+                            break;
+                        }
                     case EAttrType.AttrSummonerId:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0L : reader.ReadInt64());
                         break;
@@ -2790,6 +2815,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                         break;
                 }
             }
+
+            // 自分の技の開始では、同じ差分の値を全部当てた後で、自分の実体が持つ今の AttrTargetId をターゲットに渡し直す。
+            // ゲームは値が変わったときだけ送るので、周りから消えて外したターゲットの敵へまた技を出しても、値は届かない(SelfTargetStore)。
+            if (hasSelfSkillStart
+                && EncounterManager.Current.GetAttrKV(uuid, "AttrTargetId") is long selfTargetId)
+            {
+                SelfTargetStore.Instance.ApplyTargetId(selfTargetId);
+            }
         }
 
         /// <param name="isFullList">
@@ -2863,6 +2896,12 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>今の差分の <see cref="EnemyTaunt"/>。パケットのスレッドだけで使い、差分ごとに空にする(増え続けない)。</summary>
         private static readonly List<EnemyTaunt> EnemyTaunts = [];
+
+        /// <summary>
+        /// 今の差分の敵のヘイトの一覧の、人ごとの増え(<see cref="EnemyContributionBaseline.UpdateHate"/> が入れる)。
+        /// パケットのスレッドだけで使い、差分ごとに空にする(増え続けない)。
+        /// </summary>
+        private static readonly List<EnemyContributionBaseline.HateIncrease> HateIncreases = [];
 
         /// <summary>付けたものを発生源の種類にできなかった挑発のバフ。ログに1回ずつ書くための控えで、起動の間だけ持つ(付与元の種類の数までしか増えない)。</summary>
         private static readonly HashSet<(int FightSourceType, int SourceConfigId)> UnknownTauntSources = [];
@@ -3153,11 +3192,15 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             foreach (var disappearedEntity in syncNearEntities.Disappear)
             {
+                // 周りの実体の一覧から外す前に消す(ターゲット情報が、ターゲットの敵の居ない一覧を先に受けないように)。
+                SelfTargetStore.Instance.ClearIfTarget(disappearedEntity.Uuid);
                 PlayerRosterProjection.RemoveNearbyPlayer(disappearedEntity.Uuid);
                 NearbyEntityProjection.RemoveEntity(disappearedEntity.Uuid);
                 SummonSourceIndex.Instance.Remove(disappearedEntity.Uuid);
                 NearbyMonsterIndex.Instance.Remove(disappearedEntity.Uuid);
                 EnemyContributionBaseline.Instance.Remove(disappearedEntity.Uuid);
+                EntityPositionStore.Instance.RemoveEntity(disappearedEntity.Uuid);
+                FieldMarkStore.Instance.RemoveOwner(disappearedEntity.Uuid);
                 PlayerDeathStates.Remove(disappearedEntity.Uuid);
                 LastPassiveHealTicks.Remove(disappearedEntity.Uuid);
                 EncounterManager.Current.RemoveDisappearedEntity(disappearedEntity.Uuid);
@@ -3175,6 +3218,12 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 EncounterManager.Current.SetEntityType(entity.Uuid, entity.EntType);
                 ResetCombatStateMissingFromFullAttrs(entity.Uuid, entity.Attrs?.Attrs);
+
+                // 出現の一覧のパッシブの技は、その実体の今の全部。フィールドマークを置けるのは隊長(プレイヤー)だけ。
+                if (entity.EntType == EEntityType.EntChar)
+                {
+                    FieldMarkStore.Instance.ApplyAppear(entity.Uuid, entity.PassiveSkillInfos);
+                }
 
                 // 出現の一覧はその実体の一時属性の全部(無ければ一時属性が無い)。前に見たときの値を置き換える。
                 var appearTempAttrs = entity.TempAttrs?.Attrs ?? (IEnumerable<Zproto.TempAttr>)[];
@@ -3444,6 +3493,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
+            // フィールドマークは持ち主のパッシブの技で届く。下の早い return(精算・投票の間)より前で当てる。
+            FieldMarkStore.Instance.ApplyDelta(targetUuid, delta.PassiveSkillInfos, delta.PassiveSkillEndInfos);
+
             bool isTargetPlayer = (Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar);
             var isSelfTarget = isTargetPlayer && IsSelfPlayer(targetUuid);
             var attrCollection = delta.Attrs;
@@ -3471,7 +3523,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             // 敵のヘイトの一覧の増え(ヘイトメーター)と強靭の前の値(ブレイクメーター)。記録するのは戦闘の時計の判定と与ダメの後。
-            IReadOnlyList<EnemyContributionBaseline.HateIncrease> hateIncreases = [];
+            // 前の差分が途中の例外で空にできなかった分を残さない。
+            HateIncreases.Clear();
             int? stunnedBefore = null;
 
             if (attrCollection?.Attrs != null && attrCollection.Attrs.Any())
@@ -3500,7 +3553,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     if (changedAttributes.Contains(EAttrType.AttrHateList)
                         && EncounterManager.Current.GetAttrKV(targetUuid, "AttrHateList") is List<HateInfo> hateList)
                     {
-                        hateIncreases = EnemyContributionBaseline.Instance.UpdateHate(targetUuid, hateList);
+                        EnemyContributionBaseline.Instance.UpdateHate(targetUuid, hateList, HateIncreases);
                     }
 
                     if (changedAttributes.Contains(EAttrType.AttrStunned))
@@ -3759,7 +3812,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             if (skillEffect?.Damages == null || skillEffect.Damages.Count == 0)
             {
-                RecordHateIncreases(targetUuid, hateIncreases, [], EnemyTaunts, extraData.ArrivalTime);
+                RecordHateIncreases(targetUuid, HateIncreases, [], EnemyTaunts, extraData.ArrivalTime);
+                HateIncreases.Clear();
                 EnemyTaunts.Clear();
                 return;
             }
@@ -3985,8 +4039,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             // 与ダメの後に記録する(「最初に攻撃した敵のみ」の敵は、この差分の与ダメで決まることがある)。
-            RecordHateIncreases(targetUuid, hateIncreases, EnemyHits, EnemyTaunts, extraData.ArrivalTime);
+            RecordHateIncreases(targetUuid, HateIncreases, EnemyHits, EnemyTaunts, extraData.ArrivalTime);
             RecordBreakDecrease(targetUuid, stunnedBefore, EnemyHits, extraData.ArrivalTime);
+            HateIncreases.Clear();
             EnemyHits.Clear();
             EnemyTaunts.Clear();
 

@@ -1213,6 +1213,9 @@ VOICEVOXを起動し直してください。</value>
   <data name="Classes_Boss" xml:space="preserve">
     <value>ボス</value>
   </data>
+  <data name="Classes_Entity" xml:space="preserve">
+    <value>エンティティ</value>
+  </data>
   <data name="Classes_Unknown" xml:space="preserve">
     <value>不明</value>
   </data>
@@ -1753,10 +1756,67 @@ VOICEVOXを起動し直してください。</value>
     <value>蘇生リスト</value>
   </data>
   <data name="Widget_EntityInfo" xml:space="preserve">
-    <value>エンティティ情報</value>
+    <value>ターゲット情報</value>
   </data>
   <data name="Widget_Chat" xml:space="preserve">
     <value>チャット</value>
+  </data>
+  <data name="Widget_Map" xml:space="preserve">
+    <value>マップ</value>
+  </data>
+  <data name="Settings_Map_Opacity" xml:space="preserve">
+    <value>マップの不透明度</value>
+  </data>
+  <data name="Settings_Map_PlayerFilter" xml:space="preserve">
+    <value>プレイヤー</value>
+  </data>
+  <data name="Settings_Map_EntityFilter" xml:space="preserve">
+    <value>エンティティ</value>
+  </data>
+  <data name="Settings_Map_PlayerName" xml:space="preserve">
+    <value>プレイヤー名</value>
+  </data>
+  <data name="Settings_Map_EntityName" xml:space="preserve">
+    <value>エンティティ名</value>
+  </data>
+  <data name="Settings_Map_HideNamesInCombat" xml:space="preserve">
+    <value>交戦中の名前非表示</value>
+  </data>
+  <data name="Settings_Map_SimplifyPlayersInCombat" xml:space="preserve">
+    <value>交戦中のプレイヤーを簡略化表示</value>
+  </data>
+  <data name="Settings_Map_AlwaysSimplifySelf" xml:space="preserve">
+    <value>自分を常に簡略化表示</value>
+  </data>
+  <data name="MapHideNamesTarget_None" xml:space="preserve">
+    <value>非表示しない</value>
+  </data>
+  <data name="MapInCombatTarget_Players" xml:space="preserve">
+    <value>プレイヤーのみ</value>
+  </data>
+  <data name="MapInCombatTarget_Entities" xml:space="preserve">
+    <value>エンティティのみ</value>
+  </data>
+  <data name="MapPlayerNameDisplay_MembersOnly" xml:space="preserve">
+    <value>パーティメンバーのみ表示</value>
+  </data>
+  <data name="MapPlayerNameDisplay_NonMembersOnly" xml:space="preserve">
+    <value>パーティメンバー以外表示</value>
+  </data>
+  <data name="Map_ReturnToCurrentMap" xml:space="preserve">
+    <value>自分のいるマップに戻る</value>
+  </data>
+  <data name="Map_ClearSharedPosition" xml:space="preserve">
+    <value>位置のマークを消す</value>
+  </data>
+  <data name="EntityInfo_ReturnToTarget" xml:space="preserve">
+    <value>ターゲットに戻る</value>
+  </data>
+  <data name="Map_FooterEntities" xml:space="preserve">
+    <value>エンティティ</value>
+  </data>
+  <data name="Map_FooterPlayers" xml:space="preserve">
+    <value>プレイヤー</value>
   </data>
   <data name="Chat_Channel_World" xml:space="preserve">
     <value>ワールド</value>

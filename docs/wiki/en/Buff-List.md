@@ -6,7 +6,7 @@ This widget lists the buffs on one player or one enemy, one per row, with the re
 
 - On the "Buff List" card in "[Widgets](Widgets)", choose the target from the drop-down list in the name field and click the start button. The list shows yourself, party members, the other people in the Player List, and then the enemies in the [Entity List](Entity-List) (the default is yourself).
 - You can also open it by right-clicking a row in the [Player List](Player-List) or the [Revive List](Revive-List) and choosing "Buff List".
-- If you right-click a row in the [Entity List](Entity-List) and choose "Buff List", the window for that enemy opens. It also opens when you click a buff slot in [Entity Info](Entity-Info).
+- If you right-click a row in the [Entity List](Entity-List) and choose "Buff List", the window for that enemy opens. It also opens when you click a buff slot in [Target Info](Target-Info).
 - A window is opened per target. If a window for the same target is already open, that window is brought to the front.
 
 ## What it shows

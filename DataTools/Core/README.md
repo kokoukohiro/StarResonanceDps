@@ -28,6 +28,7 @@ python gen_match_targets.py   # マッチング先(パーティ・活動)の名�
 python gen_root_buffs.py      # ルートバフ(タレント・心相晶・因子・モジュール効果)の名前・アイコン、モジュール効果の段階、因子のアイテムと、タレントの木
 python gen_items.py           # アイテムの名前(装備の名前も含む)
 python gen_chat_hyperlinks.py # チャットのリンクの発言の文のテンプレートと、ギルドの建物の名前
+python gen_maps.py            # シーンの地図(画像の名前と座標の範囲)と、エリアの階層
 
 python check_overrides.py     # 手動編集ファイルのうち、要らなくなった項目を表示する
 python gen_images.py          # アプリの画像の足りないものを表示する(--writeで取り出して置く、--compareで今の画像と比べる)
@@ -41,7 +42,7 @@ python gen_images.py          # アプリの画像の足りないものを表示
 
 [StarResonanceTool](https://github.com/PotRooms/StarResonanceTool)の内部コードに手を入れると、言語別のZtableを取り出せる。
 
-`Star`と`StarASIA`の両方を、次の形で置く。`gen_skill_warnings.py`と`gen_images.py`は同じツールの出力の`Unk`と`Bundles`も読む。
+`Star`と`StarASIA`の両方を、次の形で置く。`gen_skill_warnings.py`・`gen_maps.py`・`gen_images.py`は同じツールの出力の`Unk`と`Bundles`も読む。
 
 ```
 JSONS/
@@ -84,6 +85,7 @@ export BPSR_TABLES=<置き場所>     # bash
 | `gen_root_buffs.py` | `Data/Localization/RootBuffNames.json`<br>`Data/Localization/ModuleEffectNames.json`<br>`Data/Localization/TalentNames.json`<br>`Data/Generated/RootBuffs.json` |
 | `gen_items.py` | `Data/Localization/ItemNames.json` |
 | `gen_chat_hyperlinks.py` | `Data/Localization/ChatHyperlinks.json`<br>`Data/Localization/UnionBuildingNames.json` |
+| `gen_maps.py` | `Data/Generated/Maps.json` |
 | `check_overrides.py` | 書かない(表示だけ) |
 | `gen_images.py` | `--write`のときだけ`StarResonanceDps.App/Data/Images/`(無いファイルだけ) |
 
@@ -102,6 +104,7 @@ export BPSR_TABLES=<置き場所>     # bash
   更新する画像はファイルを消してから`--write`を流す
 - `--before`を付けずに`--write`を流すと、前から足りなかった画像も取り出して置く
 - `Data/Images/Buffs`には、ゲームの画像と大きさが違う(手で整えた)画像がある。`--write`で足す画像はゲームの大きさのまま
+- 地図の画像(`Data/Images/Maps`)は`Maps.json`から決めるので、`gen_maps.py`を先に流す。ゲームの大きさのまま置くので、ファイルが大きい
 - `check_overrides.py`と`gen_images.py`は、アプリのアイコンの探し方と行のまとめ方に合わせて作ってある。アプリ側を変えたら合わせる
 
 ## 手動編集ファイル
