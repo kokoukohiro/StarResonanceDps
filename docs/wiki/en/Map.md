@@ -24,7 +24,7 @@ This widget shows where you, the players and enemies around you, and your party 
 ## Controls
 
 - Mouse wheel: Zooms the map in and out. At the closest zoom, the shorter side of the window covers 20m, and at the farthest zoom, the whole map fits. It opens at 200m, and the zoom is not saved.
-- Drag the map to change the spot that is shown (only in the directions in which the map extends beyond the window). When you move, it returns to centering on you.
+- Drag the map to change the spot that is shown (only in the directions in which the map extends beyond the window; on maps without a map image, in any direction). When you move, it returns to centering on you.
 - Double-click where there is no icon to center on you right away.
 - Click a player's icon to open that player's [Player Info](Player-Info). Click an enemy's icon to show that enemy in [Target Info](Target-Info).
 - While another map, or another layer shared with a link, is shown, "Back to My Map" appears in the header. Click it to return to the map and layer you are on.
@@ -39,11 +39,11 @@ The window settings and theme are described in [Common Widget Settings](Common-W
 
 - Players: Choose which players are shown from "Show all", "Party members only", "Non-party members", and "Self only" (default: "Show all").
 - Entities: Choose from "Show all" and "Hide objects". "Hide objects" does not show enemies whose HP bar is not visible in the game (default: "Hide objects").
-- Player Names: Choose whose names are shown from "Show all", "Show Party Members Only", "Show Non-Party Members", and "Show Self Only". Players whose names are not shown have only their icons (default: "Show all").
+- Player Names: Choose whose names are shown from "Show all", "Show Party Members Only", "Show Non-Party Members", and "Show Self Only". Players whose names are not shown have only their icons (default: "Show Non-Party Members").
 - Entity Names: Choose "Show" or "Hide" for the enemies' names (default: "Hide").
 - Hide Names In Combat: Choose whose names are not shown while they are in combat from "All", "Players Only", "Entities Only", and "Don't Hide" (default: "All").
 - Simplify Players In Combat: Shows players in combat as small circles with a white border (a triangle for you). When it is off, players in combat are also shown with their class icons (default: on).
-- Always Simplify Self: Shows you as the triangle with a white border even when you are not in combat (default: off).
+- Always Simplify Self: Shows you as the triangle with a white border even when you are not in combat (default: on).
 - Map Opacity: Choose the opacity of the map image from 0 to 100%. The map image is shown at this opacity regardless of the window opacity (default: 100%).
 
 ### Icon Colors

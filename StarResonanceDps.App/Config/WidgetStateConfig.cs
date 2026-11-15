@@ -1594,8 +1594,8 @@ public static class WidgetConfigDefaults
     /// <summary>マップの「マップの不透明度」の既定。</summary>
     public const int DefaultMapOpacity = 100;
 
-    /// <summary>マップの「プレイヤー名」の既定(すべて表示)。</summary>
-    public const int DefaultMapPlayerNamePartyDisplayModeIndex = (int)PartyDisplayMode.All;
+    /// <summary>マップの「プレイヤー名」の既定(パーティメンバー以外表示)。</summary>
+    public const int DefaultMapPlayerNamePartyDisplayModeIndex = (int)PartyDisplayMode.NonPartyMembersOnly;
 
     public const int MapEntityNameShownIndex = 0;
     public const int MapEntityNameHiddenIndex = 1;
@@ -1615,8 +1615,8 @@ public static class WidgetConfigDefaults
     /// <summary>マップの「交戦中のプレイヤーを簡略化表示」の既定(オン)。</summary>
     public const bool DefaultMapSimplifiesPlayersInCombat = true;
 
-    /// <summary>マップの「自分を常に簡略化表示」の既定(オフ)。</summary>
-    public const bool DefaultMapAlwaysSimplifiesSelf = false;
+    /// <summary>マップの「自分を常に簡略化表示」の既定(オン)。</summary>
+    public const bool DefaultMapAlwaysSimplifiesSelf = true;
 
     /// <summary>マップのアイコンカラーの、エンティティ全部を塗る行の鍵(アイコンはボスの印の絵 <c>Icon.Profession.Entity</c>)。</summary>
     public const string MapEntityColorKey = "Entity";

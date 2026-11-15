@@ -119,6 +119,7 @@ export BPSR_TABLES=<置き場所>     # bash
 | `Data/Overrides/BuffOverrides.json` | 同梱`Data/BuffTable.json`の項目の差し替え |
 | `Data/Overrides/SkillOverrides.json` | 同梱`SkillTable`の`SkillLevelGroup`の補い |
 | `Data/Overrides/SkillActivationOverrides.json` | 推移グラフの技のアイコンの名前とアイコン |
+| `Data/Overrides/MapOverrides.json` | マップの地図の範囲(`Generated/Maps.json`)の差し替え |
 | `Data/Overrides/MonsterNameOverrides.json` | モンスターの名前(`MonsterNames.json`)の差し替え |
 | `Data/Overrides/SkillNameOverrides.json` | 技の名前(`SkillNames.json`)の差し替え |
 | `Data/Overrides/BuffNameOverrides.json` | バフの名前(`BuffNames.json`)の差し替え |
@@ -234,6 +235,25 @@ export BPSR_TABLES=<置き場所>     # bash
 - `Name`と`Icon`はどちらも省略できる。空の値は書かなかったのと同じ
 - `Icon`はファイル名だけで書く。**イマジンのアイコンだけは頭に`ui/textures/skill_aoyi/`を付ける**(イマジンのアイコンかどうかをこの頭で決める)
 - キーが技IDの形でない行と知らない言語の名前は、エラーログが出て読まれない。ファイルが無ければエラーログを出し、上書き無しのまま続ける
+
+### MapOverrides.json
+
+マップの地図の範囲の差し替え。`Generated/Maps.json`の範囲で地図を出すと、実際の位置と地図の画像がずれる地図に使う。
+キーは`Maps.json`の`Maps`のキー(地図の画像の名前)。**書いた項目だけ**が差し替わり、同じ地図を使うシーンは全部変わる。
+
+```json
+{
+  "<地図のキー>": {
+    "X0": <地図の左端の x>,
+    "Z0": <地図の下端の z>,
+    "Width": <x の幅>,
+    "Depth": <z の幅>
+  }
+}
+```
+
+- 4つの項目はどれも省略できる
+- `Maps.json`に無いキーと中身の無い行は、エラーログが出て当てられない。ファイルが無い・読めないときはエラーログを出し、上書き無しのまま続ける
 
 ### BuffOverrides.json
 

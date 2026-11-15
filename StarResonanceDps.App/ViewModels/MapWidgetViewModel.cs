@@ -58,7 +58,7 @@ namespace StarResonanceDps.App.ViewModels;
 /// 見る中心は、地図の外が見えない位置へ寄せる(自分が地図の端に近いと、自分は領域の中央からずれる)。
 /// 地図は掴んで動かせる(<see cref="PanBy"/>)。自分のいるマップでは、掴んで動かした場所(と、現在地から選んだ同じマップの人の位置)を
 /// 自分が動くまで見続け、自分が動いたら自分に合わせ直す(<see cref="_manualSelfPosition"/>)。
-/// <see cref="ResumeFollowingSelf"/> と自分のマップ移動でもすぐ合わせ直す。地図の無いマップは掴めない。
+/// <see cref="ResumeFollowingSelf"/> と自分のマップ移動でもすぐ合わせ直す。地図の無いマップは範囲が無いので、どの向きにも動かせる。
 /// </para>
 ///
 /// <para>
@@ -375,12 +375,13 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
     public event EventHandler? DataStatusChanged;
 
     /// <summary>
-    /// 地図を掴んで動かせるか。地図を出していて、地図が領域からはみ出している向きがあるとき
-    /// (地図の全体が入っていれば、動かす所が無い)。
+    /// 地図を掴んで動かせるか。何かを出していて、地図が領域からはみ出している向きがあるとき
+    /// (地図の全体が入っていれば、動かす所が無い)。地図の無いマップは範囲が無いので、どの向きにも動かせる。
     /// </summary>
-    public bool CanPan => _shownMap is { } map
-        && _shownScale > 0d
-        && (map.Width * _shownScale > _viewportWidth + PanSlack || map.Depth * _shownScale > _viewportHeight + PanSlack);
+    public bool CanPan => _shownScale > 0d
+        && (_shownMap is not { } map
+            || map.Width * _shownScale > _viewportWidth + PanSlack
+            || map.Depth * _shownScale > _viewportHeight + PanSlack);
 
     public void RefreshDataStatus()
     {
@@ -818,12 +819,10 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
 
         ApplyImage(map, IsViewingSharedPosition ? _sharedPositionViewLayer : selfLayer);
 
-        // 地図の無いマップは掴んで動かせないので、いつも自分に合わせる。
-        var followsSelf = _isFollowingSelf || map is null;
         var (originX, originZ, scale) = ApplyView(
             map,
-            followsSelf ? selfPosition.X : _centerX,
-            followsSelf ? selfPosition.Z : _centerZ);
+            _isFollowingSelf ? selfPosition.X : _centerX,
+            _isFollowingSelf ? selfPosition.Z : _centerZ);
 
         var roster = PlayerRosterPresentationStore.Instance.Current.Entries;
         var refreshesPresentation = BeginMarkers(roster, entities, isScoreRequested);

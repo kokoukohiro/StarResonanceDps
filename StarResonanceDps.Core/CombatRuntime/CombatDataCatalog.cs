@@ -458,6 +458,8 @@ public static class CombatDataCatalog
 
     private static string SceneMapsPath => Path.Combine(CombatRuntimePaths.GeneratedDirectory, "Maps.json");
 
+    private static string MapOverridesPath => OverrideFilePath("MapOverrides.json");
+
     /// <summary>
     /// <see cref="Load"/> が読むファイルを、先に解き始める。読む側と同じパスと型で始める
     /// (食い違うと、受け取る側がエラーログを出してその場で読む)。
@@ -482,6 +484,7 @@ public static class CombatDataCatalog
         reads.Start<EquipmentFile>(EquipmentsPath);
         reads.Start<RootBuffFile>(RootBuffsPath);
         reads.Start<SceneMapFile>(SceneMapsPath);
+        reads.Start<Dictionary<string, MapOverrideEntry?>>(MapOverridesPath);
     }
 
     /// <summary>
@@ -2918,6 +2921,7 @@ public static class CombatDataCatalog
 
     /// <summary>
     /// 地図の表 <c>Data/Generated/Maps.json</c> を読む。<c>DataTools/Core/gen_maps.py</c> が生成する。
+    /// 手修正 <c>Data/Overrides/MapOverrides.json</c> を重ねてから形を確かめる(<see cref="ApplyMapOverrides"/>)。
     ///
     /// <para>
     /// ファイルが無い・形が合わないときはエラーログを出して全部空のまま続ける(マップは地図の画像を出さない)。
@@ -2942,6 +2946,7 @@ public static class CombatDataCatalog
 
             var file = loadedFile
                 ?? throw new InvalidDataException("the file is empty");
+            ApplyMapOverrides(reads, file.Maps);
             (sceneMaps, areaLayers) = ReadSceneMaps(file);
         }
         catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or InvalidDataException)
@@ -2955,6 +2960,71 @@ public static class CombatDataCatalog
         Log.Information(
             "Loaded {FileName}: {Scenes} scenes with a map / {Areas} areas on another layer",
             relativePath, sceneMaps.Count, areaLayers.Count);
+    }
+
+    /// <summary>
+    /// 手修正 <c>Data/Overrides/MapOverrides.json</c> を地図の表に重ねる。鍵は地図のキー(<c>Maps.json</c> の <c>Maps</c> の鍵)で、
+    /// 書いた項目(<c>X0</c>・<c>Z0</c>・<c>Width</c>・<c>Depth</c>)だけを差し替える。地図の画像の範囲が実際の座標とずれている地図に使う。
+    /// 表に無い鍵と中身の無い行は記録して当てない。ファイルが無い・読めないときは記録して、重ねずに続ける(地図は生成した範囲のまま)。
+    /// </summary>
+    private static void ApplyMapOverrides(JsonDataFileReads reads, Dictionary<string, SceneMapEntry?> maps)
+    {
+        const string relativePath = "Overrides/MapOverrides.json";
+        Dictionary<string, MapOverrideEntry?>? overrides;
+        try
+        {
+            // 解けなかったときの例外は受け取るときに出るので、受け取りもこの try の中。
+            if (!reads.TryTake(MapOverridesPath, out overrides))
+            {
+                Log.Error("Failed to load {OverridePath}. Maps use the generated ranges", relativePath);
+                return;
+            }
+        }
+        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
+        {
+            Log.Error(ex, "{OverridePath} could not be read. Maps use the generated ranges", relativePath);
+            return;
+        }
+
+        var applied = 0;
+        foreach (var (key, entry) in overrides ?? [])
+        {
+            if (!maps.TryGetValue(key, out var map) || map is null)
+            {
+                Log.Error("MapOverrides: skipping \"{Key}\" because Maps.json has no such map", key);
+                continue;
+            }
+
+            if (entry is null)
+            {
+                Log.Error("MapOverrides: skipping \"{Key}\" because it has no values", key);
+                continue;
+            }
+
+            if (entry.X0 is { } x0)
+            {
+                map.X0 = x0;
+            }
+
+            if (entry.Z0 is { } z0)
+            {
+                map.Z0 = z0;
+            }
+
+            if (entry.Width is { } width)
+            {
+                map.Width = width;
+            }
+
+            if (entry.Depth is { } depth)
+            {
+                map.Depth = depth;
+            }
+
+            applied++;
+        }
+
+        Log.Information("Loaded {OverridePath}: {Maps} maps", relativePath, applied);
     }
 
     /// <summary>
@@ -3364,6 +3434,18 @@ public static class CombatDataCatalog
         public SceneMapImageEntry Image { get; set; } = null!;
 
         public List<SceneMapLayerEntry?> Layers { get; set; } = null!;
+    }
+
+    /// <summary>地図の範囲の手修正1件(<c>MapOverrides.json</c>)。書いた項目だけを差し替え、書いていない項目は null。</summary>
+    private sealed class MapOverrideEntry
+    {
+        public double? X0 { get; set; }
+
+        public double? Z0 { get; set; }
+
+        public double? Width { get; set; }
+
+        public double? Depth { get; set; }
     }
 
     /// <summary>地図の基本の画像。<c>File</c> はアプリの画像のファイルの名前(拡張子なし)。</summary>
