@@ -1,6 +1,6 @@
 ![Buff Uptime](images/en/BuffUptime1.png)
 
-This widget lists the buffs that were on one player, one per row, and shows the times they were on as bars along the battle's elapsed time and the share of time they were on (uptime) as a number.
+This widget lists the buffs that were on one player, one per row. Bars show when each buff was on along the battle's elapsed time, and a number shows the share of time it was on (uptime).
 
 ## How to open
 
