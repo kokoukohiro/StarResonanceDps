@@ -319,6 +319,21 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="BuffCardNotification_Expired_Default" xml:space="preserve">
     <value>{TargetName}의 {BuffName} 효과가 끝났습니다</value>
   </data>
+  <data name="BuffCardNotification_ExpiringSoon_Default" xml:space="preserve">
+    <value>{TargetName}의 {BuffName} 효과가 곧 끝납니다</value>
+  </data>
+  <data name="BuffExpiredCondition_OnExpiry" xml:space="preserve">
+    <value>효과 종료 시</value>
+  </data>
+  <data name="BuffExpiredCondition_1" xml:space="preserve">
+    <value>효과 종료 1초 전</value>
+  </data>
+  <data name="BuffExpiredCondition_2" xml:space="preserve">
+    <value>효과 종료 2초 전</value>
+  </data>
+  <data name="BuffExpiredCondition_3" xml:space="preserve">
+    <value>효과 종료 3초 전</value>
+  </data>
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
     <value>{TargetName}의 {BuffName} 효과가 곧 끝납니다</value>
   </data>
@@ -401,6 +416,27 @@ VOICEVOX를 다시 시작하세요.</value>
   </data>
   <data name="TelegraphedSkillCondition_3" xml:space="preserve">
     <value>발동 3초 전</value>
+  </data>
+  <data name="Notification_CooldownReady" xml:space="preserve">
+    <value>쿨타임 완료</value>
+  </data>
+  <data name="CooldownReadyNotification_Default" xml:space="preserve">
+    <value>{SkillName}을(를) 사용할 수 있습니다</value>
+  </data>
+  <data name="CooldownReadyCondition_OnReady" xml:space="preserve">
+    <value>사용 가능 시</value>
+  </data>
+  <data name="CooldownReadyCondition_1" xml:space="preserve">
+    <value>사용 가능 1초 전</value>
+  </data>
+  <data name="CooldownReadyCondition_2" xml:space="preserve">
+    <value>사용 가능 2초 전</value>
+  </data>
+  <data name="CooldownReadyCondition_3" xml:space="preserve">
+    <value>사용 가능 3초 전</value>
+  </data>
+  <data name="Notification_CooldownSelfOnlyNote" xml:space="preserve">
+    <value>※자신의 스킬만 알립니다</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>기본 설정</value>
@@ -1349,6 +1385,9 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>디버프 목록</value>
   </data>
+  <data name="Widget_BuffUptime" xml:space="preserve">
+    <value>버프 가동률</value>
+  </data>
   <data name="Common_Cancel" xml:space="preserve">
     <value>취소</value>
   </data>
@@ -1509,6 +1548,18 @@ VOICEVOX를 다시 시작하세요.</value>
   </data>
   <data name="Settings_Graph_ShowSkillLog" xml:space="preserve">
     <value>스킬 로그 표시</value>
+  </data>
+  <data name="Settings_BuffUptime_ShowsPermanentBuffs" xml:space="preserve">
+    <value>상시 버프 표시</value>
+  </data>
+  <data name="Settings_BuffUptime_ShowsCuisinePotion" xml:space="preserve">
+    <value>요리·포션 표시</value>
+  </data>
+  <data name="Settings_BuffUptime_PixelsPerSecond" xml:space="preserve">
+    <value>1초의 너비</value>
+  </data>
+  <data name="Settings_BuffUptime_PixelsPerSecond_Option" xml:space="preserve">
+    <value>{0}px</value>
   </data>
   <data name="Widget_DamageSkillDetail" xml:space="preserve">
     <value>스킬 상세(피해)</value>
@@ -2110,6 +2161,15 @@ VOICEVOX를 다시 시작하세요.</value>
   </data>
   <data name="Notification_TargetIdSourceNote" xml:space="preserve">
     <value>※ID는 표시 설정의 '내부 ID'로 표시할 수 있으며, ID와 이름은 위젯 '타임라인'에서 복사할 수 있습니다</value>
+  </data>
+  <data name="Notification_CooldownSkillName_Placeholder" xml:space="preserve">
+    <value>예: 오의! 시간의 법</value>
+  </data>
+  <data name="Notification_CooldownSkillId_Placeholder" xml:space="preserve">
+    <value>예: 3921</value>
+  </data>
+  <data name="Notification_CooldownSkillIdSourceNote" xml:space="preserve">
+    <value>※ID는 표시 설정의 '내부 ID'로 표시할 수 있으며, 위젯 '플레이어 목록'의 스킬 칸에서 확인할 수 있습니다</value>
   </data>
   <data name="Notification_TargetMultipleNote" xml:space="preserve">
     <value>※'|'로 구분하여 여러 개를 입력할 수 있습니다</value>

@@ -171,6 +171,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             MapSettings.PreviewChanged += MapSettings_PreviewChanged;
         }
 
+        if (WidgetConfigDefaults.SupportsBuffUptimeSettings(kind))
+        {
+            BuffUptimeSettings = new BuffUptimeWidgetSettingsViewModel(config.BuffUptime);
+            BuffUptimeSettings.PropertyChanged += BuffUptimeSettings_PropertyChanged;
+            BuffUptimeSettings.PreviewChanged += BuffUptimeSettings_PreviewChanged;
+        }
+
         if (widget.PluginWidget is { } pluginWidget)
         {
             PluginSettings = new PluginWidgetSettingsViewModel(pluginWidget, config.Plugin);
@@ -245,6 +252,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public event Action<ChatWidgetSettingsConfig>? ChatPreviewChanged;
 
     public event Action<MapWidgetSettingsConfig>? MapPreviewChanged;
+
+    public event Action<BuffUptimeWidgetSettingsConfig>? BuffUptimePreviewChanged;
 
     public void Dispose()
     {
@@ -363,6 +372,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             MapSettings.Dispose();
         }
 
+        if (BuffUptimeSettings is not null)
+        {
+            BuffUptimeSettings.PropertyChanged -= BuffUptimeSettings_PropertyChanged;
+            BuffUptimeSettings.PreviewChanged -= BuffUptimeSettings_PreviewChanged;
+            BuffUptimeSettings.Dispose();
+        }
+
         if (PluginSettings is not null)
         {
             PluginSettings.PropertyChanged -= PluginSettings_PropertyChanged;
@@ -395,6 +411,19 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     private void MapSettings_PreviewChanged(MapWidgetSettingsConfig config)
     {
         MapPreviewChanged?.Invoke(config);
+    }
+
+    private void BuffUptimeSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(BuffUptimeWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void BuffUptimeSettings_PreviewChanged(BuffUptimeWidgetSettingsConfig config)
+    {
+        BuffUptimePreviewChanged?.Invoke(config);
     }
 
     private void EntityInfoSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -627,6 +656,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public MapWidgetSettingsViewModel? MapSettings { get; }
 
+    public BuffUptimeWidgetSettingsViewModel? BuffUptimeSettings { get; }
+
     public bool HasMeterSettings => MeterSettings is not null;
 
     /// <summary>属性カラー(アイコンカラー)の節を出すか。表示の節とは別なので <c>HasDisplaySettings</c> には入れない。</summary>
@@ -661,6 +692,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasMapDisplaySettings => MapSettings is not null;
 
+    public bool HasBuffUptimeDisplaySettings => BuffUptimeSettings is not null;
+
     /// <summary>チャットのテキストカラーの節を出すか。チャットに表示の節は無いので <c>HasDisplaySettings</c> には入れない。</summary>
     public bool HasChatSettings => ChatSettings is not null;
 
@@ -670,6 +703,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         || HasEntityInfoDisplaySettings
         || HasMapDisplaySettings
         || HasMetricGraphDisplaySettings
+        || HasBuffUptimeDisplaySettings
         || HasBuffCardDisplaySettings
         || HasTimelineDisplaySettings
         || HasBuffListDisplaySettings
@@ -695,6 +729,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         || (EntityInfoSettings?.HasUnsavedChanges ?? false)
         || (ChatSettings?.HasUnsavedChanges ?? false)
         || (MapSettings?.HasUnsavedChanges ?? false)
+        || (BuffUptimeSettings?.HasUnsavedChanges ?? false)
         || (PluginSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
@@ -795,6 +830,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.Map = MapSettings.CreateConfig();
         }
 
+        if (BuffUptimeSettings is not null)
+        {
+            config.BuffUptime = BuffUptimeSettings.CreateConfig();
+        }
+
         if (PluginSettings is not null)
         {
             config.Plugin = PluginSettings.CreateConfig();
@@ -819,6 +859,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         EntityInfoSettings?.MarkSaved(config.EntityInfo);
         ChatSettings?.MarkSaved(config.Chat);
         MapSettings?.MarkSaved(config.Map);
+        BuffUptimeSettings?.MarkSaved(config.BuffUptime);
         PluginSettings?.MarkSaved(config.Plugin);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
@@ -843,6 +884,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         EntityInfoSettings?.ResetToDefaults();
         ChatSettings?.ResetToDefaults();
         MapSettings?.ResetToDefaults();
+        BuffUptimeSettings?.ResetToDefaults();
         PluginSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
@@ -866,6 +908,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         EntityInfoSettings?.RestoreSavedPreview();
         ChatSettings?.RestoreSavedPreview();
         MapSettings?.RestoreSavedPreview();
+        BuffUptimeSettings?.RestoreSavedPreview();
         PluginSettings?.RestoreSavedPreview();
     }
 

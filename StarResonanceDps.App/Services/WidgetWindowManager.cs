@@ -1731,6 +1731,10 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
                 requestedCharacterId,
                 initialPlayer,
                 PlayerMetricSummaryKind.DamageTaken),
+            WidgetKind.BuffUptime => new BuffUptimeWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer),
             _ => throw new ArgumentOutOfRangeException(nameof(playerWidget))
         };
     }
@@ -1782,6 +1786,10 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             PlayerMetricWidgetViewModel metricViewModel => new PlayerMetricGraphWidgetView
             {
                 DataContext = metricViewModel
+            },
+            BuffUptimeWidgetViewModel buffUptimeViewModel => new BuffUptimeWidgetView
+            {
+                DataContext = buffUptimeViewModel
             },
             _ => throw new ArgumentOutOfRangeException(nameof(playerWindowViewModel))
         };
@@ -2429,7 +2437,8 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             or WidgetKind.BreakSkillDetail
             or WidgetKind.BreakGraph
             or WidgetKind.DamageTakenSummary
-            or WidgetKind.Chat;
+            or WidgetKind.Chat
+            or WidgetKind.BuffUptime;
     }
 
     private static void RestoreAndActivate(WidgetWindow window)

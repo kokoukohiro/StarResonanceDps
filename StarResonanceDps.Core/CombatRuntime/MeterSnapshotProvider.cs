@@ -79,10 +79,10 @@ public sealed record BenchmarkStateSnapshot(
     bool IsCompleted);
 
 /// <summary>
-/// 推移の区切り1つ。<see cref="StartSeconds"/>〜<see cref="EndSeconds"/> は <c>FirstDamageTimeStamp</c> からの秒(右閉じ)、
+/// 推移の区切り1つ。<see cref="EndSeconds"/> は区切りの終わりの <c>FirstDamageTimeStamp</c> からの秒、
 /// <see cref="ValuePerSecond"/> はその区切りの合計 ÷ 区切りの長さ。
 /// </summary>
-public readonly record struct MetricGraphPoint(double StartSeconds, double EndSeconds, double ValuePerSecond);
+public readonly record struct MetricGraphPoint(double EndSeconds, double ValuePerSecond);
 
 /// <summary>
 /// 推移グラフの横軸の下に出す、プレイヤーの技の開始1件。<see cref="Seconds"/> は戦闘の時計の経過(<c>Encounter.ToCombatOffset</c>)で、
@@ -2472,7 +2472,6 @@ public static class MeterSnapshotProvider
             changed |= buffer.SetPoint(
                 bucket,
                 new MetricGraphPoint(
-                    bucket * (double)intervalSeconds,
                     (bucket + 1) * (double)intervalSeconds,
                     bucketTotals[bucket] / intervalSeconds));
         }
@@ -2482,7 +2481,6 @@ public static class MeterSnapshotProvider
             changed |= buffer.SetPoint(
                 fullBucketCount,
                 new MetricGraphPoint(
-                    fullBucketCount * (double)intervalSeconds,
                     elapsedSeconds,
                     bucketTotals[fullBucketCount] / partialBucketSeconds));
         }
@@ -2497,6 +2495,22 @@ public static class MeterSnapshotProvider
     /// 戦闘の時計の起点がまだ無い回は読み進めない(線も無い)。起点より前の開始は 0 秒に置く
     /// (時計は戦闘していない時間を1点に縮める。自動一時停止の中の開始が止まった時点に重なるのと同じ扱い)。
     /// </summary>
+    /// <summary>
+    /// <paramref name="characterId"/> のバフ稼働率(表示中の回、<see cref="ResolveActiveEncounter"/>)。人が居ないか、戦闘の時計の起点が無ければ null。
+    /// 毎回全部を読み直す(区間はまだ付いているバフの分だけ時計と一緒に伸びる)。
+    /// </summary>
+    public static BuffUptimeSnapshot? GetPlayerBuffUptime(long characterId)
+    {
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null
+            || !TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out _))
+        {
+            return null;
+        }
+
+        return encounter.ReadBuffUptime(entityUuid, DateTime.UtcNow);
+    }
+
     public static MetricGraphSkillActivationSlice GetPlayerSkillActivations(
         long characterId,
         Encounter? knownEncounter,

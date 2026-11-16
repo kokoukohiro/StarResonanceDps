@@ -7,7 +7,8 @@
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
     <!--
-        推移グラフのグラフカラー。行の作りはメーターのクラスカラー(MeterWidgetClassColorSettingsView)と同じで、不透明度は持たない。
+        グラフカラー(推移グラフの線の色とバフ稼働率のバーの色。中身は GraphColorSettingsViewModel)。
+        行の作りはメーターのクラスカラー(MeterWidgetClassColorSettingsView)と同じで、不透明度は持たない。
         クラスアイコンの欄に折れ線の見本を出す(メーターのクラスアイコンと同じく、選んでいる色で描いて影を付ける)。
     -->
     <UserControl.Resources>
@@ -15,7 +16,7 @@
     </UserControl.Resources>
 
     <StackPanel>
-        <TextBlock Text="{Binding GraphColorSectionTitle}"
+        <TextBlock Text="{Binding SectionTitle}"
                    Foreground="{DynamicResource Brush.TextPrimary}"
                    FontSize="16"
                    FontWeight="SemiBold"
@@ -23,7 +24,7 @@
 
         <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
             <StackPanel>
-                <ItemsControl ItemsSource="{Binding ClassColorItems}">
+                <ItemsControl ItemsSource="{Binding Items}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border>

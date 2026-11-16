@@ -3194,6 +3194,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 // 周りの実体の一覧から外す前に消す(ターゲット情報が、ターゲットの敵の居ない一覧を先に受けないように)。
                 SelfTargetStore.Instance.ClearIfTarget(disappearedEntity.Uuid);
+                EncounterManager.Current.MarkBuffUptimeAbsent(disappearedEntity.Uuid, extraData.ArrivalTime);
                 PlayerRosterProjection.RemoveNearbyPlayer(disappearedEntity.Uuid);
                 NearbyEntityProjection.RemoveEntity(disappearedEntity.Uuid);
                 SummonSourceIndex.Instance.Remove(disappearedEntity.Uuid);
@@ -3249,6 +3250,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 ApplyAppearBuffSnapshot(entity, extraData);
 
+                EncounterManager.Current.MarkBuffUptimePresent(entity.Uuid, extraData.ArrivalTime);
                 PlayerRosterProjection.AddOrUpdateNearbyPlayer(entity.Uuid);
                 NearbyEntityProjection.AddOrUpdateAppearedEntity(entity.Uuid);
             }
@@ -3355,6 +3357,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             ActiveBuffStore.Instance.ApplyAppearList(
                 entity.Uuid,
                 buffInfos.Select(info => (ulong)info.BuffUuid).ToHashSet());
+            EncounterManager.Current.ApplyBuffUptimeAppearList(
+                entity.Uuid,
+                buffInfos.Select(info => info.BuffUuid).ToHashSet(),
+                extraData.ArrivalTime);
 
             // 特化を持つのはプレイヤーだけ。0件の一覧でも「全部を見た」になる(未装着・無効を確定する)。
             if (Utils.UuidToEntityType(entity.Uuid) == (long)EEntityType.EntChar)
@@ -3590,6 +3596,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             NearbyEntityProjection.RefreshEntity(targetUuid, changedAttributes, extraData.ArrivalTime);
+            EncounterManager.Current.MarkBuffUptimePresent(targetUuid, extraData.ArrivalTime);
             PlayerRosterProjection.AddOrUpdateNearbyPlayer(targetUuid);
 
 

@@ -48,6 +48,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private EntityInfoWidgetSettingsConfig _entityInfo = WidgetConfigDefaults.CreateEntityInfoSettings();
     private ChatWidgetSettingsConfig _chat = WidgetConfigDefaults.CreateChatSettings();
     private MapWidgetSettingsConfig _map = WidgetConfigDefaults.CreateMapSettings();
+    private BuffUptimeWidgetSettingsConfig _buffUptime = WidgetConfigDefaults.CreateBuffUptimeSettings();
     private PluginWidgetSettingsConfig _pluginSettings = new();
 
     /// <summary>エンティティリストの行を組む設定。メーターの設定(<c>_meter</c>)が変わったときに作り直す。</summary>
@@ -214,6 +215,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         or WidgetKind.PlayerModule
         or WidgetKind.BuffList
         or WidgetKind.DebuffList
+        or WidgetKind.BuffUptime
         or WidgetKind.BuffDebuffCard
         or WidgetKind.DamageSkillDetail
         or WidgetKind.DamageSummary
@@ -322,6 +324,12 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     public MapWidgetSettingsConfig GetMapSettingsSnapshot()
     {
         return WidgetConfigDefaults.CloneNormalizedMap(_map);
+    }
+
+    /// <summary>バフ稼働率の今の設定の写し(設定の窓のプレビューと、ウィジェットからの変更を含む)。</summary>
+    public BuffUptimeWidgetSettingsConfig GetBuffUptimeSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedBuffUptime(_buffUptime);
     }
 
     /// <summary>バフ・デバフグループに、その鍵の行がオンで入っているか(設定の窓のプレビューを含む今の値)。</summary>
@@ -666,6 +674,57 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         EntityInfoPriorityBuffChangedFromWidget?.Invoke(Kind, key, isEnabled);
     }
 
+    /// <summary>
+    /// バフ稼働率の窓の行の右クリックで、そのバフを非表示にする。
+    /// 開いているバフ稼働率の窓へ <see cref="BuffUptimeSettingsChanged"/> で、保存と設定ウィンドウへ
+    /// <see cref="BuffUptimeHiddenBuffsChanged"/> で知らせる。既に非表示なら何もしない(バフ・デバフ一覧と同じ扱い)。
+    /// </summary>
+    public void HideBuffInBuffUptime(int buffId)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffUptimeSettings(Kind)
+            || buffId <= 0
+            || _buffUptime.HiddenBuffIds.Contains(buffId))
+        {
+            return;
+        }
+
+        _buffUptime.HiddenBuffIds.Add(buffId);
+        BuffUptimeSettingsChanged?.Invoke(this, EventArgs.Empty);
+        BuffUptimeHiddenBuffsChanged?.Invoke(Kind, buffId);
+    }
+
+    /// <summary>バフ稼働率の優先表示リストに、そのバフの行がオンで入っているか(設定の窓のプレビューを含む今の値)。</summary>
+    public bool IsBuffUptimePriorityBuff(int buffId)
+    {
+        return WidgetConfigDefaults.SupportsBuffUptimeSettings(Kind)
+            && _buffUptime.PriorityBuffs is { } priorityBuffs
+            && priorityBuffs.Exists(entry => entry.IsEnabled && entry.GetKey() == BuffEntryKey.ForBuff(buffId));
+    }
+
+    /// <summary>
+    /// バフ稼働率の窓の行の右クリックで、そのバフを優先表示にする・やめる。
+    /// 開いているバフ稼働率の窓へ <see cref="BuffUptimeSettingsChanged"/> で、保存と設定ウィンドウへ
+    /// <see cref="BuffUptimePriorityBuffChangedFromWidget"/> で知らせる。既にその状態なら何もしない(バフ・デバフ一覧と同じ扱い)。
+    /// </summary>
+    public void SetBuffUptimePriorityBuffEnabledFromWidget(int buffId, bool isEnabled)
+    {
+        var key = BuffEntryKey.ForBuff(buffId);
+        if (!WidgetConfigDefaults.SupportsBuffUptimeSettings(Kind)
+            || !key.IsValid
+            || IsBuffUptimePriorityBuff(buffId) == isEnabled)
+        {
+            return;
+        }
+
+        WidgetConfigDefaults.SetBuffEntryEnabled(
+            _buffUptime.PriorityBuffs ??= [],
+            key,
+            isEnabled,
+            WidgetConfigDefaults.DefaultBuffUptimePriorityBuffEntries);
+        BuffUptimeSettingsChanged?.Invoke(this, EventArgs.Empty);
+        BuffUptimePriorityBuffChangedFromWidget?.Invoke(Kind, key, isEnabled);
+    }
+
     /// <summary>推移グラフの今の横軸の長さ(設定の窓のプレビューを含む)。</summary>
     public int MetricGraphVisibleSeconds => _metricGraph.VisibleSeconds;
 
@@ -822,6 +881,18 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     public event EventHandler? ChatSettingsChanged;
 
     public event EventHandler? MapSettingsChanged;
+
+    /// <summary>
+    /// バフ稼働率の設定が変わった(保存・保存前のプレビュー・破棄・初期化と、窓の右クリックの非表示・優先表示、窓の上のホイールの横軸の長さ)。
+    /// 開いているバフ稼働率の窓が受けて描き直す。
+    /// </summary>
+    public event EventHandler? BuffUptimeSettingsChanged;
+
+    /// <summary>バフ稼働率の窓の右クリックでバフを1つ非表示にした(引数はウィジェットの種別とバフのID)。設定画面のスイッチでは上げない。</summary>
+    public event Action<WidgetKind, int>? BuffUptimeHiddenBuffsChanged;
+
+    /// <summary>バフ稼働率の窓の右クリックで優先表示リストの行をオン/オフにした(引数はウィジェットの種別・行の鍵・オンか)。設定画面のスイッチでは上げない。</summary>
+    public event Action<WidgetKind, BuffEntryKey, bool>? BuffUptimePriorityBuffChangedFromWidget;
 
     /// <summary>プラグインのウィジェットの設定が変わった(保存・保存前のプレビュー・破棄・初期化)。</summary>
     public event EventHandler? PluginSettingsChanged;
@@ -986,6 +1057,9 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
                 : null,
             Map = WidgetConfigDefaults.SupportsMapSettings(Kind)
                 ? _map.Clone()
+                : null,
+            BuffUptime = WidgetConfigDefaults.SupportsBuffUptimeSettings(Kind)
+                ? _buffUptime.Clone()
                 : null
         };
     }
@@ -1112,6 +1186,12 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         {
             _map = WidgetConfigDefaults.CloneNormalizedMap(config.Map);
             MapSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (WidgetConfigDefaults.SupportsBuffUptimeSettings(Kind))
+        {
+            _buffUptime = WidgetConfigDefaults.CloneNormalizedBuffUptime(config.BuffUptime);
+            BuffUptimeSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         if (Kind == WidgetKind.Plugin)
@@ -1310,6 +1390,17 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
         _map = WidgetConfigDefaults.CloneNormalizedMap(map);
         MapSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ApplyBuffUptimeSettingsPreview(BuffUptimeWidgetSettingsConfig buffUptime)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffUptimeSettings(Kind))
+        {
+            return;
+        }
+
+        _buffUptime = WidgetConfigDefaults.CloneNormalizedBuffUptime(buffUptime);
+        BuffUptimeSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyEntityInfoSettingsPreview(EntityInfoWidgetSettingsConfig entityInfo)
@@ -1578,6 +1669,12 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private void RequestBuffList(PlayerMenuTarget? player)
     {
         RequestPlayerWindow(WidgetKind.BuffList, player);
+    }
+
+    [RelayCommand]
+    private void RequestBuffUptime(PlayerMenuTarget? player)
+    {
+        RequestPlayerWindow(WidgetKind.BuffUptime, player);
     }
 
     [RelayCommand]

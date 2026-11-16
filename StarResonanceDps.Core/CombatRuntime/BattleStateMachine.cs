@@ -40,6 +40,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: true, reason: EncounterStartReason.Force);
 
             // バフはエンカウンター境界では消さないが、マップ移動では持ち越さない。
+            EncounterManager.Current.DiscardCarriedBuffUptime();
             Services.ActiveBuffStore.Instance.Clear();
             Services.BuffInstanceIndex.Instance.Clear();
             Services.SummonSourceIndex.Instance.Clear();

@@ -456,8 +456,20 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     /// </summary>
     private static Color ResolveGraphColor(MetricGraphWidgetSettingsConfig settings, string classKey)
     {
-        var palette = settings.ClassColorPalettes[classKey];
-        var hex = palette[Math.Clamp(settings.ClassColorIndexes[classKey], 0, palette.Count - 1)];
+        return ResolveGraphColor(settings.ClassColorIndexes, settings.ClassColorPalettes, classKey);
+    }
+
+    /// <summary>
+    /// グラフカラーの <paramref name="classKey"/> の選んでいる色を不透明にした色(推移グラフの線とバフ稼働率のバー)。
+    /// 設定はそろえた後なので、鍵の行と色の形は必ずある。
+    /// </summary>
+    internal static Color ResolveGraphColor(
+        IReadOnlyDictionary<string, int> classColorIndexes,
+        IReadOnlyDictionary<string, List<string>> classColorPalettes,
+        string classKey)
+    {
+        var palette = classColorPalettes[classKey];
+        var hex = palette[Math.Clamp(classColorIndexes[classKey], 0, palette.Count - 1)];
         if (!ColorUtilities.TryParseHex(hex, out var color))
         {
             throw new InvalidOperationException($"Graph color is not a valid color (class={classKey}, value={hex}).");

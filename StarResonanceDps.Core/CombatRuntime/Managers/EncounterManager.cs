@@ -296,6 +296,10 @@ namespace StarResonanceDps.Core.CombatRuntime
                     newChar.CopyIdentityFrom(priorChar.Value);
                 }
 
+                // バフ稼働率は、周りにいた人と付いていたバフを回の始まりから続いているものとして運ぶ。
+                // マップ移動は運んだ後で捨てる(BattleStateMachine.StartNewMap、前のマップのバフが残った順番で作り直すため)。
+                Current.CarryBuffUptimeFrom(priorEncounter);
+
                 if (reason == EncounterStartReason.NewObjective)
                 {
 
@@ -2210,6 +2214,246 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        /// <summary>バフ稼働率の記録。回のあいだ全部残す。解放は回と一緒。DB の形は保存のときに作り、履歴は最初に読むときに戻す。</summary>
+        private readonly BuffUptimeRecorder _buffUptime = new();
+
+        /// <summary>
+        /// バフ稼働率に残すプレイヤーか。集計を止めている回は残さない。計測の回は自分だけ(計測は自分の出来事だけを記録する)。
+        /// 計測の窓の外でも残す(窓の前に付いた料理などを、窓の始まりから付いていたことにするため。数えるのは時計の中だけ)。
+        /// </summary>
+        private bool IsBuffUptimeRecorded(long playerUuid)
+        {
+            return Utils.UuidToEntityType(playerUuid) == (long)EEntityType.EntChar
+                && !IsAggregationStopped
+                && (!IsBenchmark || (playerUuid != 0 && playerUuid == AppState.PlayerUUID));
+        }
+
+        /// <summary>
+        /// バフの通知をバフ稼働率に残す。実体の記録(<see cref="Entity.NotifyBuffEvent"/>)を当てた後に呼ぶ。
+        /// 付与はバフリストに出るバフのうちバフの側だけ。変化(延長)は終わりの見込みを置き直し、除去は番号を運ばないので実体の番号で当てる。
+        /// </summary>
+        private void RecordBuffUptime(long entityUuid, EBuffEventType buffEventType, int buffUuid, DateTime? creationTime, DateTime arrivalUtc, BuffEventPayload payload)
+        {
+            if (!IsBuffUptimeRecorded(entityUuid))
+            {
+                return;
+            }
+
+            if (buffEventType == EBuffEventType.BuffEventRemove)
+            {
+                _buffUptime.Remove(entityUuid, buffUuid, arrivalUtc);
+                return;
+            }
+
+            if (payload == BuffEventPayload.None
+                || !Entities.TryGetValue(entityUuid, out var entity)
+                || !entity.BuffEvents.TryGetValue((ulong)buffUuid, out var buffEvent))
+            {
+                return;
+            }
+
+            if (payload == BuffEventPayload.BuffChange)
+            {
+                _buffUptime.Change(entityUuid, buffUuid, buffEvent.Duration, creationTime, arrivalUtc);
+                return;
+            }
+
+            if (BuffDisplayRules.IsShownByGameRule(buffEvent)
+                && BuffDisplayRules.GetListKind(buffEvent.BuffType) == PlayerBuffListKind.Buff)
+            {
+                _buffUptime.Apply(entityUuid, buffUuid, buffEvent.BaseId, buffEvent.Duration, creationTime, arrivalUtc);
+            }
+        }
+
+        /// <summary>プレイヤーの通知(差分・出現)が届いた。バフ稼働率の、その人が周りにいた区間を始める。</summary>
+        public void MarkBuffUptimePresent(long playerUuid, DateTime arrivalUtc)
+        {
+            if (IsBuffUptimeRecorded(playerUuid))
+            {
+                _buffUptime.MarkPresent(playerUuid, arrivalUtc);
+            }
+        }
+
+        /// <summary>プレイヤーが周りから消えた。バフ稼働率の、周りにいた区間と付いているバフをここで終える。</summary>
+        public void MarkBuffUptimeAbsent(long playerUuid, DateTime arrivalUtc)
+        {
+            if (IsBuffUptimeRecorded(playerUuid))
+            {
+                _buffUptime.MarkAbsent(playerUuid, arrivalUtc);
+            }
+        }
+
+        /// <summary>出現時の全バフの一覧に無かった実体を、バフ稼働率でも終える(<see cref="Services.ActiveBuffStore.ApplyAppearList"/> と同じ扱い)。</summary>
+        public void ApplyBuffUptimeAppearList(long playerUuid, IReadOnlySet<int> listedBuffUuids, DateTime arrivalUtc)
+        {
+            if (IsBuffUptimeRecorded(playerUuid))
+            {
+                _buffUptime.KeepOnly(playerUuid, listedBuffUuids, arrivalUtc);
+            }
+        }
+
+        /// <summary>回の作り直しで、前の回のバフ稼働率(周りにいた人と付いていたバフ)を運ぶ。</summary>
+        internal void CarryBuffUptimeFrom(Encounter prior)
+        {
+            _buffUptime.CarryFrom(prior._buffUptime, DateTime.UtcNow);
+        }
+
+        /// <summary>運んだバフ稼働率を捨てる。マップ移動は前のマップのバフを持ち越さない。</summary>
+        internal void DiscardCarriedBuffUptime()
+        {
+            _buffUptime.Clear();
+        }
+
+        /// <summary>
+        /// <paramref name="playerUuid"/> のバフ稼働率。戦闘の時計の起点が無ければ null。区間は戦闘の経過(秒)に直し、時計の前は 0、終点の後は終点にそろえる。
+        /// 畳んだ番号は畳み先の1行に、料理・薬剤はまとまりごとの1行にまとめる。
+        /// 数える時間の中に区間が残らない行(時計の前だけ・一時停止の中だけ付いていた、届いた時点で終わりの見込みを過ぎていた)は出さない。
+        /// </summary>
+        public BuffUptimeSnapshot? ReadBuffUptime(long playerUuid, DateTime utcNow)
+        {
+            // 残さない人(計測の回の自分以外・集計を止めている回)は、前の回から運んだ分があっても出さない(更新されないので)。
+            if (!IsBuffUptimeRecorded(playerUuid))
+            {
+                return null;
+            }
+
+            var clock = ReadCombatClock(utcNow);
+            if (clock.StartUtc is null || clock.EndUtc is not { } clockEnd)
+            {
+                return null;
+            }
+
+            LoadSavedBuffUptime(playerUuid);
+            if (_buffUptime.Read(playerUuid, clockEnd) is not { } raw)
+            {
+                return null;
+            }
+
+            var elapsed = clock.Elapsed.TotalSeconds;
+            double ToSeconds(long unixMilliseconds)
+            {
+                var offset = ToCombatOffset(BuffUptimeRecorder.FromUnixMilliseconds(unixMilliseconds))!.Value.TotalSeconds;
+                return Math.Clamp(offset, 0d, elapsed);
+            }
+
+            var groups = new Dictionary<(int BuffId, BuffGroup Group), List<RawBuffSpans>>();
+            foreach (var buff in raw.Buffs)
+            {
+                var group = CombatDataCatalog.GetBuffGroup(buff.BuffId);
+                var key = group == BuffGroup.None
+                    ? (CombatDataCatalog.GetBuffDisplayId(buff.BuffId), group)
+                    : (0, group);
+                if (!groups.TryGetValue(key, out var members))
+                {
+                    members = [];
+                    groups.Add(key, members);
+                }
+
+                members.Add(buff);
+            }
+
+            var rows = new List<BuffUptimeRow>(groups.Count);
+            foreach (var ((buffId, group), members) in groups)
+            {
+                var spans = MergeSpans(members.SelectMany(member => member.Spans).Select(span => (ToSeconds(span.Start), ToSeconds(span.End))));
+                if (spans.Count == 0)
+                {
+                    continue;
+                }
+
+                rows.Add(new BuffUptimeRow(
+                    buffId,
+                    group,
+                    members.All(member => member.IsPermanent),
+                    members.Min(member => member.FirstOrder),
+                    ToFlatSpans(spans),
+                    spans.Sum(span => span.End - span.Start)));
+            }
+
+            var present = MergeSpans(raw.PresentSpans.Select(span => (ToSeconds(span.Start), ToSeconds(span.End))));
+            var absent = new List<(double Start, double End)>();
+            var cursor = 0d;
+            foreach (var (start, end) in present)
+            {
+                if (start > cursor)
+                {
+                    absent.Add((cursor, start));
+                }
+
+                cursor = Math.Max(cursor, end);
+            }
+
+            if (cursor < elapsed)
+            {
+                absent.Add((cursor, elapsed));
+            }
+
+            return new BuffUptimeSnapshot(this, elapsed, ToFlatSpans(absent), absent.Sum(span => span.End - span.Start), rows);
+        }
+
+        /// <summary>重なる区間をまとめ、長さの無い区間を落とす。始まりの昇順。</summary>
+        private static List<(double Start, double End)> MergeSpans(IEnumerable<(double Start, double End)> spans)
+        {
+            var merged = new List<(double Start, double End)>();
+            foreach (var (start, end) in spans.Where(span => span.End > span.Start).OrderBy(span => span.Start))
+            {
+                if (merged.Count > 0 && start <= merged[^1].End)
+                {
+                    merged[^1] = (merged[^1].Start, Math.Max(merged[^1].End, end));
+                }
+                else
+                {
+                    merged.Add((start, end));
+                }
+            }
+
+            return merged;
+        }
+
+        private static double[] ToFlatSpans(List<(double Start, double End)> spans)
+        {
+            var flat = new double[spans.Count * 2];
+            for (var index = 0; index < spans.Count; index++)
+            {
+                flat[index * 2] = spans[index].Start;
+                flat[index * 2 + 1] = spans[index].End;
+            }
+
+            return flat;
+        }
+
+        /// <summary>DB から読んだ回の、その人のバフ稼働率を回の記録へ移す。実行中の回(記録がある人)は移さない。</summary>
+        private void LoadSavedBuffUptime(long playerUuid)
+        {
+            if (Entities.TryGetValue(playerUuid, out var entity)
+                && entity.BuffUptimeRecords is { } packed
+                && _buffUptime.LoadIfAbsent(playerUuid, packed))
+            {
+                entity.BuffUptimeRecords = null;
+            }
+        }
+
+        /// <summary>保存の直前に、プレイヤーのバフ稼働率を DB の形へ写す。書いたら <see cref="ClearBuffUptimeAfterSave"/> で捨てる。</summary>
+        internal void FillBuffUptimeForSave()
+        {
+            var endUtc = EndTime != DateTime.MinValue ? EndTime.ToUniversalTime() : DateTime.UtcNow;
+            foreach (var (uuid, entity) in Entities)
+            {
+                if (entity.EntityType == EEntityType.EntChar)
+                {
+                    entity.BuffUptimeRecords = _buffUptime.PackForSave(uuid, endUtc);
+                }
+            }
+        }
+
+        internal void ClearBuffUptimeAfterSave()
+        {
+            foreach (var entity in Entities.Values)
+            {
+                entity.BuffUptimeRecords = null;
+            }
+        }
+
         private readonly object _skillActivationGate = new();
 
         /// <summary>人ごとの技の開始。回のあいだ全部残す。解放は回と一緒。DB の形は保存のときに作り、履歴は最初に読むときに戻す。</summary>
@@ -2921,6 +3165,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 Payload = payload,
             });
             GetOrCreateEntity(entityUuid).NotifyBuffEvent(buffEventType, buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId, creationTime, extraPacketData, payload, fightSourceType);
+            RecordBuffUptime(entityUuid, buffEventType, buffUuid, creationTime, extraPacketData.ArrivalTime, payload);
 
             // 強化する9特化は、特化アビリティ本体が付与するバフ(と、その実行時変種)で判定する。
             // 紐付け先は保持者ではなく術者(FireUuid)。味方に配られるバフは受け手が保持するので、
@@ -3525,6 +3770,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 最初にブレイク値を足したときに作る(ブレイク値を持たない実体には作らない)。
         /// </summary>
         public CombatStats? BreakStats { get; set; }
+
+        /// <summary>
+        /// バフ稼働率の保存の形(時刻と中身を2つずつ並べた数の配列)。保存の間だけ埋める(<see cref="Encounter.FillBuffUptimeForSave"/>)。
+        /// DB から読んだ回は、最初に読むときに回の記録へ移して空にする。
+        /// </summary>
+        public long[]? BuffUptimeRecords { get; set; }
 
         /// <summary>
         /// このエンティティが始めた詠唱。タイムラインの詠唱の行の材料で、
@@ -4574,6 +4825,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     Services.BuffOriginResolver.Instance.Enqueue(buffEvent, extraPacketData.ArrivalTime);
                     AddRootBuff(baseId);
+
+                    // 召喚体が自分の技で付けたバフは、召喚者の技の枠のバッジが召喚体を出した技へたどれるように控える。
+                    Services.ActiveBuffStore.Instance.RecordSummonBuffSource(UUID, UID, buffEvent);
                 }
             }
         }

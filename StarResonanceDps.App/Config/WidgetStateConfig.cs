@@ -52,6 +52,8 @@ public sealed class WidgetConfig
 
     public MapWidgetSettingsConfig? Map { get; set; }
 
+    public BuffUptimeWidgetSettingsConfig? BuffUptime { get; set; }
+
     /// <summary>プラグインのウィジェットの設定(プラグインが定義した設定の値)。プラグインのウィジェットだけ持つ。</summary>
     public PluginWidgetSettingsConfig? Plugin { get; set; }
 
@@ -101,6 +103,7 @@ public sealed class WidgetConfig
             EntityInfo = EntityInfo?.Clone(),
             Chat = Chat?.Clone(),
             Map = Map?.Clone(),
+            BuffUptime = BuffUptime?.Clone(),
             Plugin = Plugin?.Clone(),
             PlayerStatusRowOrder = PlayerStatusRowOrder is null ? null : [.. PlayerStatusRowOrder],
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList()
@@ -399,7 +402,7 @@ public sealed class BuffGaugeColorConfig
 }
 
 /// <summary>
-/// バフ・デバフグループの1行と、バフ・デバフカードのショートカットの1行、両方の通知対象の1行、バフ・デバフ一覧とエンティティ情報の優先表示リストの1行。
+/// バフ・デバフグループの1行と、バフ・デバフカードのショートカットの1行、両方の通知対象の1行、バフ・デバフ一覧とエンティティ情報とバフ稼働率の優先表示リストの1行。
 /// バフの番号(<c>BaseId</c>)か、料理・薬剤のまとまり(<see cref="BuffGroup"/>)のどちらか(<see cref="BuffEntryKey"/>)。優先表示リストはバフの番号だけ。
 /// </summary>
 public sealed class BuffDebuffGroupEntryConfig
@@ -949,6 +952,64 @@ public sealed class EntityInfoWidgetSettingsConfig
     }
 }
 
+/// <summary>
+/// バフ稼働率の設定。常駐バフ(持続が永続の実体)と料理・薬剤を出すか、横軸の縮尺(1秒の幅)、
+/// 優先表示リスト・非表示リスト(バフ・デバフ一覧と同じ扱い)、バーの色(グラフカラー)。
+/// グラフカラーの形は推移グラフと同じ(クラスごとの色。不透明度は持たない)で、既定は DPS メーターと同じ
+/// (<see cref="WidgetConfigDefaults.GetMetricGraphColorDefaultSource"/>)。
+/// </summary>
+public sealed class BuffUptimeWidgetSettingsConfig
+{
+    /// <summary>
+    /// 設定「1秒の幅」(px、<see cref="WidgetConfigDefaults.MinBuffUptimePixelsPerSecond"/>〜<see cref="WidgetConfigDefaults.MaxBuffUptimePixelsPerSecond"/>)。
+    /// 幅と時間の比を固定し、窓の幅を変えたらバーを伸ばさず見える時間の範囲を変える。
+    /// </summary>
+    public int PixelsPerSecond { get; set; } = WidgetConfigDefaults.DefaultBuffUptimePixelsPerSecond;
+
+    /// <summary>設定「常駐バフの表示」。常駐バフは持続が永続(負)の実体。</summary>
+    public bool ShowsPermanentBuffs { get; set; } = WidgetConfigDefaults.DefaultBuffUptimeShowsPermanentBuffs;
+
+    /// <summary>設定「料理・薬剤の表示」。出すときは料理1行・薬剤1行。</summary>
+    public bool ShowsCuisinePotion { get; set; } = WidgetConfigDefaults.DefaultBuffUptimeShowsCuisinePotion;
+
+    /// <summary>
+    /// 優先表示リスト(一覧の先頭からこの並びで出すバフ)。扱いはバフ・デバフ一覧と同じで、
+    /// 既定の行は <see cref="WidgetConfigDefaults.DefaultBuffUptimePriorityBuffEntries"/>。
+    /// </summary>
+    public List<BuffDebuffGroupEntryConfig>? PriorityBuffs { get; set; }
+
+    /// <summary>
+    /// 一覧に出さないバフのID(<c>BaseId</c>)。並びは非表示にした順。
+    /// 行の右クリックで足し、設定画面のスイッチで外す。
+    /// </summary>
+    public List<int> HiddenBuffIds { get; set; } = [];
+
+    public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DpsMeter);
+
+    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DpsMeter);
+
+    public BuffUptimeWidgetSettingsConfig Clone()
+    {
+        return new BuffUptimeWidgetSettingsConfig
+        {
+            PixelsPerSecond = PixelsPerSecond,
+            ShowsPermanentBuffs = ShowsPermanentBuffs,
+            ShowsCuisinePotion = ShowsCuisinePotion,
+            PriorityBuffs = PriorityBuffs?.Select(entry => entry.Clone()).ToList(),
+            HiddenBuffIds = HiddenBuffIds is null ? [] : [.. HiddenBuffIds],
+            ClassColorIndexes = ClassColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DpsMeter)
+                : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
+            ClassColorPalettes = ClassColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DpsMeter)
+                : ClassColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}
+
 /// <summary>チャットの設定。発言者の名前の色(テキストカラー)。形は蘇生リストのテキストカラーと同じ。</summary>
 public sealed class ChatWidgetSettingsConfig
 {
@@ -1221,6 +1282,8 @@ public static class WidgetConfigDefaults
     private const double HateGraphInitialWindowHeight = 260d;
     private const double BreakGraphInitialWindowWidth = 440d;
     private const double BreakGraphInitialWindowHeight = 260d;
+    private const double BuffUptimeInitialWindowWidth = 440d;
+    private const double BuffUptimeInitialWindowHeight = 260d;
 
     /// <summary>
     /// バフ・デバフグループの既定の高さ。既定でオンの行(<see cref="DefaultBuffDebuffGroupEntries"/>)がちょうど入る高さで、
@@ -1447,6 +1510,20 @@ public static class WidgetConfigDefaults
         (BuffEntryKey.ForBuff(2110305), true)    // 回復禁止(ロールスキルの鉄牙のデバフ、10秒)
     ];
 
+    /// <summary>
+    /// バフ稼働率の優先表示リストの既定の行(この並び)。先頭の3つはバフ一覧の既定と同じ番号で、この窓では全部オン。
+    /// 既定の行はオフにしても消えず、初期化でこの並びと既定のオン・オフに戻る。
+    /// </summary>
+    public static IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> DefaultBuffUptimePriorityBuffEntries { get; } =
+    [
+        (BuffEntryKey.ForBuff(2110034), true),  // リキャスト短縮(ティナの奥義のバフ)
+        (BuffEntryKey.ForBuff(2110140), true),  // 機械の力(ガトグリフの奥義のバフ)
+        (BuffEntryKey.ForBuff(2110125), true),  // 高原血統(バジリスクの奥義のバフ)
+        (BuffEntryKey.ForBuff(2110065), true),  // 灼熱の戦意(異国の山賊長ヒグマの奥義のバフ)
+        (BuffEntryKey.ForBuff(2110143), true),  // 機能強化(クロックゲイザーの奥義のバフ)
+        (BuffEntryKey.ForBuff(2110183), true)   // 激励バリア(夢現の宿主の奥義のバフ)
+    ];
+
     /// <summary>バフ・デバフ一覧の優先表示リストの既定の行。バフ一覧とデバフ一覧で別。</summary>
     public static IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> GetBuffListPriorityDefaults(WidgetKind kind)
     {
@@ -1461,7 +1538,7 @@ public static class WidgetConfigDefaults
     }
 
     /// <summary>
-    /// 行(バフ・デバフグループの行、バフ・デバフカードのショートカット、カードとグループの通知対象、バフ・デバフ一覧とエンティティ情報の優先表示リスト)をオン/オフにする
+    /// 行(バフ・デバフグループの行、バフ・デバフカードのショートカット、カードとグループの通知対象、バフ・デバフ一覧とエンティティ情報とバフ稼働率の優先表示リスト)をオン/オフにする
     /// (右クリックの「グループに追加」「ショートカットに追加」「通知対象にする」「優先表示」と「グループから削除」「通知対象にしない」「優先表示をやめる」)。
     /// オンにするときは、行があればオンに戻し、無ければ末尾に足す。オフにするときは、既定の行(<paramref name="defaults"/>)はオフにして残し、足した行は消す
     /// (足した行をオフのまま保存したときと同じ)。ウィジェットの今の値・保存する値・設定の窓の保存済みの値がこの決まりを使う。
@@ -2013,6 +2090,12 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.Map;
     }
 
+    /// <summary>バフ稼働率の設定(表示設定・優先表示リスト・非表示リスト・グラフカラー)を持つ種別か。</summary>
+    public static bool SupportsBuffUptimeSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.BuffUptime;
+    }
+
     /// <summary>自分だけを出す、1枚だけ開くプレイヤーの窓の種別か(ステータス詳細・バフ・デバフグループ)。</summary>
     public static bool IsSelfOnlyPlayerWindowKind(WidgetKind kind)
     {
@@ -2032,6 +2115,7 @@ public static class WidgetConfigDefaults
             or WidgetKind.PlayerModule
             or WidgetKind.BuffList
             or WidgetKind.DebuffList
+            or WidgetKind.BuffUptime
             or WidgetKind.BuffDebuffCard
             or WidgetKind.DamageSkillDetail
             or WidgetKind.DamageSummary
@@ -2072,6 +2156,7 @@ public static class WidgetConfigDefaults
             EntityInfo = SupportsEntityInfoSettings(kind) ? CreateEntityInfoSettings() : null,
             Chat = SupportsChatSettings(kind) ? CreateChatSettings() : null,
             Map = SupportsMapSettings(kind) ? CreateMapSettings() : null,
+            BuffUptime = SupportsBuffUptimeSettings(kind) ? CreateBuffUptimeSettings() : null,
             Plugin = kind == WidgetKind.Plugin ? new PluginWidgetSettingsConfig() : null
         };
     }
@@ -2550,6 +2635,62 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
+    /// <summary>バフ稼働率の「常駐バフの表示」の既定。</summary>
+    public const bool DefaultBuffUptimeShowsPermanentBuffs = false;
+
+    /// <summary>バフ稼働率の「料理・薬剤の表示」の既定。</summary>
+    public const bool DefaultBuffUptimeShowsCuisinePotion = false;
+
+    /// <summary>バフ稼働率の「1秒の幅」の既定(px)。既定の大きさの窓で横軸がおよそ12秒(推移グラフの横軸の長さの既定)になる比。</summary>
+    public const int DefaultBuffUptimePixelsPerSecond = 10;
+
+    public const int MinBuffUptimePixelsPerSecond = 2;
+
+    public const int MaxBuffUptimePixelsPerSecond = 60;
+
+    public static int ClampBuffUptimePixelsPerSecond(int pixelsPerSecond)
+    {
+        return Math.Clamp(pixelsPerSecond, MinBuffUptimePixelsPerSecond, MaxBuffUptimePixelsPerSecond);
+    }
+
+    /// <summary>バフ稼働率の設定の既定。グラフカラーの既定は推移グラフと同じ決め方(<see cref="GetMetricGraphColorDefaultSource"/>)。</summary>
+    public static BuffUptimeWidgetSettingsConfig CreateBuffUptimeSettings()
+    {
+        var source = GetMetricGraphColorDefaultSource(WidgetKind.BuffUptime);
+
+        return new BuffUptimeWidgetSettingsConfig
+        {
+            PixelsPerSecond = DefaultBuffUptimePixelsPerSecond,
+            ShowsPermanentBuffs = DefaultBuffUptimeShowsPermanentBuffs,
+            ShowsCuisinePotion = DefaultBuffUptimeShowsCuisinePotion,
+            PriorityBuffs = CreateBuffEntries(DefaultBuffUptimePriorityBuffEntries),
+            HiddenBuffIds = [],
+            ClassColorIndexes = CreateDefaultClassColorIndexes(source),
+            ClassColorPalettes = CreateDefaultClassColorPalettes(source)
+        };
+    }
+
+    /// <summary>
+    /// 保存値を正規化して写す。1秒の幅は範囲に収め、優先表示リストは <see cref="NormalizeBuffEntries"/> で直し、
+    /// グラフカラーは推移グラフと同じく読み替え先のメーターの行の並びと既定値で揃える。
+    /// </summary>
+    public static BuffUptimeWidgetSettingsConfig CloneNormalizedBuffUptime(BuffUptimeWidgetSettingsConfig? buffUptime)
+    {
+        var normalized = (buffUptime ?? CreateBuffUptimeSettings()).Clone();
+        normalized.PixelsPerSecond = ClampBuffUptimePixelsPerSecond(normalized.PixelsPerSecond);
+        normalized.PriorityBuffs = NormalizeBuffEntries(normalized.PriorityBuffs, DefaultBuffUptimePriorityBuffEntries);
+
+        // 0 以下はバフのIDではない。重なりは先に足したほうを残し、非表示にした順を保つ(バフ・デバフ一覧と同じ)。
+        normalized.HiddenBuffIds = [.. normalized.HiddenBuffIds.Where(baseId => baseId > 0).Distinct()];
+
+        var source = GetMetricGraphColorDefaultSource(WidgetKind.BuffUptime);
+        (normalized.ClassColorIndexes, normalized.ClassColorPalettes) = NormalizeClassColors(
+            source,
+            normalized.ClassColorIndexes,
+            normalized.ClassColorPalettes);
+        return normalized;
+    }
+
     /// <summary>チャットの設定の既定。</summary>
     public static ChatWidgetSettingsConfig CreateChatSettings()
     {
@@ -2729,6 +2870,11 @@ public static class WidgetConfigDefaults
                 Width = PlayerBuffListInitialWindowWidth,
                 Height = PlayerBuffListInitialWindowHeight
             },
+            WidgetKind.BuffUptime => new WidgetWindowConfig
+            {
+                Width = BuffUptimeInitialWindowWidth,
+                Height = BuffUptimeInitialWindowHeight
+            },
             WidgetKind.BuffDebuffGroup => new WidgetWindowConfig
             {
                 Width = BuffDebuffGroupInitialWindowWidth,
@@ -2870,7 +3016,7 @@ public static class WidgetConfigDefaults
 
     /// <summary>
     /// 推移グラフのグラフカラーの既定を引くときの読み替え先。DPS・HPS・TPS・BPS推移グラフは、それぞれ DPS・HPS・ヘイト・ブレイクメーターに合わせる
-    /// (行の並び・色・最初に選ぶ枠)。推移グラフ以外(設定の初期値で種類が分からないとき)は DPS メーター。
+    /// (行の並び・色・最初に選ぶ枠)。バフ稼働率のバーの色と、推移グラフ以外(設定の初期値で種類が分からないとき)は DPS メーター。
     /// </summary>
     public static WidgetKind GetMetricGraphColorDefaultSource(WidgetKind kind)
     {
@@ -3569,6 +3715,9 @@ public static class WidgetConfigDefaults
         config.Map = SupportsMapSettings(kind)
             ? CloneNormalizedMap(config.Map)
             : null;
+        config.BuffUptime = SupportsBuffUptimeSettings(kind)
+            ? CloneNormalizedBuffUptime(config.BuffUptime)
+            : null;
         config.Plugin = kind == WidgetKind.Plugin
             ? CloneNormalizedPlugin(config.Plugin)
             : null;
@@ -3619,6 +3768,10 @@ public static class WidgetConfigDefaults
             case WidgetKind.DebuffList:
                 config.Window.Width ??= PlayerBuffListInitialWindowWidth;
                 config.Window.Height ??= PlayerBuffListInitialWindowHeight;
+                break;
+            case WidgetKind.BuffUptime:
+                config.Window.Width ??= BuffUptimeInitialWindowWidth;
+                config.Window.Height ??= BuffUptimeInitialWindowHeight;
                 break;
             case WidgetKind.BuffDebuffGroup:
                 config.Window.Width ??= BuffDebuffGroupInitialWindowWidth;
@@ -3862,7 +4015,7 @@ public static class WidgetConfigDefaults
 
     /// <summary>
     /// クラスカラーの色の一覧と選んでいる枠を、<paramref name="kind"/> の職の並びと既定値で揃える。
-    /// メーター系の設定とタイムラインとプレイヤー情報と推移グラフ(読み替え先のメーターの種類で呼ぶ)が使う。
+    /// メーター系の設定とタイムラインとプレイヤー情報と推移グラフ・バフ稼働率(読み替え先のメーターの種類で呼ぶ)が使う。
     /// </summary>
     private static (Dictionary<string, int> Indexes, Dictionary<string, List<string>> Palettes) NormalizeClassColors(
         WidgetKind kind,

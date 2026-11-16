@@ -274,6 +274,42 @@ public sealed class WidgetStateManager
         }
     }
 
+    /// <summary>バフ稼働率の非表示のバフだけを保存する。行の右クリックで非表示にしたときに呼ぶ(バフ・デバフ一覧と同じく、この項目だけを書く)。</summary>
+    public void SaveBuffUptimeHiddenBuffs(WidgetKind kind, IReadOnlyList<int> hiddenBuffIds)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffUptimeSettings(kind))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.BuffUptime ??= WidgetConfigDefaults.CreateBuffUptimeSettings();
+            config.BuffUptime.HiddenBuffIds = [.. hiddenBuffIds];
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
+    /// <summary>バフ稼働率の優先表示リストだけを保存する。行の右クリックで優先表示にした・やめたときに呼ぶ(バフ・デバフ一覧と同じく、この項目だけを書く)。</summary>
+    public void SaveBuffUptimePriorityBuffs(WidgetKind kind, IReadOnlyList<BuffDebuffGroupEntryConfig> priorityBuffs)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffUptimeSettings(kind))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.BuffUptime ??= WidgetConfigDefaults.CreateBuffUptimeSettings();
+            config.BuffUptime.PriorityBuffs = [.. priorityBuffs.Select(entry => entry.Clone())];
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
     /// <summary>
     /// バフ・デバフグループの行だけを保存する。バフ・デバフ一覧かカードの右クリックで行を足したときに呼ぶ
     /// (バフ・デバフ一覧の非表示のバフと同じく、この項目だけを書く)。

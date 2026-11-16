@@ -319,6 +319,21 @@
   <data name="BuffCardNotification_Expired_Default" xml:space="preserve">
     <value>{TargetName}的{BuffName}效果已结束</value>
   </data>
+  <data name="BuffCardNotification_ExpiringSoon_Default" xml:space="preserve">
+    <value>{TargetName}的{BuffName}效果即将结束</value>
+  </data>
+  <data name="BuffExpiredCondition_OnExpiry" xml:space="preserve">
+    <value>效果结束时</value>
+  </data>
+  <data name="BuffExpiredCondition_1" xml:space="preserve">
+    <value>效果结束前1秒</value>
+  </data>
+  <data name="BuffExpiredCondition_2" xml:space="preserve">
+    <value>效果结束前2秒</value>
+  </data>
+  <data name="BuffExpiredCondition_3" xml:space="preserve">
+    <value>效果结束前3秒</value>
+  </data>
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
     <value>{TargetName}的{BuffName}效果即将结束</value>
   </data>
@@ -401,6 +416,27 @@
   </data>
   <data name="TelegraphedSkillCondition_3" xml:space="preserve">
     <value>发动前3秒</value>
+  </data>
+  <data name="Notification_CooldownReady" xml:space="preserve">
+    <value>冷却完毕</value>
+  </data>
+  <data name="CooldownReadyNotification_Default" xml:space="preserve">
+    <value>{SkillName}已可使用</value>
+  </data>
+  <data name="CooldownReadyCondition_OnReady" xml:space="preserve">
+    <value>可用时</value>
+  </data>
+  <data name="CooldownReadyCondition_1" xml:space="preserve">
+    <value>可用前1秒</value>
+  </data>
+  <data name="CooldownReadyCondition_2" xml:space="preserve">
+    <value>可用前2秒</value>
+  </data>
+  <data name="CooldownReadyCondition_3" xml:space="preserve">
+    <value>可用前3秒</value>
+  </data>
+  <data name="Notification_CooldownSelfOnlyNote" xml:space="preserve">
+    <value>※仅通知自己的技能</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>基础设置</value>
@@ -1350,6 +1386,9 @@
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>减益列表</value>
   </data>
+  <data name="Widget_BuffUptime" xml:space="preserve">
+    <value>增益覆盖率</value>
+  </data>
   <data name="Common_Cancel" xml:space="preserve">
     <value>取消</value>
   </data>
@@ -1510,6 +1549,18 @@
   </data>
   <data name="Settings_Graph_ShowSkillLog" xml:space="preserve">
     <value>显示技能日志</value>
+  </data>
+  <data name="Settings_BuffUptime_ShowsPermanentBuffs" xml:space="preserve">
+    <value>显示常驻增益</value>
+  </data>
+  <data name="Settings_BuffUptime_ShowsCuisinePotion" xml:space="preserve">
+    <value>显示料理·药剂</value>
+  </data>
+  <data name="Settings_BuffUptime_PixelsPerSecond" xml:space="preserve">
+    <value>1秒的宽度</value>
+  </data>
+  <data name="Settings_BuffUptime_PixelsPerSecond_Option" xml:space="preserve">
+    <value>{0}px</value>
   </data>
   <data name="Widget_DamageSkillDetail" xml:space="preserve">
     <value>技能详情(伤害)</value>
@@ -2113,6 +2164,15 @@
   </data>
   <data name="Notification_TargetIdSourceNote" xml:space="preserve">
     <value>※ID可通过显示设置的“内部ID”显示，ID和名称可从小组件“时间轴”复制</value>
+  </data>
+  <data name="Notification_CooldownSkillName_Placeholder" xml:space="preserve">
+    <value>例: 奥义！时间法令</value>
+  </data>
+  <data name="Notification_CooldownSkillId_Placeholder" xml:space="preserve">
+    <value>例: 3921</value>
+  </data>
+  <data name="Notification_CooldownSkillIdSourceNote" xml:space="preserve">
+    <value>※ID可通过显示设置的“内部ID”显示，并可在小组件“玩家列表”的技能栏位中查看</value>
   </data>
   <data name="Notification_TargetMultipleNote" xml:space="preserve">
     <value>※可用“|”分隔输入多个</value>

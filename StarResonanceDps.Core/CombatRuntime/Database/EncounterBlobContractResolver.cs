@@ -61,6 +61,7 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
             nameof(Entity.TakenStats),
             nameof(Entity.HateStats),
             nameof(Entity.BreakStats),
+            nameof(Entity.BuffUptimeRecords),
             nameof(Entity.SkillMetrics),
             nameof(Entity.Attributes),
             nameof(Entity.SkillCasts),

@@ -112,6 +112,7 @@ public sealed partial class MainViewModel : ViewModelBase
         AddWidget(WidgetKind.PlayerModule, "Widget_PlayerModule");
         AddWidget(WidgetKind.BuffList, "Widget_BuffList");
         AddWidget(WidgetKind.DebuffList, "Widget_DebuffList");
+        AddWidget(WidgetKind.BuffUptime, "Widget_BuffUptime");
         AddWidget(WidgetKind.BuffDebuffCard, "Widget_BuffDebuffCard");
         AddWidget(WidgetKind.BuffDebuffGroup, "Widget_BuffDebuffGroup");
         AddWidget(WidgetKind.ReviveList, "Widget_ReviveList");
@@ -281,6 +282,8 @@ public sealed partial class MainViewModel : ViewModelBase
             widget.EntityInfoHiddenBuffsChanged -= Widget_EntityInfoHiddenBuffsChanged;
             widget.BuffListPriorityBuffChangedFromWidget -= Widget_BuffListPriorityBuffChangedFromWidget;
             widget.EntityInfoPriorityBuffChangedFromWidget -= Widget_EntityInfoPriorityBuffChangedFromWidget;
+            widget.BuffUptimeHiddenBuffsChanged -= Widget_BuffUptimeHiddenBuffsChanged;
+            widget.BuffUptimePriorityBuffChangedFromWidget -= Widget_BuffUptimePriorityBuffChangedFromWidget;
             widget.BuffDebuffGroupEntryChangedFromWidget -= Widget_BuffDebuffGroupEntryChangedFromWidget;
             widget.BuffCardShortcutChangedFromWidget -= Widget_BuffCardShortcutChangedFromWidget;
             widget.BuffCardNotificationTargetChangedFromWidget -= Widget_BuffCardNotificationTargetChangedFromWidget;
@@ -331,6 +334,8 @@ public sealed partial class MainViewModel : ViewModelBase
         widget.EntityInfoHiddenBuffsChanged += Widget_EntityInfoHiddenBuffsChanged;
         widget.BuffListPriorityBuffChangedFromWidget += Widget_BuffListPriorityBuffChangedFromWidget;
         widget.EntityInfoPriorityBuffChangedFromWidget += Widget_EntityInfoPriorityBuffChangedFromWidget;
+        widget.BuffUptimeHiddenBuffsChanged += Widget_BuffUptimeHiddenBuffsChanged;
+        widget.BuffUptimePriorityBuffChangedFromWidget += Widget_BuffUptimePriorityBuffChangedFromWidget;
         widget.BuffDebuffGroupEntryChangedFromWidget += Widget_BuffDebuffGroupEntryChangedFromWidget;
         widget.BuffCardShortcutChangedFromWidget += Widget_BuffCardShortcutChangedFromWidget;
         widget.BuffCardNotificationTargetChangedFromWidget += Widget_BuffCardNotificationTargetChangedFromWidget;
@@ -496,6 +501,28 @@ public sealed partial class MainViewModel : ViewModelBase
             .PriorityBuffs ?? [];
         WidgetConfigDefaults.SetBuffEntryEnabled(priorityBuffs, key, isEnabled, WidgetConfigDefaults.DefaultEntityInfoPriorityBuffEntries);
         _widgetStateManager.SaveEntityInfoPriorityBuffs(kind, priorityBuffs);
+    }
+
+    /// <summary>バフ稼働率の行の右クリックでバフを非表示にした。バフ・デバフ一覧と同じく、保存済みの一覧に足してその項目だけ書く。</summary>
+    private void Widget_BuffUptimeHiddenBuffsChanged(WidgetKind kind, int baseId)
+    {
+        var hiddenBuffIds = _widgetStateManager.GetWidgetSnapshot(kind).BuffUptime?.HiddenBuffIds ?? [];
+        if (hiddenBuffIds.Contains(baseId))
+        {
+            return;
+        }
+
+        _widgetStateManager.SaveBuffUptimeHiddenBuffs(kind, [.. hiddenBuffIds, baseId]);
+    }
+
+    /// <summary>バフ稼働率の行の右クリックでバフを優先表示にした・やめた。バフ・デバフ一覧と同じく、保存済みの行に同じ決まりで当ててその項目だけ書く。</summary>
+    private void Widget_BuffUptimePriorityBuffChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
+    {
+        var priorityBuffs = WidgetConfigDefaults
+            .CloneNormalizedBuffUptime(_widgetStateManager.GetWidgetSnapshot(kind).BuffUptime)
+            .PriorityBuffs ?? [];
+        WidgetConfigDefaults.SetBuffEntryEnabled(priorityBuffs, key, isEnabled, WidgetConfigDefaults.DefaultBuffUptimePriorityBuffEntries);
+        _widgetStateManager.SaveBuffUptimePriorityBuffs(kind, priorityBuffs);
     }
 
     /// <summary>

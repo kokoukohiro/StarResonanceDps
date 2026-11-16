@@ -319,6 +319,21 @@ Restart VOICEVOX.</value>
   <data name="BuffCardNotification_Expired_Default" xml:space="preserve">
     <value>{BuffName} on {TargetName} has expired</value>
   </data>
+  <data name="BuffCardNotification_ExpiringSoon_Default" xml:space="preserve">
+    <value>{BuffName} on {TargetName} is about to expire</value>
+  </data>
+  <data name="BuffExpiredCondition_OnExpiry" xml:space="preserve">
+    <value>On expiry</value>
+  </data>
+  <data name="BuffExpiredCondition_1" xml:space="preserve">
+    <value>1s before expiry</value>
+  </data>
+  <data name="BuffExpiredCondition_2" xml:space="preserve">
+    <value>2s before expiry</value>
+  </data>
+  <data name="BuffExpiredCondition_3" xml:space="preserve">
+    <value>3s before expiry</value>
+  </data>
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
     <value>{TargetName}'s {BuffName} effect is about to expire</value>
   </data>
@@ -401,6 +416,27 @@ Restart VOICEVOX.</value>
   </data>
   <data name="TelegraphedSkillCondition_3" xml:space="preserve">
     <value>3s before activation</value>
+  </data>
+  <data name="Notification_CooldownReady" xml:space="preserve">
+    <value>Cooldown ready</value>
+  </data>
+  <data name="CooldownReadyNotification_Default" xml:space="preserve">
+    <value>{SkillName} is ready</value>
+  </data>
+  <data name="CooldownReadyCondition_OnReady" xml:space="preserve">
+    <value>When ready</value>
+  </data>
+  <data name="CooldownReadyCondition_1" xml:space="preserve">
+    <value>1s before ready</value>
+  </data>
+  <data name="CooldownReadyCondition_2" xml:space="preserve">
+    <value>2s before ready</value>
+  </data>
+  <data name="CooldownReadyCondition_3" xml:space="preserve">
+    <value>3s before ready</value>
+  </data>
+  <data name="Notification_CooldownSelfOnlyNote" xml:space="preserve">
+    <value>Note: Only your own skills are notified.</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>General</value>
@@ -1349,6 +1385,9 @@ Wait a moment and copy again.</value>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>Debuff List</value>
   </data>
+  <data name="Widget_BuffUptime" xml:space="preserve">
+    <value>Buff Uptime</value>
+  </data>
   <data name="Common_Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
@@ -1509,6 +1548,18 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="Settings_Graph_ShowSkillLog" xml:space="preserve">
     <value>Show Skill Log</value>
+  </data>
+  <data name="Settings_BuffUptime_ShowsPermanentBuffs" xml:space="preserve">
+    <value>Show permanent buffs</value>
+  </data>
+  <data name="Settings_BuffUptime_ShowsCuisinePotion" xml:space="preserve">
+    <value>Show cuisine/potions</value>
+  </data>
+  <data name="Settings_BuffUptime_PixelsPerSecond" xml:space="preserve">
+    <value>Width per second</value>
+  </data>
+  <data name="Settings_BuffUptime_PixelsPerSecond_Option" xml:space="preserve">
+    <value>{0}px</value>
   </data>
   <data name="Widget_DamageSkillDetail" xml:space="preserve">
     <value>Skill Details (Damage)</value>
@@ -2110,6 +2161,15 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="Notification_TargetIdSourceNote" xml:space="preserve">
     <value>Note: Show IDs with "Internal ID" in Display, and copy IDs and names from the "Timeline" widget.</value>
+  </data>
+  <data name="Notification_CooldownSkillName_Placeholder" xml:space="preserve">
+    <value>e.g. Arcane! Time Decree</value>
+  </data>
+  <data name="Notification_CooldownSkillId_Placeholder" xml:space="preserve">
+    <value>e.g. 3921</value>
+  </data>
+  <data name="Notification_CooldownSkillIdSourceNote" xml:space="preserve">
+    <value>Note: Show IDs with "Internal ID" in Display, and check them on the skill slots of the "Player List" widget.</value>
   </data>
   <data name="Notification_TargetMultipleNote" xml:space="preserve">
     <value>Note: Separate multiple entries with "|".</value>

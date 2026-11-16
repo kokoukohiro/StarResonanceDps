@@ -277,7 +277,8 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
         return MeterNumberFormatter.Format(value, numberDisplayFormatIndex);
     }
 
-    private static string FormatPercent(double value)
+    /// <summary>割合の文字(小数2桁＋「%」)。与ダメ詳細などの率とバフ稼働率で同じ書式。</summary>
+    internal static string FormatPercent(double value)
     {
         return value.ToString("F2", CultureInfo.CurrentCulture) + "%";
     }

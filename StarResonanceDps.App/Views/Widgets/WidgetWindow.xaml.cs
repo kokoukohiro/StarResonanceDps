@@ -944,6 +944,7 @@ public partial class WidgetWindow : Window
         {
             WidgetContentScrollBar.Visibility = Visibility.Collapsed;
             WidgetContentScrollBarColumn.Width = new GridLength(5);
+            SpanHorizontalScrollBar(verticalScrollBarVisible: false);
             return;
         }
 
@@ -970,11 +971,26 @@ public partial class WidgetWindow : Window
             WidgetContentScrollBarColumn.Width = isScrollBarVisible
                 ? new GridLength(16)
                 : new GridLength(5);
+            SpanHorizontalScrollBar(isScrollBarVisible);
         }
         finally
         {
             _isSynchronizingContentScrollBar = false;
         }
+    }
+
+    /// <summary>
+    /// 縦と横の両方を持つ中身の横のバーの長さ。縦のバーが出ている間は縦のバーの列の手前で止め、出ていない間は縦のバーの列まで伸ばす
+    /// (枠の層の縦のバーの列は幅16のままなので、伸ばさないと中身の右端より手前で止まる)。縦のバーを持たない中身はいつも伸ばしてある。
+    /// </summary>
+    private void SpanHorizontalScrollBar(bool verticalScrollBarVisible)
+    {
+        if (_horizontalScrollContent is null || _verticalScrollContent is null)
+        {
+            return;
+        }
+
+        Grid.SetColumnSpan(WidgetContentHorizontalScrollBar, verticalScrollBarVisible ? 1 : 2);
     }
 
     private void WidgetWindow_MouseWheel(object sender, MouseWheelEventArgs e)
