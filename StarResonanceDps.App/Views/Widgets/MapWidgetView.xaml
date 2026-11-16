@@ -244,7 +244,7 @@
     </UserControl.Resources>
 
     <!--
-        地図を出す領域。印と、枠の層の画像だけでは足りない分の地図の画像を1つの層(Canvas)に置き、
+        地図を出す領域。印と、その上の名前と得点の文字と、枠の層の画像だけでは足りない分の地図の画像を1つの層(Canvas)に置き、
         層ごと領域の中へずらす(枠の層の地図の画像の層と同じ量)。
         領域の外へ出た分は切る。背景は透明で塗って、何も無い所でもホイールと、地図を掴む左ボタンを受ける。
         右クリックのメニューは、出せる項目があるときだけ開く(「自分のいるマップに戻る」は別のマップを見ている間と
@@ -304,8 +304,7 @@
                     <DataTemplate>
                         <!--
                             印。層の中の位置(整数)へずらし、その点をアイコン(25)の中心にする。名前の有無でアイコンは動かない。
-                            名前はアイコンの上端から 21 でアイコンに 4 重ねる(プレイヤーリストの特化の文字と同じ置き方)。
-                            円の名前は円の下端に寄せる(日本語の文字の上端と円の間が 2〜3)。矢先は回ると先端が中心から約 9 まで来るのでアイコンと同じ位置。
+                            名前と得点は、この一覧の後ろの文字の層に置く(どの印よりも上に描くため)。
                             名前の欄を出さない印も、アイコンの TIPS に名前を出す(作りはエンティティリストのヘイトの枠の TIPS と同じ。
                             左クリックで窓を開くので、押したら閉じる)。
                         -->
@@ -484,6 +483,40 @@
                                     </Image.RenderTransform>
                                 </Image>
                             </Grid>
+
+                        </Canvas>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!--
+                文字の層(名前と得点)。印の層の後ろに置くので、どの印の円・アイコンよりも上に描かれる。
+                並べ方は印の層と同じ(同じ印の一覧、位置は印の座標、重なりの順は ZIndex)で、文字どうしの重なりの順も印と同じ。
+                名前は押せる(押した印の窓を開く、指の形のカーソル)。得点は押せない。
+            -->
+            <ItemsControl ItemsSource="{Binding Markers}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                        <Setter Property="Panel.ZIndex" Value="{Binding ZIndex}" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <!--
+                            印の座標へずらし、印の層のアイコン(25)の中心と同じ点を原点にする。
+                            名前はアイコンの上端から 21 でアイコンに 4 重ねる(プレイヤーリストの特化の文字と同じ置き方)。
+                            円の名前は円の下端に寄せる(日本語の文字の上端と円の間が 2〜3)。矢先は回ると先端が中心から約 9 まで来るのでアイコンと同じ位置。
+                        -->
+                        <Canvas Style="{StaticResource Map.Marker}">
+                            <Canvas.RenderTransform>
+                                <TranslateTransform X="{Binding X}" Y="{Binding Y}" />
+                            </Canvas.RenderTransform>
 
                             <!--
                                 得点を求めている間の敵の得点(「○○pt」)。円は名前と同じ文字で円の上に出す(p の下端が円の上端から 1 上)。

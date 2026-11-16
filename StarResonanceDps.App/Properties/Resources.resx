@@ -693,6 +693,9 @@ Its settings will also be deleted.</value>
     <value>The app will close, update, and restart.
 Your settings and history are kept.</value>
   </data>
+  <data name="Update_Progress_Comparing" xml:space="preserve">
+    <value>Checking for changed files…</value>
+  </data>
   <data name="Update_Progress_Downloading" xml:space="preserve">
     <value>Downloading…</value>
   </data>
@@ -704,6 +707,20 @@ Your settings and history are kept.</value>
   </data>
   <data name="Update_Progress_WaitingForFiles" xml:space="preserve">
     <value>Waiting for files in use to be released…</value>
+  </data>
+  <data name="Update_FileInUse_Message" xml:space="preserve">
+    <value>The update cannot continue because another program is using a file.</value>
+  </data>
+  <data name="Update_FileInUse_Detail" xml:space="preserve">
+    <value>Close {0}, then click "Yes" to continue the update.
+Click "No" to stop the update and start the previous version.</value>
+  </data>
+  <data name="Update_FileInUseUnknownProgram_Detail" xml:space="preserve">
+    <value>Close the program that is using {0}, then click "Yes" to continue the update.
+Click "No" to stop the update and start the previous version.</value>
+  </data>
+  <data name="Update_Progress_ProgramSeparator" xml:space="preserve">
+    <value>, </value>
   </data>
   <data name="Update_Progress_Replacing" xml:space="preserve">
     <value>Replacing files…</value>
@@ -1984,6 +2001,9 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="Settings_Widget_DataStatus" xml:space="preserve">
     <value>Widget Status</value>
+  </data>
+  <data name="Settings_Widget_HideWhenGameInactive" xml:space="preserve">
+    <value>Hide widgets when the game is inactive</value>
   </data>
   <data name="WidgetDataStatusDisplay_NonNormalOnly" xml:space="preserve">
     <value>Show Only When Not Normal</value>

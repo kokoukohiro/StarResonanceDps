@@ -29,7 +29,7 @@ namespace StarResonanceDps.App.ViewModels;
 /// 付与者の名前は出さない。行は番号(料理・薬剤はまとまり)ごとに作り直さず値だけ入れ替える。
 /// </para>
 /// </summary>
-public sealed partial class BuffUptimeWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
+public sealed partial class BuffUptimeWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable, IWidgetWindowHiddenAware
 {
     private readonly ConfigManager _configManager = ConfigManager.Instance;
     private readonly DispatcherTimer _refreshTimer;
@@ -98,6 +98,9 @@ public sealed partial class BuffUptimeWidgetViewModel : PlayerWidgetWindowViewMo
         private set => SetProperty(ref _horizontalOffset, value);
     }
 
+    /// <summary>今の時刻(戦闘の経過の秒、横軸の全体の長さ)。履歴の回は回の終わり。今の時刻の縦線が使う(変わると <see cref="AxisChanged"/>)。</summary>
+    public double ElapsedSeconds => _totalSeconds;
+
     /// <summary>ずらせる秒数。スクロールバーの最大値で、0 ならバーを出さない。</summary>
     public double ScrollableSeconds => _scroll.ScrollableSeconds;
 
@@ -114,7 +117,7 @@ public sealed partial class BuffUptimeWidgetViewModel : PlayerWidgetWindowViewMo
         private set => SetProperty(ref _barBrush, value);
     }
 
-    /// <summary>横軸(長さ・位置・ずらせる秒数)か、周りにいなかった区間が変わった(スクロールバーとレールを合わせる合図)。</summary>
+    /// <summary>横軸(長さ・位置・ずらせる秒数)か、周りにいなかった区間が変わった(スクロールバー・レール・今の時刻の縦線を合わせる合図)。</summary>
     public event EventHandler? AxisChanged;
 
     /// <summary>右クリックのメニューを開いた行。メニューの文言はこの行の今の状態で決める。</summary>
@@ -247,6 +250,19 @@ public sealed partial class BuffUptimeWidgetViewModel : PlayerWidgetWindowViewMo
         return true;
     }
 
+    /// <summary>窓が隠れたら定期の読み直しを止め、見えたら1回読み直してから再開する(<see cref="IWidgetWindowHiddenAware"/>)。</summary>
+    public void SetWindowHidden(bool isHidden)
+    {
+        if (isHidden)
+        {
+            _refreshTimer.Stop();
+            return;
+        }
+
+        RefreshTimer_Tick(this, EventArgs.Empty);
+        _refreshTimer.Start();
+    }
+
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
         Refresh();
@@ -352,11 +368,13 @@ public sealed partial class BuffUptimeWidgetViewModel : PlayerWidgetWindowViewMo
         }
     }
 
-    /// <summary>横軸の全体の長さを置き直し、位置を決め直す(推移グラフの <c>UpdateScrollRange</c> と同じ決まり)。変わったら true。</summary>
+    /// <summary>横軸の全体の長さを置き直し、位置を決め直す(推移グラフの <c>UpdateScrollRange</c> と同じ決まり)。長さ・位置・ずらせる秒数のどれかが変わったら true。</summary>
     private bool ApplyTotalSeconds(double totalSeconds)
     {
         var previousScrollable = _scroll.ScrollableSeconds;
+        var totalChanged = _totalSeconds != totalSeconds;
         _totalSeconds = totalSeconds;
+
         var scrollable = _scroll.SetRange(_totalSeconds, VisibleSeconds);
         double offset;
         if (_scroll.IsFollowingEnd)
@@ -377,7 +395,7 @@ public sealed partial class BuffUptimeWidgetViewModel : PlayerWidgetWindowViewMo
             return true;
         }
 
-        return offsetChanged;
+        return offsetChanged || totalChanged;
     }
 
     private bool ApplyHorizontalOffset(double offset)

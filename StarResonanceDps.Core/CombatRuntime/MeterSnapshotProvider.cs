@@ -1459,8 +1459,8 @@ public static class MeterSnapshotProvider
         }
 
         // 変更検知のトークンは実際の表示元と一致させる。
-        // Entity 側に一覧が無いときは保持している一覧が表示元になるので、そちらを指す。
-        skillSourceToken = entity?.GetAttrKV("AttrSkillLevelIdList");
+        // 保存した回の自分はその回のアクションバー、Entity 側に一覧が無いときは保持している一覧が表示元になるので、そちらを指す。
+        skillSourceToken = (object?)entity?.RecordedSelf?.ActionBar ?? entity?.GetAttrKV("AttrSkillLevelIdList");
         if (skillSourceToken is null
             && PartyMemberCache.Instance.TryGetSkillLevels(characterId, out var cachedSkillLevels))
         {
@@ -1497,6 +1497,12 @@ public static class MeterSnapshotProvider
         if (isSelf)
         {
             return CreateSelfActionBarLoadout(entityUuid);
+        }
+
+        // 保存した回の自分は、その回のアクションバーから同じ形で組み立てる。
+        if (entity?.RecordedSelf?.ActionBar is { } recordedActionBar)
+        {
+            return CreateRecordedActionBarLoadout(entityUuid, recordedActionBar);
         }
 
         var skillLevels = ResolvePlayerSkillLevels(entityUuid, entity, characterId);
@@ -1643,7 +1649,83 @@ public static class MeterSnapshotProvider
         return result;
     }
 
+    /// <summary>
+    /// 保存した回の自分のイマジン/ロール枠を、その回のアクションバーの枠番号どおりに組み立てる。
+    /// 空枠は <c>null</c> のまま返す(<see cref="CreateSelfActionBarLoadout"/> と同じ形)。
+    /// </summary>
+    private static PlayerImagineRoleSkillLoadoutSnapshot CreateRecordedActionBarLoadout(
+        long entityUuid,
+        IReadOnlyList<RecordedActionBarSlot> actionBar)
+    {
+        var imagineSkills = BuildRecordedActionBarSlots(actionBar, SelfImagineSlotIds);
+        var roleSkills = BuildRecordedActionBarSlots(actionBar, SelfRoleSlotIds);
+        return new PlayerImagineRoleSkillLoadoutSnapshot(
+            entityUuid,
+            imagineSkills,
+            roleSkills,
+            roleSkills.Length);
+    }
+
+    private static PlayerCooldownSkillSnapshot?[] BuildRecordedActionBarSlots(
+        IReadOnlyList<RecordedActionBarSlot> actionBar,
+        IReadOnlyList<int> slotIds)
+    {
+        var result = new PlayerCooldownSkillSnapshot?[slotIds.Count];
+        for (var index = 0; index < slotIds.Count; index++)
+        {
+            foreach (var slot in actionBar)
+            {
+                if (slot.SlotId == slotIds[index])
+                {
+                    result[index] = CreateSlotSnapshot(slot.SkillId, slot.Level, slot.Tier);
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// 自分のアクションバーのイマジンとロールスキルの枠を、保存する形に写す(<see cref="RecordedSelfData.ActionBar"/>)。
+    /// レベルと改造段階は今の値。アクションバーが未受信なら <c>null</c>。空の枠は入れない。
+    /// </summary>
+    internal static IReadOnlyList<RecordedActionBarSlot>? CaptureSelfActionBar(long selfUuid)
+    {
+        if (!PlayerSkillLevelStateStore.HasSelfActionBarSlots)
+        {
+            return null;
+        }
+
+        var slots = new List<RecordedActionBarSlot>(SelfImagineSlotIds.Length + SelfRoleSlotIds.Length);
+        AddCapturedActionBarSlots(slots, selfUuid, SelfImagineSlotIds);
+        AddCapturedActionBarSlots(slots, selfUuid, SelfRoleSlotIds);
+        return slots.ToArray();
+    }
+
+    private static void AddCapturedActionBarSlots(List<RecordedActionBarSlot> slots, long selfUuid, IReadOnlyList<int> slotIds)
+    {
+        foreach (var slotId in slotIds)
+        {
+            var skillId = PlayerSkillLevelStateStore.GetSelfActionBarSkillId(slotId);
+            if (skillId <= 0)
+            {
+                continue;
+            }
+
+            var (currentLevel, tier) = ResolveSelfSlotLevel(selfUuid, skillId);
+            slots.Add(new RecordedActionBarSlot(slotId, skillId, currentLevel, tier));
+        }
+    }
+
     private static PlayerCooldownSkillSnapshot CreateSelfSlotSnapshot(long entityUuid, int skillId)
+    {
+        var (currentLevel, tier) = ResolveSelfSlotLevel(entityUuid, skillId);
+        return CreateSlotSnapshot(skillId, currentLevel, tier);
+    }
+
+    /// <summary>自分のアクションバーの技の、今のレベルと改造段階。</summary>
+    private static (int CurrentLevel, int Tier) ResolveSelfSlotLevel(long entityUuid, int skillId)
     {
         PlayerSkillLevelStateStore.TryGetSelfLearnedSkill(skillId, out var learnedLevel, out var tier);
         var skillLevel = new DataTypes.Skills.SkillLevelInfo
@@ -1653,11 +1735,15 @@ public static class MeterSnapshotProvider
             Tier = tier
         };
 
+        return (ResolvePlayerSkillCurrentLevel(entityUuid, skillLevel), tier);
+    }
+
+    private static PlayerCooldownSkillSnapshot CreateSlotSnapshot(int skillId, int currentLevel, int tier)
+    {
         var iconName = CombatDataCatalog.GetSkillIconName(skillId, string.Empty);
         var isImagine = CombatDataCatalog.IsSkillImagine(skillId, iconName);
         var isRole = CombatDataCatalog.IsSkillRole(skillId);
         var showLevel = isRole && CombatDataCatalog.HasLevelDependentCooldown(skillId);
-        var currentLevel = ResolvePlayerSkillCurrentLevel(entityUuid, skillLevel);
         var maxCharges = CombatDataCatalog.GetSkillMaxCharges(skillId);
         return new PlayerCooldownSkillSnapshot(
             skillId,
@@ -2490,12 +2576,6 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// 推移グラフに出すプレイヤーの技の開始(届いた順)の、<paramref name="startIndex"/> 番目から後の分。回は線と同じ(<see cref="ResolveActiveEncounter"/>)。
-    /// 表示中の回か G○ の元の一覧が控え(<paramref name="knownEncounter"/>・<paramref name="knownGradeSource"/>)と違えば先頭から読む。足す分が無ければ何も作らない。
-    /// 戦闘の時計の起点がまだ無い回は読み進めない(線も無い)。起点より前の開始は 0 秒に置く
-    /// (時計は戦闘していない時間を1点に縮める。自動一時停止の中の開始が止まった時点に重なるのと同じ扱い)。
-    /// </summary>
-    /// <summary>
     /// <paramref name="characterId"/> のバフ稼働率(表示中の回、<see cref="ResolveActiveEncounter"/>)。人が居ないか、戦闘の時計の起点が無ければ null。
     /// 毎回全部を読み直す(区間はまだ付いているバフの分だけ時計と一緒に伸びる)。
     /// </summary>
@@ -2511,6 +2591,12 @@ public static class MeterSnapshotProvider
         return encounter.ReadBuffUptime(entityUuid, DateTime.UtcNow);
     }
 
+    /// <summary>
+    /// 推移グラフに出すプレイヤーの技の開始(届いた順)の、<paramref name="startIndex"/> 番目から後の分。回は線と同じ(<see cref="ResolveActiveEncounter"/>)。
+    /// 表示中の回か G○ の元の一覧が控え(<paramref name="knownEncounter"/>・<paramref name="knownGradeSource"/>)と違えば先頭から読む。足す分が無ければ何も作らない。
+    /// 戦闘の時計の起点がまだ無い回は読み進めない(線も無い)。起点より前の開始は 0 秒に置く
+    /// (時計は戦闘していない時間を1点に縮める。自動一時停止の中の開始が止まった時点に重なるのと同じ扱い)。
+    /// </summary>
     public static MetricGraphSkillActivationSlice GetPlayerSkillActivations(
         long characterId,
         Encounter? knownEncounter,

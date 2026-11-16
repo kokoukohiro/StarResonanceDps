@@ -1913,6 +1913,13 @@ public static class CombatDataCatalog
         };
     }
 
+    /// <summary>表示名が空でないか。内部ID注記は数えない(注記は表示設定で付くので、名前の有無の判定に使えない)。</summary>
+    public static bool HasMonsterName(long monsterId)
+    {
+        return monsterId is > 0 and <= int.MaxValue
+            && !string.IsNullOrEmpty(ResolveText(_monsterNames, Volatile.Read(ref _cultureName), (int)monsterId));
+    }
+
     /// <summary>
     /// モンスター名。<b>表示中の言語で引く。</b>
     ///
@@ -1921,13 +1928,6 @@ public static class CombatDataCatalog
     /// 名前は起動時に英語で焼き付くので、言語切替に追従させるにはここを通す。
     /// </para>
     /// </summary>
-    /// <summary>表示名が空でないか。内部ID注記は数えない(注記は表示設定で付くので、名前の有無の判定に使えない)。</summary>
-    public static bool HasMonsterName(long monsterId)
-    {
-        return monsterId is > 0 and <= int.MaxValue
-            && !string.IsNullOrEmpty(ResolveText(_monsterNames, Volatile.Read(ref _cultureName), (int)monsterId));
-    }
-
     public static string GetMonsterName(long monsterId)
     {
         return monsterId is > 0 and <= int.MaxValue
@@ -2114,20 +2114,6 @@ public static class CombatDataCatalog
     }
 
     /// <summary>
-    /// シーン/ダンジョン名。<b>表示中の言語で引く。</b>
-    ///
-    /// <para>
-    /// 引数は <c>LevelMapId</c> と、ダンジョン同期で届いた難易度(<c>EncounterExData.DungeonDifficulty</c>)。
-    /// 履歴は名前ではなくIDと難易度を保持し、表示時にここで引き直す。
-    /// </para>
-    ///
-    /// <para>
-    /// 難易度名があれば <c>ダンジョン名-難易度名</c> にする。マスターの段階の名前(<c>番号:段階</c>)を先に引き、
-    /// 無ければダンジョンごとの名前(<c>番号</c>)。マスターのダンジョンは後者を持たないので、
-    /// 段階が分からなければ難易度名を付けない。
-    /// </para>
-    /// </summary>
-    /// <summary>
     /// その職業が出す攻撃力の属性番号(物理 11330 か魔法 11340)。
     /// 表に行が無ければ 0。<b>直書きの分岐で持たない</b> — ゲームの表とずれる。
     /// </summary>
@@ -2188,6 +2174,20 @@ public static class CombatDataCatalog
         return 0;
     }
 
+    /// <summary>
+    /// シーン/ダンジョン名。<b>表示中の言語で引く。</b>
+    ///
+    /// <para>
+    /// 引数は <c>LevelMapId</c> と、ダンジョン同期で届いた難易度(<c>EncounterExData.DungeonDifficulty</c>)。
+    /// 履歴は名前ではなくIDと難易度を保持し、表示時にここで引き直す。
+    /// </para>
+    ///
+    /// <para>
+    /// 難易度名があれば <c>ダンジョン名-難易度名</c> にする。マスターの段階の名前(<c>番号:段階</c>)を先に引き、
+    /// 無ければダンジョンごとの名前(<c>番号</c>)。マスターのダンジョンは後者を持たないので、
+    /// 段階が分からなければ難易度名を付けない。
+    /// </para>
+    /// </summary>
     public static string GetSceneName(long levelMapId, int dungeonDifficulty)
     {
         return levelMapId is > 0 and <= int.MaxValue

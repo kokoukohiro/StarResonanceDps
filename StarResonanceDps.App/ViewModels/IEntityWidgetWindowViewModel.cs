@@ -36,6 +36,9 @@ public interface IEntityWidgetWindowViewModel : INotifyPropertyChanged, IDisposa
 
     bool RepresentsEntity(long entityUuid);
 
+    /// <summary>まだ捕まえておらず、その個体を捕まえられるか(種類と種別IDの一致、<see cref="EntityWindowTarget.CanCapture"/>)。</summary>
+    bool CanCaptureEntity(EntityTargetInfo entity);
+
     /// <summary>個体の値を採用する。未捕獲なら種別一致で捕まえる。</summary>
     bool TryApplyEntity(EntityTargetInfo entity);
 

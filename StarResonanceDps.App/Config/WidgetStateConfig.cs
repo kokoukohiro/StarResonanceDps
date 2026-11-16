@@ -68,11 +68,11 @@ public sealed class WidgetConfig
     public List<int>? PlayerStatusRowOrder { get; set; }
 
     /// <summary>
-    /// 前回開いていたウィンドウの対象一覧。プレイヤー用ウィンドウのみ持つ。
+    /// 前回開いていたウィンドウの対象一覧。複数開けるウィジェット(人・敵・チャット・プラグインの窓)だけが持つ。
     ///
     /// <para>
-    /// これが無いと、状態が Running のウィジェットは再起動のたびに
-    /// <b>自分の窓1枚</b>として作り直される(対象の指定が失われる)。
+    /// これが無い(<c>null</c>)と、状態が Running のウィジェットは再起動のたびに、記録の無いまま起動中になったときの既定の窓で開く。
+    /// 空の一覧は「窓はあったが戻せるものが無い」(<see cref="WidgetOpenTargetConfig"/>)。
     /// </para>
     /// </summary>
     public List<WidgetOpenTargetConfig>? OpenTargets { get; set; }
@@ -472,16 +472,18 @@ public sealed class BuffDebuffGroupWidgetSettingsConfig
 /// <para>
 /// プレイヤーとエンティティリストの実体(モンスター)とチャットのチャンネルとプラグインの相手を1つの型で表す。
 /// <see cref="PluginTargetId"/> があればプラグインの相手、<see cref="ChatChannel"/> があればチャット、
-/// <see cref="EntityId"/> が 0 以外なら実体、そうでなければプレイヤー
-/// (エンティティ情報にプレイヤーの窓は無いので、エンティティ情報でそうなら敵を待つ空の窓)。
+/// <see cref="EntityId"/> が 0 以外なら実体、そうでなければプレイヤー。
+/// </para>
+///
+/// <para>
+/// 開いている窓がどれも保存できない(種別ID 0 の未知の敵の窓だけ)ときは空の一覧で保存し、「記録が無い」(<c>null</c>)と分ける。
 /// </para>
 /// </summary>
 public sealed class WidgetOpenTargetConfig
 {
     /// <summary>
-    /// プレイヤーのID。<c>null</c> は「自分」。
-    /// <b>解決後の自分のIDではなく、窓を開いたときの指定をそのまま保存する。</b>
-    /// 解決後の値を保存すると、キャラを変えたときに前のキャラの窓として復元される。
+    /// プレイヤーのID。窓を開いたときの指定をそのまま保存する。<c>null</c> は相手を持たない窓
+    /// (人の窓とメーターの種類では空の窓、バフ・デバフカードでは自分のカード)。
     /// </summary>
     public long? CharacterId { get; set; }
 
@@ -504,16 +506,18 @@ public sealed class WidgetOpenTargetConfig
     public string? Name { get; set; }
 
     /// <summary>
-    /// 実際に観測したプレイヤーのUID。<b>表示用</b>で、対象の指定ではない。
-    ///
-    /// <para>
-    /// 自分の窓は <see cref="CharacterId"/> が <c>null</c>(＝「自分」という指定)なので、
-    /// これが無いとタイトルに出すUIDが分からない。かといって <see cref="CharacterId"/> を
-    /// 観測値で埋めてしまうと、キャラを変えたときに<b>前のキャラ固定の窓として復元される</b>。
-    /// 指定と観測値は別に持つ。
-    /// </para>
+    /// 最後に映した相手のUID。復元直後のタイトルに使う。
+    /// 人の窓とメーターの種類を相手の指定なしで保存したもの(前の版の自分の窓)は、復元のときにこれを相手にして開く。
     /// </summary>
     public long? ResolvedCharacterId { get; set; }
+
+    /// <summary>
+    /// 人の窓専用。最後に映した相手が NPC(助っ人)なら true、ほかは <c>null</c>。復元直後のタイトルに名前の規則(NPC は職業名)を当てるために持つ。
+    /// </summary>
+    public bool? IsNpc { get; set; }
+
+    /// <summary>人の窓専用。最後に映した相手の職業。NPC のタイトルに出す職業名の元。分からなければ <c>null</c>。</summary>
+    public int? ProfessionId { get; set; }
 
     /// <summary>バフ・デバフカード専用。<c>PlayerBuffListKind</c> の値。</summary>
     public int? BuffListKind { get; set; }
@@ -569,6 +573,8 @@ public sealed class WidgetOpenTargetConfig
             EntityType = EntityType,
             Name = Name,
             ResolvedCharacterId = ResolvedCharacterId,
+            IsNpc = IsNpc,
+            ProfessionId = ProfessionId,
             BuffListKind = BuffListKind,
             BuffKey = BuffKey,
             BuffName = BuffName,
@@ -2103,7 +2109,16 @@ public static class WidgetConfigDefaults
     }
 
     /// <summary>
-    /// 開いていた窓の対象を保存する種別か。プレイヤー用ウィンドウだけが持つ。
+    /// 窓の管理がプレイヤーの窓の仕組み(相手ごとの窓)で開く本体の種別か。複数開ける種別(<see cref="SupportsOpenTargets"/>)と、
+    /// 自分だけを出す1枚の窓(<see cref="IsSelfOnlyPlayerWindowKind"/>)。プラグインの複数起動のウィジェットは別に判定する。
+    /// </summary>
+    public static bool IsPlayerWindowKind(WidgetKind kind)
+    {
+        return SupportsOpenTargets(kind) || IsSelfOnlyPlayerWindowKind(kind);
+    }
+
+    /// <summary>
+    /// 開いていた窓の対象を保存する種別か(本体の複数開けるウィジェット。人・敵・チャットの窓)。プラグインの複数起動のウィジェットは別に判定する。
     /// 自分だけを出す窓(<see cref="IsSelfOnlyPlayerWindowKind"/>)は常に自分1枚なので対象外。
     /// </summary>
     public static bool SupportsOpenTargets(WidgetKind kind)

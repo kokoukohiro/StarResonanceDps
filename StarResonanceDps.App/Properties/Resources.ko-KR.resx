@@ -693,6 +693,9 @@ VOICEVOX를 다시 시작하세요.</value>
     <value>앱을 닫고 업데이트한 뒤 다시 시작합니다.
 설정과 기록은 그대로 유지됩니다.</value>
   </data>
+  <data name="Update_Progress_Comparing" xml:space="preserve">
+    <value>변경된 파일을 확인하는 중입니다…</value>
+  </data>
   <data name="Update_Progress_Downloading" xml:space="preserve">
     <value>다운로드하는 중입니다…</value>
   </data>
@@ -704,6 +707,20 @@ VOICEVOX를 다시 시작하세요.</value>
   </data>
   <data name="Update_Progress_WaitingForFiles" xml:space="preserve">
     <value>사용 중인 파일이 해제되기를 기다리는 중입니다…</value>
+  </data>
+  <data name="Update_FileInUse_Message" xml:space="preserve">
+    <value>다른 프로그램이 파일을 사용하고 있어 업데이트할 수 없습니다.</value>
+  </data>
+  <data name="Update_FileInUse_Detail" xml:space="preserve">
+    <value>{0}을(를) 닫은 후 '예'를 누르면 업데이트를 계속합니다.
+'아니요'를 누르면 업데이트를 중단하고 원래 버전을 실행합니다.</value>
+  </data>
+  <data name="Update_FileInUseUnknownProgram_Detail" xml:space="preserve">
+    <value>{0} 파일을 사용하는 프로그램을 닫은 후 '예'를 누르면 업데이트를 계속합니다.
+'아니요'를 누르면 업데이트를 중단하고 원래 버전을 실행합니다.</value>
+  </data>
+  <data name="Update_Progress_ProgramSeparator" xml:space="preserve">
+    <value>, </value>
   </data>
   <data name="Update_Progress_Replacing" xml:space="preserve">
     <value>파일을 교체하는 중입니다…</value>
@@ -1984,6 +2001,9 @@ VOICEVOX를 다시 시작하세요.</value>
   </data>
   <data name="Settings_Widget_DataStatus" xml:space="preserve">
     <value>위젯 상태</value>
+  </data>
+  <data name="Settings_Widget_HideWhenGameInactive" xml:space="preserve">
+    <value>게임 비활성 시 위젯 숨기기</value>
   </data>
   <data name="WidgetDataStatusDisplay_NonNormalOnly" xml:space="preserve">
     <value>정상 상태가 아닐 때만 표시</value>

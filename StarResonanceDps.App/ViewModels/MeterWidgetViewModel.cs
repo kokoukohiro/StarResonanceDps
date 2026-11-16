@@ -15,7 +15,7 @@ using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
-public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, IWidgetDataStatusSource
+public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, IWidgetDataStatusSource, IWidgetWindowHiddenAware
 {
     private readonly WidgetListItemViewModel _widget;
     private readonly MeterSnapshotKind _kind;
@@ -144,6 +144,22 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
         _ => throw new InvalidOperationException($"No graph for the meter kind {_kind}.")
     });
 
+    /// <summary>バフ稼働率の項目の文字。どのメーターでも同じ(回の記録を出すウィジェットとして、メーター4種のメニューの末尾に置く)。</summary>
+    public string BuffUptimeMenuText => LocalizationManager.Instance.GetString("Widget_BuffUptime");
+
+    /// <summary>窓が隠れたら定期の読み直しを止め、見えたら1回読み直してから再開する(<see cref="IWidgetWindowHiddenAware"/>)。</summary>
+    public void SetWindowHidden(bool isHidden)
+    {
+        if (isHidden)
+        {
+            _refreshTimer.Stop();
+            return;
+        }
+
+        RefreshTimer_Tick(this, EventArgs.Empty);
+        _refreshTimer.Start();
+    }
+
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
         Refresh();
@@ -164,6 +180,7 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
         OnPropertyChanged(nameof(SkillDetailMenuText));
         OnPropertyChanged(nameof(SummaryMenuText));
         OnPropertyChanged(nameof(GraphMenuText));
+        OnPropertyChanged(nameof(BuffUptimeMenuText));
         Refresh();
     }
 
@@ -296,6 +313,12 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
                 _ => throw new InvalidOperationException($"No graph for the meter kind {_kind}.")
             },
             player);
+    }
+
+    [RelayCommand]
+    private void RequestBuffUptime(MeterPlayerEntry? player)
+    {
+        RequestPlayerWindow(WidgetKind.BuffUptime, player);
     }
 
     private void RequestPlayerWindow(WidgetKind widgetKind, MeterPlayerEntry? player)

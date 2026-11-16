@@ -125,9 +125,10 @@ public sealed class WidgetStateManager
     }
 
     /// <summary>
-    /// 開いていた窓の対象一覧を保存する。窓が増減したときだけ呼ぶ。
+    /// 開いていた窓の対象一覧を保存する。窓が増減したときと、窓の相手の素性が変わったときに呼ぶ。
+    /// <c>null</c> は記録なし、空の一覧は「窓はあったが戻せるものが無い」(<see cref="WidgetOpenTargetConfig"/>)。
     /// </summary>
-    public void SaveWidgetOpenTargets(WidgetKey key, IReadOnlyList<WidgetOpenTargetConfig> targets)
+    public void SaveWidgetOpenTargets(WidgetKey key, IReadOnlyList<WidgetOpenTargetConfig>? targets)
     {
         if (!key.IsPlugin && !WidgetConfigDefaults.SupportsOpenTargets(key.Kind))
         {
@@ -137,9 +138,7 @@ public sealed class WidgetStateManager
         lock (_syncRoot)
         {
             var config = GetOrCreateWidgetConfig(key);
-            config.OpenTargets = targets.Count == 0
-                ? null
-                : targets.Select(target => target.Clone()).ToList();
+            config.OpenTargets = targets?.Select(target => target.Clone()).ToList();
             WidgetConfigDefaults.Normalize(key.Kind, config);
             SaveCore();
         }

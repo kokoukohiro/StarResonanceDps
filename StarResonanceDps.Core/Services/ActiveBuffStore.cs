@@ -232,15 +232,6 @@ public sealed class ActiveBuffStore
     }
 
     /// <summary>
-    /// サーバの付与時刻から「もう何ミリ秒経ったか」を出す。
-    ///
-    /// <para>
-    /// <c>Known</c> … 差し引ける。<c>Unknown</c> … 付与時刻はあるのにサーバ時刻が無く、
-    /// <b>残り時間を名乗れない</b>(表示は「?」)。どちらでもない場合(付与時刻そのものが無い、
-    /// 持続時間なし)は従来どおり受信時刻を起点にする。
-    /// </para>
-    /// </summary>
-    /// <summary>
     /// サーバの付与時刻から経ったミリ秒。残り時間と同じ決め方(<see cref="ResolveElapsedNoLock"/>)で、差し引けないとき(付与時刻・持続・サーバ時刻のどれかが無い)は null。
     /// バフ稼働率が、除去の届かない実体の終わりを決めるのに使う。
     /// </summary>
@@ -250,6 +241,15 @@ public sealed class ActiveBuffStore
         return elapsed.Known ? elapsed.Milliseconds : null;
     }
 
+    /// <summary>
+    /// サーバの付与時刻から「もう何ミリ秒経ったか」を出す。
+    ///
+    /// <para>
+    /// <c>Known</c> … 差し引ける。<c>Unknown</c> … 付与時刻はあるのにサーバ時刻が無く、
+    /// <b>残り時間を名乗れない</b>(表示は「?」)。どちらでもない場合(付与時刻そのものが無い、
+    /// 持続時間なし)は従来どおり受信時刻を起点にする。
+    /// </para>
+    /// </summary>
     private static (bool Known, bool Unknown, double Milliseconds) ResolveElapsedNoLock(
         DateTime? serverCreateTimeUtc,
         int durationMilliseconds)

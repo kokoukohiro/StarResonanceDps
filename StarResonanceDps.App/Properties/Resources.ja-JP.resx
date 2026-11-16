@@ -214,7 +214,7 @@
     <value>別のキーを割り当ててください。</value>
   </data>
   <data name="Hotkey_RegisterFailed_InUse" xml:space="preserve">
-    <value>「{0}」はほかのアプリが使用中です。</value>
+    <value>「{0}」は他のアプリが使用中です。</value>
   </data>
   <data name="Hotkey_RegisterFailed_Error" xml:space="preserve">
     <value>「{0}」を設定できませんでした(エラー{1})。</value>
@@ -694,6 +694,9 @@ VOICEVOXを起動し直してください。</value>
     <value>アプリを閉じて更新し、起動し直します。
 設定と履歴はそのまま残ります。</value>
   </data>
+  <data name="Update_Progress_Comparing" xml:space="preserve">
+    <value>変更されたファイルを確認しています…</value>
+  </data>
   <data name="Update_Progress_Downloading" xml:space="preserve">
     <value>ダウンロードしています…</value>
   </data>
@@ -705,6 +708,20 @@ VOICEVOXを起動し直してください。</value>
   </data>
   <data name="Update_Progress_WaitingForFiles" xml:space="preserve">
     <value>使用中のファイルが解放されるのを待っています…</value>
+  </data>
+  <data name="Update_FileInUse_Message" xml:space="preserve">
+    <value>他のプログラムがファイルを使用しているため、更新できません。</value>
+  </data>
+  <data name="Update_FileInUse_Detail" xml:space="preserve">
+    <value>{0}を閉じてから「はい」を押すと、更新を続けます。
+「いいえ」を押すと、更新をやめて元のバージョンを起動します。</value>
+  </data>
+  <data name="Update_FileInUseUnknownProgram_Detail" xml:space="preserve">
+    <value>{0}を使用しているプログラムを閉じてから「はい」を押すと、更新を続けます。
+「いいえ」を押すと、更新をやめて元のバージョンを起動します。</value>
+  </data>
+  <data name="Update_Progress_ProgramSeparator" xml:space="preserve">
+    <value>、</value>
   </data>
   <data name="Update_Progress_Replacing" xml:space="preserve">
     <value>ファイルを置き換えています…</value>
@@ -759,7 +776,7 @@ VOICEVOXを起動し直してください。</value>
   </data>
   <data name="Update_Error_Replace" xml:space="preserve">
     <value>ファイルを置き換えられなかったので、元のバージョンに戻しました。
-アプリのフォルダを開いているほかのアプリを閉じて、もう一度お試しください。</value>
+アプリのフォルダを開いている他のアプリを閉じて、もう一度お試しください。</value>
   </data>
   <data name="Update_Error_RestoreFailed" xml:space="preserve">
     <value>元のバージョンに戻せませんでした。
@@ -1054,7 +1071,7 @@ VOICEVOXを起動し直してください。</value>
     <value>テキストをコピーできませんでした。</value>
   </data>
   <data name="TextCopyFailed_Detail" xml:space="preserve">
-    <value>ほかのアプリがクリップボードを使っている可能性があります。
+    <value>他のアプリがクリップボードを使っている可能性があります。
 少し待ってから、もう一度コピーしてください。</value>
   </data>
   <data name="Timeline_HealFormat" xml:space="preserve">
@@ -1989,6 +2006,9 @@ VOICEVOXを起動し直してください。</value>
   <data name="Settings_Widget_DataStatus" xml:space="preserve">
     <value>ウィジェット状態</value>
   </data>
+  <data name="Settings_Widget_HideWhenGameInactive" xml:space="preserve">
+    <value>ゲーム非アクティブ時にウィジェットを隠す</value>
+  </data>
   <data name="WidgetDataStatusDisplay_NonNormalOnly" xml:space="preserve">
     <value>正常状態以外のみ表示</value>
   </data>
@@ -2630,7 +2650,7 @@ VOICEVOXを起動し直してください。</value>
     <value>画像をコピーできませんでした。</value>
   </data>
   <data name="PlayerInfo_CopyImageFailed_Detail" xml:space="preserve">
-    <value>ほかのアプリがクリップボードを使っている可能性があります。
+    <value>他のアプリがクリップボードを使っている可能性があります。
 少し待ってから、もう一度コピーしてください。</value>
   </data>
   <data name="Startup_Error_Title" xml:space="preserve">

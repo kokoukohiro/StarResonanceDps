@@ -15,8 +15,8 @@ public enum WidgetTargetOptionKind
     Entity,
 
     /// <summary>
-    /// バフ・デバフカードのバフ・デバフ。相手は、料理・薬剤のまとまりなら自分、
-    /// それ以外はバフリスト(デバフならデバフリスト)のカードで選んでいる項目。
+    /// バフ・デバフカードのバフ・デバフ。相手は、開いている窓の項目ならその窓の相手(<see cref="WidgetTargetOption.BuffPerson"/>)、
+    /// 自分のカード(<see cref="WidgetTargetOption.IsSelf"/>)なら自分、それ以外はバフリスト(デバフならデバフリスト)のカードで選んでいる項目。
     /// </summary>
     Buff,
 
@@ -36,11 +36,15 @@ public sealed class WidgetTargetOption
     public required WidgetTargetOptionKind Kind { get; init; }
 
     /// <summary>
-    /// 人: 自分(相手の指定なしで開く)。バフ: 相手がいつも自分のカード(ショートカット・「指定なし」とそれが決まった項目)。
+    /// 人: 自分(相手の指定なしで開く)。バフ・デバフカードの相手にだけ使う(人の窓とメーターの種類の一覧の自分は、ほかの人と同じく UID の項目)。
+    /// バフ: 相手がいつも自分のカード(ショートカット・「指定なし」とそれが決まった項目)。
     /// </summary>
     public bool IsSelf { get; init; }
 
-    /// <summary>人: 相手の UID。自分なら分かっていれば自分のもの(0 はまだ分からない)。チャット: プライベートトークの相手の UID(ほかのチャンネルは 0)。</summary>
+    /// <summary>
+    /// 人: 相手の UID。自分なら分かっていれば自分のもの(0 はまだ分からない)。相手を選んでいない項目は 0(<see cref="IsUnselectedPlayer"/>)。
+    /// チャット: プライベートトークの相手の UID(ほかのチャンネルは 0)。
+    /// </summary>
     public long CharacterId { get; init; }
 
     /// <summary>チャット: チャンネル。</summary>
@@ -103,7 +107,7 @@ public sealed class WidgetTargetOption
                 ? Entity?.EntityUuid == other.Entity?.EntityUuid
                 : UnacquiredEntityId == other.UnacquiredEntityId && UnacquiredEntityType == other.UnacquiredEntityType,
             WidgetTargetOptionKind.Chat => ChatChannel == other.ChatChannel && CharacterId == other.CharacterId,
-            WidgetTargetOptionKind.Plugin => string.Equals(PluginTargetId, other.PluginTargetId, StringComparison.OrdinalIgnoreCase),
+            WidgetTargetOptionKind.Plugin => IsSamePluginTargetId(PluginTargetId, other.PluginTargetId),
             _ => IsSelf == other.IsSelf
                 && BuffListKind == other.BuffListKind
                 && BuffGroup == other.BuffGroup
@@ -112,6 +116,12 @@ public sealed class WidgetTargetOption
                     ? other.BuffPerson is null
                     : other.BuffPerson is not null && BuffPerson.IsSameTarget(other.BuffPerson))
         };
+    }
+
+    /// <summary>プラグインの相手の ID が同じか(大文字と小文字は区別しない)。どちらも null(相手を選んでいない項目・空の窓)なら同じ。</summary>
+    public static bool IsSamePluginTargetId(string? left, string? right)
+    {
+        return string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>同じ相手を指す、行の文字と円の色を付けた項目。</summary>
@@ -140,7 +150,29 @@ public sealed class WidgetTargetOption
         };
     }
 
-    /// <summary>自分(人の窓の既定)。</summary>
+    /// <summary>人(相手の UID)。人の窓とメーターの種類の一覧では、自分もほかの人と同じくこの形で指す(窓はその UID で開く)。</summary>
+    public static WidgetTargetOption CreatePlayer(long characterId)
+    {
+        return new WidgetTargetOption
+        {
+            Kind = WidgetTargetOptionKind.Player,
+            CharacterId = characterId
+        };
+    }
+
+    /// <summary>バフ・デバフカードのバフの指定だけを持つ項目(相手を持たない)。窓を探すときに、そのバフのカードかを比べるのに使う。</summary>
+    public static WidgetTargetOption CreateBuff(PlayerBuffListKind kind, string? buffKey, BuffGroup group)
+    {
+        return new WidgetTargetOption
+        {
+            Kind = WidgetTargetOptionKind.Buff,
+            BuffListKind = kind,
+            BuffKey = buffKey,
+            BuffGroup = group
+        };
+    }
+
+    /// <summary>自分。バフ・デバフカードの相手(自分のカード)に使う。</summary>
     public static WidgetTargetOption CreateSelf(long selfCharacterId)
     {
         return new WidgetTargetOption
@@ -220,4 +252,19 @@ public sealed class WidgetTargetOption
 
     /// <summary>相手を選んでいない項目か(<see cref="CreateUnselectedPlugin"/>)。</summary>
     public bool IsUnselectedPlugin => Kind == WidgetTargetOptionKind.Plugin && PluginTargetId is null;
+
+    /// <summary>
+    /// 人の窓・メーターの種類で、相手を選んでいない項目(並べるものが無いときの既定)。開く窓は相手を持たない空の窓で、
+    /// 一覧にプレイヤーが出たらその人の窓になる。
+    /// </summary>
+    public static WidgetTargetOption CreateUnselectedPlayer()
+    {
+        return new WidgetTargetOption
+        {
+            Kind = WidgetTargetOptionKind.Player
+        };
+    }
+
+    /// <summary>相手を選んでいない人の項目か(<see cref="CreateUnselectedPlayer"/>)。</summary>
+    public bool IsUnselectedPlayer => Kind == WidgetTargetOptionKind.Player && !IsSelf && CharacterId == 0;
 }

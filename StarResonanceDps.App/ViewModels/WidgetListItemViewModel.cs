@@ -206,29 +206,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     /// <summary>
     /// 相手ごとに窓を開く(か、自分の窓を1枚だけ開く)ウィジェットか。名前は本体の人の窓から来ていて、プラグインの複数起動のウィジェットも入る。
     /// </summary>
-    public bool IsPlayerWindowWidget => PluginWidget is { IsMultiWindow: true } || Kind is WidgetKind.PlayerInfo
-        or WidgetKind.PlayerStatus
-        or WidgetKind.BuffDebuffGroup
-        or WidgetKind.PlayerEquipment
-        or WidgetKind.PlayerTalent
-        or WidgetKind.PlayerSeasonTalent
-        or WidgetKind.PlayerModule
-        or WidgetKind.BuffList
-        or WidgetKind.DebuffList
-        or WidgetKind.BuffUptime
-        or WidgetKind.BuffDebuffCard
-        or WidgetKind.DamageSkillDetail
-        or WidgetKind.DamageSummary
-        or WidgetKind.DpsGraph
-        or WidgetKind.HealingSkillDetail
-        or WidgetKind.HealingSummary
-        or WidgetKind.HpsGraph
-        or WidgetKind.HateSkillDetail
-        or WidgetKind.HateGraph
-        or WidgetKind.BreakSkillDetail
-        or WidgetKind.BreakGraph
-        or WidgetKind.DamageTakenSummary
-        or WidgetKind.Chat;
+    public bool IsPlayerWindowWidget => PluginWidget is { IsMultiWindow: true } || WidgetConfigDefaults.IsPlayerWindowKind(Kind);
 
     public bool HasOpenPlayerWindows => IsPlayerWindowWidget && OpenPlayerWindowCount > 0;
 
@@ -239,7 +217,8 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     public bool SupportsTargetSelection => PluginWidget is { IsMultiWindow: true } || WidgetConfigDefaults.SupportsOpenTargets(Kind);
 
     /// <summary>
-    /// 選択リストで手で項目を選んだか。選んだ後は既定の決め方(自分・プラグインが指定した相手)で選択を替えない。保存しない。
+    /// 手で相手を選んだか。選択リストで選んだときと、ほかのウィジェットから窓を開いた・前に出したとき・空の窓がその人の窓になったとき
+    /// (選択リストで選んだのと同じ扱い)に真。真の間は既定の決め方(空の選択を一覧の先頭で埋める・プラグインが指定した相手)で選択を替えない。保存しない。
     /// 並べるものが無くなって既定に戻ったら偽に戻る。
     /// </summary>
     public bool IsTargetChosenByUser { get; set; }
@@ -1669,12 +1648,6 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private void RequestBuffList(PlayerMenuTarget? player)
     {
         RequestPlayerWindow(WidgetKind.BuffList, player);
-    }
-
-    [RelayCommand]
-    private void RequestBuffUptime(PlayerMenuTarget? player)
-    {
-        RequestPlayerWindow(WidgetKind.BuffUptime, player);
     }
 
     [RelayCommand]

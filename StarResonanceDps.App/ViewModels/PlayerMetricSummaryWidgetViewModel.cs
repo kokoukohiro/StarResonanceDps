@@ -14,7 +14,7 @@ using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
-public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
+public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable, IWidgetWindowHiddenAware
 {
     private readonly PlayerMetricSummaryKind _kind;
     private readonly ConfigManager _configManager = ConfigManager.Instance;
@@ -70,6 +70,19 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
     protected override void OnSelectedPlayerChanged(PlayerRosterEntry? player)
     {
         Refresh();
+    }
+
+    /// <summary>窓が隠れたら定期の読み直しを止め、見えたら1回読み直してから再開する(<see cref="IWidgetWindowHiddenAware"/>)。</summary>
+    public void SetWindowHidden(bool isHidden)
+    {
+        if (isHidden)
+        {
+            _refreshTimer.Stop();
+            return;
+        }
+
+        RefreshTimer_Tick(this, EventArgs.Empty);
+        _refreshTimer.Start();
     }
 
     private void RefreshTimer_Tick(object? sender, EventArgs e)

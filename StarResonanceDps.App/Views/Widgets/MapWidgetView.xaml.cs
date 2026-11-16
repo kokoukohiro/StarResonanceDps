@@ -22,12 +22,15 @@ namespace StarResonanceDps.App.Views.Widgets;
 /// マウスはここで受け、動かす量と表示範囲の計算は中身(<see cref="MapWidgetViewModel"/>)が持つ。
 /// 地図を出す領域の実際の大きさ・印の名前の欄の幅(画面の資源)・Windows の表示倍率は、ここから中身へ渡す。
 /// </summary>
-public partial class MapWidgetView : UserControl, IWidgetMouseWheelContent
+public partial class MapWidgetView : UserControl, IWidgetMouseWheelContent, IWidgetWindowHiddenAware
 {
     private const string MarkerNameWidthKey = "Map.MarkerNameWidth";
     private const string ImageLayerKey = "Map.ImageLayer";
 
     private readonly DispatcherTimer _positionRefreshTimer;
+
+    /// <summary>窓が隠れているか(全体設定「ゲーム非アクティブ時にウィジェットを隠す」)。隠れている間は地図と印を当て直さない。</summary>
+    private bool _isWindowHidden;
 
     /// <summary>枠の層へ差し込んだ地図の画像の層と、差し込んだ先の窓。差し込んでいなければ null。</summary>
     private FrameworkElement? _imageLayer;
@@ -72,13 +75,33 @@ public partial class MapWidgetView : UserControl, IWidgetMouseWheelContent
     {
         AttachImageLayer();
         UpdateViewport();
-        _positionRefreshTimer.Start();
+        if (!_isWindowHidden)
+        {
+            _positionRefreshTimer.Start();
+        }
     }
 
     private void MapWidgetView_Unloaded(object sender, RoutedEventArgs e)
     {
         _positionRefreshTimer.Stop();
         DetachImageLayer();
+    }
+
+    /// <summary>窓が隠れたら地図と印の定期の当て直しを止め、見えたら(読み込み済みなら)当て直してから再開する。</summary>
+    public void SetWindowHidden(bool isHidden)
+    {
+        _isWindowHidden = isHidden;
+        if (isHidden)
+        {
+            _positionRefreshTimer.Stop();
+            return;
+        }
+
+        if (IsLoaded)
+        {
+            PositionRefreshTimer_Tick(this, EventArgs.Empty);
+            _positionRefreshTimer.Start();
+        }
     }
 
     /// <summary>地図の画像の層は別の層にあって中身を引き継がないので、中身が替わったら入れ直す。</summary>
@@ -196,7 +219,7 @@ public partial class MapWidgetView : UserControl, IWidgetMouseWheelContent
         _isPanning = false;
     }
 
-    /// <summary>押した要素が印(アイコンか名前か得点)なら、その印。</summary>
+    /// <summary>押した要素が印(アイコンか名前)なら、その印。得点の文字は押せない。</summary>
     private static MapMarkerEntry? GetMarker(object originalSource)
     {
         return originalSource is FrameworkElement { DataContext: MapMarkerEntry marker }

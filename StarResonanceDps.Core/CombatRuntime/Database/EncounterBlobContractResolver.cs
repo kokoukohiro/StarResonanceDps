@@ -67,6 +67,7 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
             nameof(Entity.SkillCasts),
             nameof(Entity.RecordedAvatar),
             nameof(Entity.RecordedBuffTransformation),
+            nameof(Entity.RecordedSelf),
             nameof(Entity.RootBuffIds),
             nameof(Entity.TalentNodeIdsByProfession),
             nameof(Entity.LastReplaceableSkills),

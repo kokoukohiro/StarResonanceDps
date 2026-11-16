@@ -14,6 +14,7 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 /// 形はメーターのクラスカラーと同じ(クラスごとに色見本(最大5枠)と選んでいる枠。不透明度は持たない)で、
 /// 行の並びと既定は読み替え先のメーター(<see cref="WidgetConfigDefaults.GetMetricGraphColorDefaultSource"/>)と同じ。
 /// 値の正規化と保存は持ち主の設定の型が行う。
+/// 行の見本は、推移グラフは折れ線、バフ稼働率はバー(<see cref="UsesBarSwatch"/>)。
 /// </summary>
 public sealed class GraphColorSettingsViewModel : ObservableObject, IDisposable
 {
@@ -21,9 +22,10 @@ public sealed class GraphColorSettingsViewModel : ObservableObject, IDisposable
     private readonly Dictionary<string, MeterClassColorItemViewModel> _itemsByKey = new(StringComparer.OrdinalIgnoreCase);
     private bool _isLoading;
 
-    public GraphColorSettingsViewModel(WidgetKind colorDefaultSource)
+    public GraphColorSettingsViewModel(WidgetKind colorDefaultSource, bool usesBarSwatch)
     {
         _colorDefaultSource = colorDefaultSource;
+        UsesBarSwatch = usesBarSwatch;
 
         var items = new ObservableCollection<MeterClassColorItemViewModel>();
         var classColorKeys = WidgetConfigDefaults.GetClassColorKeys(colorDefaultSource);
@@ -49,6 +51,9 @@ public sealed class GraphColorSettingsViewModel : ObservableObject, IDisposable
 
     /// <summary>グラフカラーの行。クラスごとに色見本(最大5枠)と、選んでいる枠を持つ。</summary>
     public ReadOnlyObservableCollection<MeterClassColorItemViewModel> Items { get; }
+
+    /// <summary>行の見本をバーで出すか。偽なら折れ線。</summary>
+    public bool UsesBarSwatch { get; }
 
     public string SectionTitle => LocalizationManager.Instance.GetString("Settings_Section_GraphColors_Title");
 

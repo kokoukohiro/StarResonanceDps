@@ -44,7 +44,7 @@ public sealed partial class BuffUptimeWidgetSettingsViewModel : ObservableObject
             NotifyChanged);
         HiddenBuffItems = new ReadOnlyObservableCollection<BuffSettingRowViewModel>(_hiddenBuffItems);
 
-        GraphColors = new GraphColorSettingsViewModel(WidgetConfigDefaults.GetMetricGraphColorDefaultSource(WidgetKind.BuffUptime));
+        GraphColors = new GraphColorSettingsViewModel(WidgetConfigDefaults.GetMetricGraphColorDefaultSource(WidgetKind.BuffUptime), usesBarSwatch: true);
         GraphColors.Changed += NotifyChanged;
 
         _lastSaved = WidgetConfigDefaults.CloneNormalizedBuffUptime(config);

@@ -35,6 +35,7 @@
 - [Module Info](Module-Info)
 - [Buff List](Buff-List)
 - [Debuff List](Debuff-List)
+- [Buff Uptime](Buff-Uptime)
 - [Buff & Debuff Card](Buff-&-Debuff-Card)
 - [Buff & Debuff Group](Buff-&-Debuff-Group)
 - [Revive List](Revive-List)

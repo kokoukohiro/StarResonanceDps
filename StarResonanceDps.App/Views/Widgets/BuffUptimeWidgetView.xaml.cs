@@ -11,7 +11,7 @@ namespace StarResonanceDps.App.Views.Widgets;
 
 /// <summary>
 /// バフ稼働率。縦のスクロールバーと横のスクロールバーは窓の枠の層の1本ずつ(<see cref="IWidgetVerticalScrollContent"/>・<see cref="IWidgetHorizontalScrollContent"/>)、
-/// 行のレールは枠の層(<see cref="WidgetWindow.FrameOverlayHost"/>)へ差し込む。
+/// 行のレールと今の時刻の縦線は枠の層(<see cref="WidgetWindow.FrameOverlayHost"/>)へ差し込む。
 ///
 /// <para>
 /// ホイールは一覧を縦に流す(一覧のテンプレートの <see cref="ScrollViewer"/> が受ける)。横軸の縮尺は設定「1秒の幅」だけで変え、
@@ -53,6 +53,8 @@ public partial class BuffUptimeWidgetView : UserControl, IWidgetVerticalScrollCo
     public double HorizontalOffset => _viewModel?.HorizontalOffset ?? 0d;
 
     public double VisibleSeconds => _viewModel?.VisibleSeconds ?? 1d;
+
+    public double ElapsedSeconds => _viewModel?.ElapsedSeconds ?? 0d;
 
     public IReadOnlyList<double> AbsentSpans => _viewModel?.AbsentSpans ?? Array.Empty<double>();
 

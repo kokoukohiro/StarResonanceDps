@@ -164,6 +164,7 @@ public static class AppConfigDefaults
             UnnamedSkillNameDisplayModeIndex = UnnamedSkillNameInternalNameIndex,
             WidgetWindowTopmostModeIndex = AlwaysWidgetWindowTopmostModeIndex,
             WidgetDataStatusDisplayModeIndex = WidgetDataStatusDisplayShowIndex,
+            HidesWidgetsWhenGameInactive = true,
             WindowColorIndex = 1,
             WindowColors = CreateDefaultWindowColors(),
             Hotkeys = CreateDefaultHotkeys()
@@ -213,7 +214,7 @@ public static class AppConfigDefaults
     }
 
     /// <summary>
-    /// ホットキーの既定。プレイヤー名 Ctrl+F11 / お気に入り Ctrl+F8 / ピン留め Ctrl+F7 / クリック透過 Ctrl+F6 / 最前面 Ctrl+F5 /
+    /// ホットキーの既定。プレイヤー名 Ctrl+F11 / お気に入り Ctrl+F8 / ピン留め Ctrl+F7 / クリック透過 Ctrl+F6 /
     /// 計測 Ctrl+F10 / リセット Ctrl+F9。
     /// </summary>
     public static HotkeySettingsConfig CreateDefaultHotkeys()
@@ -224,7 +225,6 @@ public static class AppConfigDefaults
             StartFavoritesOrStopAll = HotkeyBindingConfig.Create(Key.F8, ModifierKeys.Control),
             PinRunningOrUnpinAll = HotkeyBindingConfig.Create(Key.F7, ModifierKeys.Control),
             ClickThroughPinnedOrClearAll = HotkeyBindingConfig.Create(Key.F6, ModifierKeys.Control),
-            WidgetWindowTopmostAlwaysOrPinnedOnly = HotkeyBindingConfig.Create(Key.F5, ModifierKeys.Control),
             Benchmark = HotkeyBindingConfig.Create(Key.F10, ModifierKeys.Control),
             ResetEncounter = HotkeyBindingConfig.Create(Key.F9, ModifierKeys.Control)
         };

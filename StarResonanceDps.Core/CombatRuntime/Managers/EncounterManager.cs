@@ -521,6 +521,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             encounter.ExData.SeasonId = SeasonStateStore.CurrentSeasonId;
             encounter.ExData.GameServer = GameServerStore.Current;
 
+            // 今ログインしているキャラの実体に、自分にしか届かない値を写す。
+            ApplyRecordedSelf(encounter, AppState.PlayerUID);
+
             var roster = Services.PlayerRosterStore.Instance.Current.Entries;
             if (roster.Count == 0)
             {
@@ -565,6 +568,37 @@ namespace StarResonanceDps.Core.CombatRuntime
                     displayed.IsNpc,
                     SocialDataStore.GetAvatar(characterId),
                     Models.PlayerClassSpecResolver.GetBuffTransformation(entity.UUID) ?? Models.PlayerClassSpec.Unknown);
+            }
+        }
+
+        /// <summary>
+        /// 今ログインしているキャラの実体に、自分にしか届かない値(<see cref="RecordedSelfData"/>)を焼き付ける。
+        /// ログインしていない・自分の実体が回に居なければ何もしない。
+        /// </summary>
+        private static void ApplyRecordedSelf(Encounter encounter, long selfCharacterId)
+        {
+            if (selfCharacterId == 0)
+            {
+                return;
+            }
+
+            foreach (var (_, entity) in encounter.Entities)
+            {
+                if (entity.EntityType != EEntityType.EntChar)
+                {
+                    continue;
+                }
+
+                var characterId = entity.UID != 0
+                    ? entity.UID
+                    : Utils.UuidToEntityId(entity.UUID);
+                if (characterId != selfCharacterId)
+                {
+                    continue;
+                }
+
+                entity.ApplyRecordedSelfForRecord(RecordedSelfData.Capture(encounter.ExData.SeasonId, entity.UUID));
+                return;
             }
         }
 
@@ -3728,6 +3762,13 @@ namespace StarResonanceDps.Core.CombatRuntime
         public Models.PlayerClassSpec? RecordedBuffTransformation { get; private set; }
 
         /// <summary>
+        /// 保存した回の、自分にしか届かない値(装備の具体値・モジュールの効果・因子・アクションバー)。保存の時点でログインしていたキャラの実体だけが持ち、他は null。
+        /// 書くのは保存の直前の焼き付け(<see cref="ApplyRecordedSelfForRecord"/>)だけで、回の作り直しでは運ばない。
+        /// 履歴から来た行(そのキャラで今ログインしていないとき)は、この値で詳しく出す。
+        /// </summary>
+        public RecordedSelfData? RecordedSelf { get; private set; }
+
+        /// <summary>
         /// 特化が「アビリティ未装着」(ゲーム内呼称 クラスR1)と確定できる状態か。
         ///
         /// <para>
@@ -4221,6 +4262,12 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 MaxHp = maxHp;
             }
+        }
+
+        /// <summary>保存の直前に、その回の自分の実体へ自分にしか届かない値を焼き付ける(<see cref="RecordedSelf"/>)。</summary>
+        public void ApplyRecordedSelfForRecord(RecordedSelfData recordedSelf)
+        {
+            RecordedSelf = recordedSelf;
         }
 
         public void SetSubProfessionUnknown()

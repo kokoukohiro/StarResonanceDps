@@ -77,4 +77,4 @@ The buffs and debuffs whose expiry is notified by "Buff & Debuff expired" in [No
 - The Hide List of the Buff List does not apply to cards.
 - Even while a history entry is open, the current buffs are shown.
 - The buffs are read again every second.
-- Cards that were running when you closed the app open again with the same target and buff the next time you start the app. A card for an enemy shows that enemy when an enemy of the same type appears.
+- Cards that were running when you closed the app open again with the same target and buff the next time you start the app. A card for an enemy shows that enemy when an enemy of the same type appears (when there are two or more cards for the same buff, each shows a different enemy).

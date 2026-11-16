@@ -11,8 +11,8 @@
              DataContextChanged="BuffUptimeWidgetView_DataContextChanged">
     <UserControl.Resources>
         <!--
-            行のレール。推移グラフの軸と同じく<b>枠のレイヤー(WidgetWindow.FrameOverlayHost)へ差し込む</b>(分割線と同じく窓の不透明度で合成する)。
-            色と太さは推移グラフの格子と同じ。
+            行のレールと今の時刻の縦線。推移グラフの軸と同じく<b>枠のレイヤー(WidgetWindow.FrameOverlayHost)へ差し込む</b>(分割線と同じく窓の不透明度で合成する)。
+            色と太さは推移グラフの格子と同じ。縦線はまだ来ていない時刻が見えている間だけ出る(出すかは部品が決める)。
         -->
         <controls:BuffUptimeRailLayer x:Key="RailLayer"
                                       LineThickness="1"
@@ -291,6 +291,7 @@
                                                 Grid.Column="2"
                                                 Height="10"
                                                 VerticalAlignment="Center"
+                                                Effect="{StaticResource Effect.ProfessionIconShadow}"
                                                 Spans="{Binding Spans}"
                                                 Fill="{Binding DataContext.BarBrush, RelativeSource={RelativeSource AncestorType={x:Type local:BuffUptimeWidgetView}}}"
                                                 HorizontalOffset="{Binding DataContext.HorizontalOffset, RelativeSource={RelativeSource AncestorType={x:Type local:BuffUptimeWidgetView}}}"

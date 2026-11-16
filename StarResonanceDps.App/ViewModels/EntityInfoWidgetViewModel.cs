@@ -39,7 +39,7 @@ namespace StarResonanceDps.App.ViewModels;
 /// 詠唱の文字とゲージの 0.1 秒ごとの当て直しは画面が受け持つ(エンティティリストと同じ)。
 /// </para>
 /// </summary>
-public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IDisposable, IWidgetDataStatusSource
+public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IDisposable, IWidgetDataStatusSource, IWidgetWindowHiddenAware
 {
     private readonly WidgetListItemViewModel _widget;
     private readonly Dispatcher _dispatcher;
@@ -451,6 +451,19 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IDisposab
         _rowSettings = EntityRowSettings.FromEntityInfo(_settings);
         ApplyRow();
         RefreshBuffs();
+    }
+
+    /// <summary>窓が隠れたら定期の読み直しを止め、見えたら1回読み直してから再開する(<see cref="IWidgetWindowHiddenAware"/>)。</summary>
+    public void SetWindowHidden(bool isHidden)
+    {
+        if (isHidden)
+        {
+            _refreshTimer.Stop();
+            return;
+        }
+
+        RefreshTimer_Tick(this, EventArgs.Empty);
+        _refreshTimer.Start();
     }
 
     private void RefreshTimer_Tick(object? sender, EventArgs e)

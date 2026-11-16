@@ -67,7 +67,6 @@ public sealed partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     private int _widgetActionIndex = -1;
 
-    private bool _isBulkUpdatingWidgets;
     private bool _isLoadingWidgets;
 
     /// <summary>
@@ -140,6 +139,8 @@ public sealed partial class MainViewModel : ViewModelBase
         _entityListWidget.EntityListTargetsChanged += EntityListWidget_EntityListTargetsChanged;
         _widgetWindowManager.TargetWindowsChanged += WidgetWindowManager_TargetWindowsChanged;
         _widgetWindowManager.UnspecifiedBuffCardResolved += WidgetWindowManager_UnspecifiedBuffCardResolved;
+        _widgetWindowManager.TargetOpenedFromWidget += WidgetWindowManager_TargetOpenedFromWidget;
+        _widgetWindowManager.EntityWindowAcquired += WidgetWindowManager_EntityWindowAcquired;
         // 起動できないときに見せるだけのメイン窓では Core が初期化されていない(DB も開いていない)。
         // EncounterManager に触ると静的コンストラクタが回を作り直しに行くので、Core の購読も選択リストを読み直す時計も始めない(集計タブと同じ)。
         if (CombatRuntimeHost.Instance.IsInitialized)
@@ -396,6 +397,17 @@ public sealed partial class MainViewModel : ViewModelBase
     private void WidgetWindowManager_UnspecifiedBuffCardResolved(WidgetListItemViewModel widget, WidgetTargetOption card)
     {
         _targetSelection.ResolveUnspecified(widget, card);
+    }
+
+    /// <summary>ほかのウィジェットから窓を開いたか前に出した。カードの選択をその窓の相手にする。</summary>
+    private void WidgetWindowManager_TargetOpenedFromWidget(WidgetListItemViewModel widget, WidgetTargetOption option)
+    {
+        _targetSelection.SelectOpenedTarget(widget, option);
+    }
+
+    private void WidgetWindowManager_EntityWindowAcquired(WidgetListItemViewModel widget, WidgetTargetOption before, WidgetTargetOption after)
+    {
+        _targetSelection.ReplaceAcquiredTarget(widget, before, after);
     }
 
     /// <summary>バフ・デバフカードのショートカット(保存かプレビュー)が変わった。並べるものの有無と既定が変わるので、そのカードを当て直す。</summary>
@@ -940,9 +952,7 @@ public sealed partial class MainViewModel : ViewModelBase
 
             if (e.PropertyName == nameof(WidgetListItemViewModel.IsPinned))
             {
-                _widgetWindowManager.ApplyWidgetPinState(
-                    widget,
-                    bringToFront: !_isBulkUpdatingWidgets);
+                _widgetWindowManager.ApplyWidgetPinState(widget);
             }
         }
 
@@ -1025,13 +1035,6 @@ public sealed partial class MainViewModel : ViewModelBase
                     _configManager.CurrentSettings.PlayerNameDisplayModeIndex == (int)PlayerNameDisplayMode.Show
                         ? (int)PlayerNameDisplayMode.Hide
                         : (int)PlayerNameDisplayMode.Show);
-                break;
-
-            case HotkeyAction.WidgetWindowTopmostAlwaysOrPinnedOnly:
-                _configManager.SaveWidgetWindowTopmostModeIndex(
-                    _configManager.CurrentSettings.WidgetWindowTopmostModeIndex == AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex
-                        ? AppConfigDefaults.PinnedOnlyWidgetWindowTopmostModeIndex
-                        : AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex);
                 break;
 
             case HotkeyAction.Benchmark:
@@ -1184,21 +1187,11 @@ public sealed partial class MainViewModel : ViewModelBase
         }
     }
 
-    /// <summary>一括のピン留めでは、窓を1枚ずつ前に出さない(<c>bringToFront</c>)。</summary>
-    private void UpdateWidgetPinStates(IEnumerable<WidgetListItemViewModel> widgets, bool isPinned)
+    private static void UpdateWidgetPinStates(IEnumerable<WidgetListItemViewModel> widgets, bool isPinned)
     {
-        _isBulkUpdatingWidgets = true;
-
-        try
+        foreach (var widget in widgets)
         {
-            foreach (var widget in widgets)
-            {
-                widget.IsPinned = isPinned;
-            }
-        }
-        finally
-        {
-            _isBulkUpdatingWidgets = false;
+            widget.IsPinned = isPinned;
         }
     }
 

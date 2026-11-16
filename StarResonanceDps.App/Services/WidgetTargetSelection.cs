@@ -16,11 +16,9 @@ namespace StarResonanceDps.App.Services;
 ///
 /// <para>
 /// 項目は名前の選択リストを開いたときにだけ作る(閉じている間は作り直さない)。並べるものは種別で決まる:
-/// 人の窓は名簿の全員(自分 → パーティの番号順 → そのほかの名前順)、バフリスト・デバフリストはそれに続けてエンティティリストの敵、
-/// エンティティ情報はエンティティリストの敵だけ、
-/// 与ダメ・ヒールの詳細とグラフはメーターの行、バフ・デバフカードはカードの設定のショートカットのオンの行(自分のバフ・デバフ、設定の並び)と、
+/// 人の窓は名簿の全員(プレイヤーリストと同じく、自分 → パーティの番号順 → そのほかの名前順)、バフリスト・デバフリストはそれに続けてエンティティリストの敵、
+/// 与ダメ・ヒールなどの詳細とグラフはメーターの行(メーターの並び)、被ダメ詳細は被ダメログに出る人(被ダメの多い順)、バフ・デバフカードはカードの設定のショートカットのオンの行(自分のバフ・デバフ、設定の並び)と、
 /// バフリスト(デバフはデバフリスト)のカードで選んでいる相手のバフ(デバフ)、チャットはチャンネルとプライベートトークの相手、
-/// マップは自分のいるマップ(分かっているとき)と、パーティの人がいるほかのマップ、
 /// プラグインのウィジェットはプラグインが返す相手の一覧。
 /// 開いている窓の相手と選んでいる項目は、名簿などから外れていても末尾に足す(選んで閉じられるように)。
 /// 行の文字は、その項目で開く窓のタイトル(<see cref="WidgetHeaderText"/>)。
@@ -32,7 +30,11 @@ namespace StarResonanceDps.App.Services;
 /// </para>
 ///
 /// <para>
-/// 人の窓の既定は自分。自分が分からない間は、手で選ぶまでそのカードの一覧の1番目を入れ、自分が分かったら自分に替える(<see cref="ApplySelfDefault"/>)。
+/// 人の窓とメーターの種類は、選んでいる項目が空(相手を選んでいない項目)のときだけ、一覧の先頭を入れる(<see cref="ApplyFirstCandidate"/>)。
+/// 入れた後は自動では替えない。自分は特別に扱わない(人の窓は名簿の並びで自分が先頭になる)。窓はいつも相手を1人持つ(自分の行でも相手の UID で開く)。
+/// 並べるものが無い間の既定は相手を選んでいない項目で、起動ボタンは相手を持たない空の窓を開く。空の窓は一覧にプレイヤーが出たらその人の窓になり、
+/// その人の窓がもう開いていれば閉じる(<see cref="EnterAwaitingPlayerWindow"/>。カードはその人を選ぶ)。
+/// ほかのウィジェット(プレイヤーリストの行など)から窓を開いたときも、選択リストで選んだのと同じくその窓の相手を選ぶ(<see cref="SelectOpenedTarget"/>)。
 /// </para>
 ///
 /// <para>
@@ -81,7 +83,7 @@ public sealed class WidgetTargetSelection
 
     /// <summary>
     /// 選んでいる項目の既定。バフ・デバフカードはショートカットの1つ目(無ければ「指定なし」)、チャットはワールド、
-    /// プラグインのウィジェットは相手を選んでいない項目、ほかは自分。
+    /// プラグインのウィジェットと人の窓・メーターの種類は相手を選んでいない項目(並べるものがあれば当て直しで一覧の先頭が入る)。
     /// </summary>
     public WidgetTargetOption CreateDefault(WidgetListItemViewModel widget)
     {
@@ -91,7 +93,7 @@ public sealed class WidgetTargetSelection
                 ?? WidgetTargetOption.CreateUnspecifiedBuffCard(),
             WidgetKind.Chat => WidgetTargetOption.CreateChat(DefaultChatChannel, 0),
             WidgetKind.Plugin => WidgetTargetOption.CreateUnselectedPlugin(),
-            _ => WidgetTargetOption.CreateSelf(AppState.PlayerUID)
+            _ => WidgetTargetOption.CreateUnselectedPlayer()
         };
     }
 
@@ -153,7 +155,10 @@ public sealed class WidgetTargetSelection
         return options;
     }
 
-    /// <summary>選んでいる項目の窓を開くか閉じる(起動ボタン)。バフ・デバフカードの「指定なし」は、待っている窓が開いていなければ開くカードを決める。</summary>
+    /// <summary>
+    /// 選んでいる項目の窓を開くか閉じる(起動ボタン)。バフ・デバフカードの「指定なし」は、待っている窓が開いていなければ開くカードを決める。
+    /// 人の窓・メーターの種類の相手を選んでいない項目は、相手を持たない空の窓を開く・閉じる。
+    /// </summary>
     public void Toggle(WidgetListItemViewModel widget)
     {
         if (!widget.SupportsTargetSelection)
@@ -232,11 +237,45 @@ public sealed class WidgetTargetSelection
         if (listed is not null)
         {
             ReplacePlaceholder(widget, listed[0]);
+            return;
         }
-        else if (UsesSelfDefault(widget.Kind) && !widget.IsTargetChosenByUser)
+
+        if (UsesFirstCandidateDefault(widget.Kind))
         {
-            ApplySelfDefault(widget);
+            EnterAwaitingPlayerWindow(widget);
+            if (!widget.IsTargetChosenByUser && GetSelected(widget).IsUnselectedPlayer)
+            {
+                ApplyFirstCandidate(widget);
+            }
         }
+    }
+
+    /// <summary>
+    /// 相手を持たない空の窓を、一覧で先頭のプレイヤー(<see cref="FindFirstCandidatePlayer"/>)の窓にする
+    /// (<see cref="WidgetWindowManager.EnterAwaitingPlayerWindow"/>。その人の窓がもう開いていれば、空の窓を閉じる。どちらもカードはその人を選ぶ)。
+    /// 一覧を作るのは、空の窓があって候補のプレイヤーがいるときだけ(いない間は一覧を作らずに数えて終わる)。
+    /// </summary>
+    private void EnterAwaitingPlayerWindow(WidgetListItemViewModel widget)
+    {
+        if (!_windowManager.HasAwaitingPlayerWindow(widget) || !HasPlayerCandidates(widget))
+        {
+            return;
+        }
+
+        if (FindFirstCandidatePlayer(widget) is { } first)
+        {
+            _windowManager.EnterAwaitingPlayerWindow(widget, first.CharacterId);
+        }
+    }
+
+    /// <summary>
+    /// 一覧で先頭のプレイヤー(UID の分かる人)。空の窓が入る人。バフリスト・デバフリストの一覧は人の後に敵が続くので、敵は飛ばす。
+    /// 一覧を作るのは空の窓があるときだけ。
+    /// </summary>
+    private WidgetTargetOption? FindFirstCandidatePlayer(WidgetListItemViewModel widget)
+    {
+        return CreateCandidates(widget).FirstOrDefault(option =>
+            option.Kind == WidgetTargetOptionKind.Player && option.CharacterId != 0);
     }
 
     /// <summary>
@@ -259,39 +298,24 @@ public sealed class WidgetTargetSelection
         }
     }
 
-    /// <summary>既定が自分の項目の種別か(人の窓)。</summary>
-    private static bool UsesSelfDefault(WidgetKind kind)
+    /// <summary>空の選択を一覧の先頭で埋める種別か(人の窓とメーターの種類)。</summary>
+    private static bool UsesFirstCandidateDefault(WidgetKind kind)
     {
         return kind is not (WidgetKind.BuffDebuffCard or WidgetKind.Chat);
     }
 
     /// <summary>
-    /// 手で選んでいない人の窓のカード。自分が分かれば自分の項目を選び、分からない間は一覧の1番目を入れる。
-    /// 一覧を作るのは、自分が分からず自分の項目を選んでいる間だけ。
+    /// 選んでいる項目が空(相手を選んでいない項目)の人の窓・メーターの種類のカードに、並べるもの(候補と開いている窓)の先頭を入れる。
+    /// 一覧を作るのは空から埋めるときの1回だけ(当て直しは1秒ごとに全部のカードで走るので、埋まった後は作らない)。
+    /// 空の窓の項目(相手を選んでいない項目)は入れない(今の選択と同じで、入れても空のまま次の当て直しでまた一覧を作るため)。
     /// </summary>
-    private void ApplySelfDefault(WidgetListItemViewModel widget)
+    private void ApplyFirstCandidate(WidgetListItemViewModel widget)
     {
-        var selected = GetSelected(widget);
-        if (IsSelfKnown())
-        {
-            if (!selected.IsSelf)
-            {
-                widget.SelectedTargetOption = CreateDefault(widget);
-            }
-
-            return;
-        }
-
-        if (selected.IsSelf && CreateListedOptions(widget).FirstOrDefault() is { IsSelf: false } first)
+        if (CreateListedOptions(widget).FirstOrDefault(option => !option.IsUnselectedPlayer) is { } first
+            && !GetSelected(widget).IsSameTarget(first))
         {
             widget.SelectedTargetOption = first;
         }
-    }
-
-    /// <summary>自分の項目が何を指すか(自分の素性)分かっているか。</summary>
-    private static bool IsSelfKnown()
-    {
-        return ResolvePlayerIdentity(WidgetTargetOption.CreateSelf(AppState.PlayerUID)).UserId != 0;
     }
 
     /// <summary>
@@ -380,6 +404,40 @@ public sealed class WidgetTargetSelection
         }
     }
 
+    /// <summary>
+    /// カード以外(ほかのウィジェットの行・メニュー)から窓を開いたか前に出した(<see cref="WidgetWindowManager.TargetOpenedFromWidget"/>)。
+    /// 選択リストで選んだときと同じく、その窓の項目を手で選んだ扱いで選ぶ(既定の決め方では替えない)。
+    /// </summary>
+    public void SelectOpenedTarget(WidgetListItemViewModel widget, WidgetTargetOption option)
+    {
+        if (!widget.SupportsTargetSelection)
+        {
+            return;
+        }
+
+        widget.SelectTargetOption(option);
+        Refresh(widget);
+    }
+
+    /// <summary>
+    /// まだ捕まえていなかった敵の窓が敵を捕まえた(<see cref="WidgetWindowManager.EntityWindowAcquired"/>)。捕まえる前の項目を選んでいれば、
+    /// 捕まえた後の項目に置き換える(残すと、同じ窓を指す行が2つ並ぶ)。手で選んだかどうかは変えない。
+    /// </summary>
+    public void ReplaceAcquiredTarget(WidgetListItemViewModel widget, WidgetTargetOption before, WidgetTargetOption after)
+    {
+        if (!widget.SupportsTargetSelection)
+        {
+            return;
+        }
+
+        if (widget.SelectedTargetOption is { } selected && selected.IsSameTarget(before))
+        {
+            widget.SelectedTargetOption = after;
+        }
+
+        Refresh(widget);
+    }
+
     public void RefreshAll(IEnumerable<WidgetListItemViewModel> widgets)
     {
         foreach (var widget in widgets)
@@ -394,16 +452,30 @@ public sealed class WidgetTargetSelection
     }
 
     /// <summary>
-    /// 並べるもの(と開いている窓)があるか。リストを作らずに、件数や1人でもいるかだけを見る。
+    /// 並べるもの(候補と、相手を持つ開いている窓)があるか。リストを作らずに、件数や1人でもいるかだけを見る。
+    /// 空の窓は数えない(相手を選んでいない既定の項目と同じもので、起動ボタンで開け閉めできる。数えると、空の窓しか無い間も
+    /// 空の欄と空の窓を埋める処理が毎秒走り、一覧を作っては何も入れずに終わる)。
     /// バフ・デバフカードはここを使わない(<see cref="Refresh"/> が並べるものを作って数える)。
     /// </summary>
     private bool HasOptions(WidgetListItemViewModel widget)
     {
-        if (_windowManager.GetOpenTargets(widget).Count > 0)
+        if (_windowManager.HasFilledTargetWindows(widget))
         {
             return true;
         }
 
+        return widget.Kind switch
+        {
+            WidgetKind.Chat => true,
+            WidgetKind.BuffList or WidgetKind.DebuffList
+                => HasPlayerCandidates(widget) || _findWidget(WidgetKind.EntityList)?.EntityListEntries.Count > 0,
+            _ => HasPlayerCandidates(widget)
+        };
+    }
+
+    /// <summary>候補のプレイヤーが1人でもいるか(空の窓が入る人がいるか)。リストを作らずに数える。</summary>
+    private bool HasPlayerCandidates(WidgetListItemViewModel widget)
+    {
         return widget.Kind switch
         {
             WidgetKind.DamageSkillDetail or WidgetKind.DamageSummary or WidgetKind.DpsGraph
@@ -415,11 +487,8 @@ public sealed class WidgetTargetSelection
             WidgetKind.BreakSkillDetail or WidgetKind.BreakGraph
                 => MeterSnapshotProvider.HasPlayers(MeterSnapshotKind.Break, GetPartyDisplayMode(WidgetKind.BreakMeter)),
             WidgetKind.DamageTakenSummary => MeterSnapshotProvider.HasDamageTakenPlayers(),
-            WidgetKind.Chat => true,
+            WidgetKind.Chat => false,
             _ => PlayerRosterPresentationStore.Instance.Current.Entries.Count > 0
-                || MeterSnapshotProvider.GetSelfPlayerIdentity() is not null
-                || (widget.Kind is WidgetKind.BuffList or WidgetKind.DebuffList
-                    && _findWidget(WidgetKind.EntityList)?.EntityListEntries.Count > 0)
         };
     }
 
@@ -456,7 +525,8 @@ public sealed class WidgetTargetSelection
     }
 
     /// <summary>
-    /// 項目から、開く窓の相手とバフを決める。バフ・デバフカードの相手は、開いている窓の項目ならその窓の相手、料理・薬剤のまとまりなら自分、
+    /// 項目から、開く窓の相手とバフを決める。バフ・デバフカードの相手は、開いている窓の項目ならその窓の相手、
+    /// 自分のカード(<see cref="WidgetTargetOption.IsSelf"/>、ショートカット・「指定なし」とそれが決まった項目)なら自分、
     /// それ以外はバフリスト(デバフはデバフリスト)のカードで今選んでいる項目。
     /// </summary>
     private (WidgetTargetOption Person, WidgetTargetOption? Buff) Resolve(WidgetListItemViewModel widget, WidgetTargetOption option)
@@ -553,10 +623,15 @@ public sealed class WidgetTargetSelection
 
     /// <summary>
     /// 人の素性。窓と同じく、名簿の行、無ければメーターの実体から引く。どちらにも無ければ、自分は何も分からない、
-    /// ほかの人は相手の指定の UID だけ(窓のタイトルも相手の指定の UID を出す)。
+    /// ほかの人は相手の指定の UID だけ(窓のタイトルも相手の指定の UID を出す)。相手を選んでいない項目は何も分からない。
     /// </summary>
     private static PlayerIdentity ResolvePlayerIdentity(WidgetTargetOption person)
     {
+        if (person.IsUnselectedPlayer)
+        {
+            return new PlayerIdentity(null, 0, false, false, 0);
+        }
+
         var roster = PlayerRosterPresentationStore.Instance.Current.Entries;
         if (person.IsSelf)
         {
@@ -581,31 +656,29 @@ public sealed class WidgetTargetSelection
             : new PlayerIdentity(null, person.CharacterId, isSelf, false, 0);
     }
 
-    /// <summary>名簿の全員(自分 → パーティの番号順 → そのほかの名前順)。バフリスト・デバフリストはエンティティリストの敵を続ける。</summary>
+    /// <summary>
+    /// 名簿の全員(プレイヤーリストと同じく、自分 → パーティの番号順 → 他の名前順)。自分の行は名簿が持つ(自分が分かっていれば必ずある)。
+    /// バフリスト・デバフリストはエンティティリストの敵を続ける。
+    /// </summary>
     private List<WidgetTargetOption> CreateRosterOptions(bool includesEntities)
     {
         var roster = PlayerRosterPresentationStore.Instance.Current.Entries;
         var options = new List<WidgetTargetOption>();
 
-        if (roster.FirstOrDefault(entry => entry.IsSelf) is { } selfRow)
-        {
-            options.Add(CreatePlayerOption(PlayerIdentity.FromRoster(selfRow)));
-        }
-        else if (MeterSnapshotProvider.GetSelfPlayerIdentity() is { } selfIdentity)
-        {
-            options.Add(CreatePlayerOption(PlayerIdentity.FromMeter(selfIdentity, isSelf: true)));
-        }
+        options.AddRange(roster
+            .Where(entry => entry.IsSelf)
+            .Select(entry => WidgetTargetOption.CreatePlayer(entry.CharacterId)));
 
         options.AddRange(roster
             .Where(entry => !entry.IsSelf && entry.IsPartyMember)
             .OrderBy(entry => entry.PartyNumber ?? int.MaxValue)
-            .Select(entry => CreatePlayerOption(PlayerIdentity.FromRoster(entry))));
+            .Select(entry => WidgetTargetOption.CreatePlayer(entry.CharacterId)));
 
         options.AddRange(roster
             .Where(entry => !entry.IsSelf && !entry.IsPartyMember)
             .Select(entry => PlayerIdentity.FromRoster(entry))
             .OrderBy(identity => identity.DisplayName, StringComparer.CurrentCulture)
-            .Select(CreatePlayerOption));
+            .Select(identity => WidgetTargetOption.CreatePlayer(identity.UserId)));
 
         if (includesEntities)
         {
@@ -637,26 +710,27 @@ public sealed class WidgetTargetSelection
     /// <summary>メーターに出ている行(メーターの並びと、メーターのカードの設定のパーティ表示のまま)。</summary>
     private List<WidgetTargetOption> CreateMeterOptions(MeterSnapshotKind kind, WidgetKind meterKind)
     {
-        var snapshot = MeterSnapshotProvider.GetSnapshot(kind, GetPartyDisplayMode(meterKind));
-        return [.. snapshot.Players.Select(player => new WidgetTargetOption
+        var options = new List<WidgetTargetOption>();
+        foreach (var player in MeterSnapshotProvider.GetSnapshot(kind, GetPartyDisplayMode(meterKind)).Players)
         {
-            Kind = WidgetTargetOptionKind.Player,
-            IsSelf = player.IsSelf,
             // メーターの行から開くときと同じ相手の指定(MeterPlayerEntry.PlayerId)。
-            CharacterId = player.UserId != 0 ? player.UserId : player.CharacterId
-        })];
+            options.Add(WidgetTargetOption.CreatePlayer(player.UserId != 0 ? player.UserId : player.CharacterId));
+        }
+
+        return options;
     }
 
-    /// <summary>被ダメ詳細。被ダメログに出る人(その回で被弾の記録がある人)を、被ダメの合計の多い順。</summary>
+    /// <summary>被ダメ詳細。被ダメログに出る人(その回で被弾の記録がある人)を被ダメの合計の多い順。</summary>
     private static List<WidgetTargetOption> CreateDamageTakenOptions()
     {
-        return [.. MeterSnapshotProvider.GetDamageTakenPlayers().Select(player => new WidgetTargetOption
+        var options = new List<WidgetTargetOption>();
+        foreach (var player in MeterSnapshotProvider.GetDamageTakenPlayers())
         {
-            Kind = WidgetTargetOptionKind.Player,
-            IsSelf = player.IsSelf,
             // 被ダメログの行から開くときと同じ相手の指定(DamageTakenLogEntry.CharacterId)。
-            CharacterId = player.CharacterId
-        })];
+            options.Add(WidgetTargetOption.CreatePlayer(player.CharacterId));
+        }
+
+        return options;
     }
 
     private PartyDisplayMode GetPartyDisplayMode(WidgetKind meterKind)
@@ -851,16 +925,6 @@ public sealed class WidgetTargetSelection
         var leftId = left.IsSelf ? AppState.PlayerUID : left.CharacterId;
         var rightId = right.IsSelf ? AppState.PlayerUID : right.CharacterId;
         return (left.IsSelf && right.IsSelf) || (leftId != 0 && leftId == rightId);
-    }
-
-    private static WidgetTargetOption CreatePlayerOption(PlayerIdentity identity)
-    {
-        return new WidgetTargetOption
-        {
-            Kind = WidgetTargetOptionKind.Player,
-            IsSelf = identity.IsSelf,
-            CharacterId = identity.UserId
-        };
     }
 
     private static WidgetTargetOption CreateEntityOption(EntityListEntry entity)

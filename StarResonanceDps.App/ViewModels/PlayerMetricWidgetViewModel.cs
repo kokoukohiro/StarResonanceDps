@@ -37,7 +37,7 @@ public sealed record MetricElementIconSegment(Brush PrimaryMask, Brush? Secondar
     public bool HasSecondary => SecondaryMask is not null;
 }
 
-public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
+public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable, IWidgetWindowHiddenAware
 {
     /// <summary>タイプ(書式の{Type}と行のTIPS)の並び。enumの値の順ではない。</summary>
     private static readonly Zproto.EDamageMode[] DamageModeDisplayOrder =
@@ -239,6 +239,19 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
 
         _pendingWheelVisibleSeconds = null;
         PlayerWidget.SaveMetricGraphVisibleSeconds(visibleSeconds);
+    }
+
+    /// <summary>窓が隠れたら定期の読み直しを止め、見えたら1回読み直してから再開する(<see cref="IWidgetWindowHiddenAware"/>)。</summary>
+    public void SetWindowHidden(bool isHidden)
+    {
+        if (isHidden)
+        {
+            _refreshTimer.Stop();
+            return;
+        }
+
+        RefreshTimer_Tick(this, EventArgs.Empty);
+        _refreshTimer.Start();
     }
 
     private void RefreshTimer_Tick(object? sender, EventArgs e)

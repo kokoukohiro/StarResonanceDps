@@ -94,6 +94,15 @@ public sealed class EntityWindowTarget
     }
 
     /// <summary>
+    /// まだ捕まえておらず、その個体を捕まえられるか(<see cref="Matches"/>)。
+    /// ほかの窓がその個体を映しているかは、窓の一覧を持つ窓の管理が見る。
+    /// </summary>
+    public bool CanCapture(EntityTargetInfo entity)
+    {
+        return _entity is null && Matches(entity);
+    }
+
+    /// <summary>
     /// 与えられた個体の値を採用する。未捕獲なら種類と種別が一致するものを捕まえ、
     /// 捕獲済みなら同じ実体の新しい値にだけ差し替える。
     /// </summary>

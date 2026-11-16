@@ -44,6 +44,7 @@ Both are switched with the card buttons in "[Widgets](Widgets)" and apply to all
 - Pin: The window can no longer be moved or resized. Clicking the window does not make it active, so it does not interfere with playing the game. You can hide the header and footer with "Window" below.
 - Click-through: The window does not take mouse input and passes it straight to the screen below (such as the game). The window's buttons and scrolling cannot be used either.
 - On top: By default, widget windows are always on top. If you select "On Top Only While Pinned" in "Widget Windows" in Settings, only pinned windows are on top.
+- While using other windows: By default, widget windows are hidden while you are using a window other than the game or this app. If you turn off "Hide widgets when the game is inactive" in Settings, they are always shown.
 
 ## Settings window
 

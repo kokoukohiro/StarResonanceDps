@@ -36,7 +36,7 @@ public sealed partial class MetricGraphWidgetSettingsViewModel : ObservableObjec
         _kind = kind;
         AvailableAggregationIntervals = new ReadOnlyObservableCollection<MetricGraphSecondsOption>(_availableAggregationIntervals);
 
-        GraphColors = new GraphColorSettingsViewModel(WidgetConfigDefaults.GetMetricGraphColorDefaultSource(kind));
+        GraphColors = new GraphColorSettingsViewModel(WidgetConfigDefaults.GetMetricGraphColorDefaultSource(kind), usesBarSwatch: false);
         GraphColors.Changed += NotifyChanged;
 
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;

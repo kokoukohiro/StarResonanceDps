@@ -693,6 +693,9 @@
     <value>将关闭应用进行更新，然后重新启动。
 设置和历史记录会保留。</value>
   </data>
+  <data name="Update_Progress_Comparing" xml:space="preserve">
+    <value>正在检查已更改的文件…</value>
+  </data>
   <data name="Update_Progress_Downloading" xml:space="preserve">
     <value>正在下载…</value>
   </data>
@@ -704,6 +707,20 @@
   </data>
   <data name="Update_Progress_WaitingForFiles" xml:space="preserve">
     <value>正在等待占用的文件释放…</value>
+  </data>
+  <data name="Update_FileInUse_Message" xml:space="preserve">
+    <value>其他程序正在使用文件，无法更新。</value>
+  </data>
+  <data name="Update_FileInUse_Detail" xml:space="preserve">
+    <value>关闭{0}后点击“是”即可继续更新。
+点击“否”将停止更新并启动原版本。</value>
+  </data>
+  <data name="Update_FileInUseUnknownProgram_Detail" xml:space="preserve">
+    <value>关闭正在使用{0}的程序后点击“是”即可继续更新。
+点击“否”将停止更新并启动原版本。</value>
+  </data>
+  <data name="Update_Progress_ProgramSeparator" xml:space="preserve">
+    <value>、</value>
   </data>
   <data name="Update_Progress_Replacing" xml:space="preserve">
     <value>正在替换文件…</value>
@@ -1987,6 +2004,9 @@
   </data>
   <data name="Settings_Widget_DataStatus" xml:space="preserve">
     <value>小组件状态</value>
+  </data>
+  <data name="Settings_Widget_HideWhenGameInactive" xml:space="preserve">
+    <value>游戏未激活时隐藏小组件</value>
   </data>
   <data name="WidgetDataStatusDisplay_NonNormalOnly" xml:space="preserve">
     <value>仅非正常状态时显示</value>

@@ -15,7 +15,7 @@ using StarResonanceDps.Core.CombatRuntime;
 namespace StarResonanceDps.App.ViewModels;
 
 public sealed partial class EntityBuffListWidgetViewModel
-    : ViewModelBase, IEntityWidgetWindowViewModel, IBuffListWindowViewModel, IDisposable
+    : ViewModelBase, IEntityWidgetWindowViewModel, IBuffListWindowViewModel, IDisposable, IWidgetWindowHiddenAware
 {
     private readonly WidgetListItemViewModel _widget;
     private readonly EntityWindowTarget _target;
@@ -137,6 +137,11 @@ public sealed partial class EntityBuffListWidgetViewModel
         return _target.Represents(entityUuid);
     }
 
+    public bool CanCaptureEntity(EntityTargetInfo entity)
+    {
+        return _target.CanCapture(entity);
+    }
+
     [RelayCommand]
     private void OpenCard(PlayerBuffEntry? entry)
     {
@@ -223,6 +228,19 @@ public sealed partial class EntityBuffListWidgetViewModel
         _settings = _widget.GetBuffListSettingsSnapshot();
         GaugeBrush = BuffGaugeBrush.Create(_settings.GaugeColors);
         Refresh();
+    }
+
+    /// <summary>窓が隠れたら定期の読み直しを止め、見えたら1回読み直してから再開する(<see cref="IWidgetWindowHiddenAware"/>)。</summary>
+    public void SetWindowHidden(bool isHidden)
+    {
+        if (isHidden)
+        {
+            _refreshTimer.Stop();
+            return;
+        }
+
+        RefreshTimer_Tick(this, EventArgs.Empty);
+        _refreshTimer.Start();
     }
 
     private void RefreshTimer_Tick(object? sender, EventArgs e)
