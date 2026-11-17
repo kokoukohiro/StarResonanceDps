@@ -17,7 +17,7 @@ This widget lists the buffs that were on one player, one per row. Bars show when
 - Uptime: The share of time the buff was on, in the form "12.34%". Time when another player was not around you is not counted.
 - Horizontal axis: The battle's elapsed time (in the form "2:55"). The length that fits in the window is decided by the width of the bar column and "Width per second" in the display settings.
 - Vertical line: While a time that has not come yet is visible in the window, a vertical line appears at the current time. To the right of the line is time that has not come yet.
-- Buffs shown: The same buffs as in the [Buff List](Buff-List). Debuffs are not shown. The same buff is one row even if different people applied it.
+- Buffs shown: The same buffs as in the [Buff List](Buff-List). Debuffs are not shown. The same buff is one row even if its casters are different.
 - Order: Buffs turned on in the Priority List come first (in the order of the list), and the rest follow in the order they were first applied in that battle.
 
 ## Controls

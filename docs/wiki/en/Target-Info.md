@@ -47,7 +47,7 @@ The window settings and theme are described in [Common Widget Settings](Common-W
 - Combat State: Choose how the combat state icon is shown from "Show" and "Hide" (default: "Show").
 - Targeted Player: Whether the player the enemy is targeting now is shown at the left end of the second line (default: "Show").
 - Aggro: Choose how many people are shown on the second line from "Show All", "Show Top 5", "Show Top 4", "Show Top 3", "Show Top 2", and "Show Top Aggro Only" (default: "Show All").
-- Same Buffs: Choose from "Don't Group" and "Group". "Don't Group" shows buffs applied by players in a separate slot for each player who applied them (default: "Don't Group").
+- Same Buffs: Choose from "Don't Group" and "Group". "Don't Group" shows buffs applied by players in a separate slot for each caster (default: "Don't Group").
 - Caster Player Name: Choose from "Show", "Hide", and "Applied by Others" (default: "Applied by Others").
 
 ### Priority List

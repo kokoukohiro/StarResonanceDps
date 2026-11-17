@@ -11,7 +11,7 @@ This widget lists the debuffs on one player or one enemy, one per row, with the 
 ## What it shows
 
 - Title: "Debuff List - target name".
-- The rows are read the same way as in the [Buff List](Buff-List). In enemy windows, by default, debuffs applied by players are shown one row per player who applied them, with that player's name added (the image shows debuffs that two players applied to a boss).
+- The rows are read the same way as in the [Buff List](Buff-List). In enemy windows, by default, debuffs applied by players are shown one row per caster, with the caster's name added (the image shows debuffs that two players applied to a boss).
 - Order: Debuffs turned on in the Priority List come first (in the order of the list), and the rest follow in the order they were applied (newest at the bottom).
 
 ## Controls
