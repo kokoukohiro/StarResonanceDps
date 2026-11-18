@@ -60,8 +60,8 @@ public sealed class PluginPacketMessage
     }
 
     /// <summary>
-    /// The capture order. Numbered across all messages delivered to any plugin, so a plugin sees gaps
-    /// for messages that only other plugins read.
+    /// The capture order. Numbered across all messages and combat events (<see cref="PluginCombatEvent.SequenceNumber"/>) delivered to any plugin,
+    /// so a plugin sees gaps for those it does not read.
     /// </summary>
     public long SequenceNumber { get; }
 

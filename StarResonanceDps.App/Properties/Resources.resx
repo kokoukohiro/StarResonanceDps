@@ -2230,6 +2230,9 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>Note: e.g. entering a boss room or a wipe in a dungeon</value>
   </data>
+  <data name="Settings_Aggregation_SplitOnPhases_PluginNote" xml:space="preserve">
+    <value>Note: The settings of the plugin "{0}" take precedence.</value>
+  </data>
   <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
     <value>Move Speed</value>
   </data>

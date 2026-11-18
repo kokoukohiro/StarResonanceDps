@@ -29,7 +29,14 @@ public sealed record PluginEntity(
     bool IsInCombat,
     PluginEntityCast? Cast,
     long? TargetCharacterId,
-    IReadOnlyList<PluginHateRank> HateRanking);
+    IReadOnlyList<PluginHateRank> HateRanking)
+{
+    /// <summary>The level (the same as the host's Entity List), or 0 when not received.</summary>
+    public int Level { get; init; }
+
+    /// <summary>The shield amount.</summary>
+    public long CurrentShield { get; init; }
+}
 
 /// <summary>
 /// A cast an entity started (a skill with a cast bar).

@@ -10,15 +10,17 @@ using StarResonanceDps.PluginSdk;
 namespace StarResonanceDps.App.Services;
 
 /// <summary>
-/// 本体が受けたゲームのメッセージを、プラグインの受け手(<see cref="IPluginPacketService.ReadAsync"/> の繰り返し)へ配る。全部で1つ。
+/// 本体が受けたゲームのメッセージと、本体が処理した戦闘のできごとを、プラグインの受け手
+/// (<see cref="IPluginPacketService.ReadAsync"/> と <see cref="IPluginCombatEventService.ReadAsync"/> の繰り返し)へ配る。全部で1つ。
 ///
 /// <para>
-/// パケット処理のスレッドで、どれかの受け手が受ける種類のメッセージだけを1件につき1回写し、受け手ごとの順番待ちに入れる。
-/// 順番待ちに上限は無く、捨てない。まだ取られていない中身がプラグインごとに <see cref="MaxPendingBytesPerPlugin"/> を越えたら、
-/// そのプラグインを止める(<see cref="Account"/> の越えたときの処理)。
+/// パケット処理のスレッドで、どれかの受け手が受ける種類だけを1件につき1回写し、受け手ごとの順番待ちに入れる。
+/// 順番待ちに上限は無く、捨てない。まだ取られていない分が、ゲームのメッセージと戦闘のできごとを合わせて
+/// プラグインごとに <see cref="MaxPendingBytesPerPlugin"/> を越えたら、そのプラグインを止める(<see cref="Account"/> の越えたときの処理)。
+/// 通し番号・受け手の登録と外し・閉じた印は、2つで同じものを使う(<see cref="_sync"/>)。
 /// </para>
 /// </summary>
-internal sealed class PluginPacketHub
+internal sealed partial class PluginPacketHub
 {
     public const long MaxPendingBytesPerPlugin = 64L * 1024 * 1024;
 
@@ -30,6 +32,7 @@ internal sealed class PluginPacketHub
     private PluginPacketHub()
     {
         MessageManager.MessageObserved += MessageManager_MessageObserved;
+        SubscribeCombatObservations();
     }
 
     public static PluginPacketHub Instance { get; } = new();
@@ -107,19 +110,25 @@ internal sealed class PluginPacketHub
     private void UnregisterAll(Account account)
     {
         List<Reader> removed;
+        List<CombatEventReader> removedCombatEventReaders;
         lock (_sync)
         {
             removed = _readers.Where(reader => reader.Account == account).ToList();
-            if (removed.Count == 0)
+            if (removed.Count > 0)
             {
-                return;
+                _readers.RemoveAll(reader => reader.Account == account);
+                RebuildLookup();
             }
 
-            _readers.RemoveAll(reader => reader.Account == account);
-            RebuildLookup();
+            removedCombatEventReaders = RemoveCombatEventReadersNoLock(account);
         }
 
         foreach (var reader in removed)
+        {
+            reader.Complete();
+        }
+
+        foreach (var reader in removedCombatEventReaders)
         {
             reader.Complete();
         }
@@ -134,8 +143,11 @@ internal sealed class PluginPacketHub
         Volatile.Write(ref _readersByType, lookup);
     }
 
-    /// <summary>プラグイン1つの受け取りの勘定(まだ取られていない中身の大きさ)と、そのプラグインの受け手の口。</summary>
-    public sealed class Account : IPluginPacketService
+    /// <summary>
+    /// プラグイン1つの受け取りの勘定(まだ取られていない中身の大きさ)と、そのプラグインの受け手の口。
+    /// ゲームのメッセージ(<see cref="IPluginPacketService"/>)と戦闘のできごと(<see cref="IPluginCombatEventService"/>)の両方を、同じ勘定で数える。
+    /// </summary>
+    public sealed partial class Account : IPluginPacketService, IPluginCombatEventService
     {
         private readonly PluginPacketHub _hub;
         private readonly Action _onOverflow;

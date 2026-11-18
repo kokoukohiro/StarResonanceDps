@@ -23,6 +23,114 @@ public static class WindowPlacementBehavior
         obj.SetValue(UseAppConfigStartUpStateProperty, value);
     }
 
+    /// <summary>保存した位置の無い窓を置く、持ち主の窓(メイン画面)の左上からの横の距離。<see cref="PlaceNearOwner"/> が読む。</summary>
+    public static readonly DependencyProperty OwnerOffsetXProperty = DependencyProperty.RegisterAttached(
+        "OwnerOffsetX",
+        typeof(double),
+        typeof(WindowPlacementBehavior),
+        new PropertyMetadata(0d));
+
+    /// <summary>保存した位置の無い窓を置く、持ち主の窓(メイン画面)の左上からの縦の距離。<see cref="PlaceNearOwner"/> が読む。</summary>
+    public static readonly DependencyProperty OwnerOffsetYProperty = DependencyProperty.RegisterAttached(
+        "OwnerOffsetY",
+        typeof(double),
+        typeof(WindowPlacementBehavior),
+        new PropertyMetadata(0d));
+
+    /// <summary>
+    /// 置く場所に同じ種類の窓があるとき、右下へずらす量。0 ならずらさない(<see cref="MoveToFreeSpot"/>)。
+    /// </summary>
+    public static readonly DependencyProperty CascadeStepProperty = DependencyProperty.RegisterAttached(
+        "CascadeStep",
+        typeof(double),
+        typeof(WindowPlacementBehavior),
+        new PropertyMetadata(0d));
+
+    public static double GetOwnerOffsetX(DependencyObject obj)
+    {
+        return (double)obj.GetValue(OwnerOffsetXProperty);
+    }
+
+    public static void SetOwnerOffsetX(DependencyObject obj, double value)
+    {
+        obj.SetValue(OwnerOffsetXProperty, value);
+    }
+
+    public static double GetOwnerOffsetY(DependencyObject obj)
+    {
+        return (double)obj.GetValue(OwnerOffsetYProperty);
+    }
+
+    public static void SetOwnerOffsetY(DependencyObject obj, double value)
+    {
+        obj.SetValue(OwnerOffsetYProperty, value);
+    }
+
+    public static double GetCascadeStep(DependencyObject obj)
+    {
+        return (double)obj.GetValue(CascadeStepProperty);
+    }
+
+    public static void SetCascadeStep(DependencyObject obj, double value)
+    {
+        obj.SetValue(CascadeStepProperty, value);
+    }
+
+    /// <summary>
+    /// 保存した位置の無い窓を、持ち主の窓の左上から <see cref="OwnerOffsetXProperty"/>・<see cref="OwnerOffsetYProperty"/> の場所に置き、
+    /// そこに同じ種類の窓があればずらす(<see cref="MoveToFreeSpot"/>)。持ち主が無ければ画面の中央。
+    /// 窓を見せる前(コンストラクタ)に呼ぶ。見せないまま位置を保存する窓(ゲームが前面でない間に開いたウィジェット)があるため。
+    /// </summary>
+    public static void PlaceNearOwner(Window window, Window? owner)
+    {
+        if (owner is null)
+        {
+            window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            return;
+        }
+
+        window.WindowStartupLocation = WindowStartupLocation.Manual;
+        window.Left = owner.Left + GetOwnerOffsetX(window);
+        window.Top = owner.Top + GetOwnerOffsetY(window);
+        MoveToFreeSpot(window);
+    }
+
+    /// <summary>
+    /// 今の位置に同じ種類のほかの窓の左上がそのままあれば、空くまで <see cref="CascadeStepProperty"/> ずつ右下へずらす。
+    /// 左上の座標が完全に一致するときだけずらす(Windows と同じ)ので、開いた後に一度も動かしていない窓だけが場所を塞ぐ。
+    /// 数えるのはアプリの窓の一覧にある同じ型の窓で、まだ見せていない窓・隠している窓・最小化した窓も入る。
+    /// </summary>
+    public static void MoveToFreeSpot(Window window)
+    {
+        var step = GetCascadeStep(window);
+        if (step <= 0 || !double.IsFinite(window.Left) || !double.IsFinite(window.Top))
+        {
+            return;
+        }
+
+        while (IsOccupied(window))
+        {
+            window.Left += step;
+            window.Top += step;
+        }
+    }
+
+    private static bool IsOccupied(Window window)
+    {
+        foreach (Window other in Application.Current.Windows)
+        {
+            if (!ReferenceEquals(other, window)
+                && other.GetType() == window.GetType()
+                && other.Left == window.Left
+                && other.Top == window.Top)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static void OnUseAppConfigStartUpStateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is not Window window)

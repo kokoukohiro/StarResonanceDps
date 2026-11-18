@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Threading;
+using StarResonanceDps.App.Behaviors;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Services;
 
@@ -126,13 +127,8 @@ public partial class ManagerView : UserControl
 
         if (managerWindow is not null)
         {
-            const double leftOffset = 24;
-            const double topOffset = 72;
-
             dialog.Owner = managerWindow;
-            dialog.WindowStartupLocation = WindowStartupLocation.Manual;
-            dialog.Left = managerWindow.Left + leftOffset;
-            dialog.Top = managerWindow.Top + topOffset;
+            WindowPlacementBehavior.PlaceNearOwner(dialog, managerWindow);
         }
 
         OwnerModalWindow.Show(dialog, managerWindow);

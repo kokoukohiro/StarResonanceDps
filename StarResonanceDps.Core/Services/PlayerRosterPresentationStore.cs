@@ -79,8 +79,16 @@ public sealed class PlayerRosterPresentationStore
             return null;
         }
 
-        var nameDisplayMode = NameDisplayMode;
-        return ShouldHideName(entry, nameDisplayMode)
+        return ApplyNameDisplay(entry, NameDisplayMode);
+    }
+
+    /// <summary>
+    /// 一覧と同じ決まりで名前を伏せた行。伏せるなら名前を <see cref="HiddenPlayerName"/> にした写し、伏せなければ同じ行を返す。
+    /// 名簿を通らない行(プラグインが読む履歴の回の参加者など)に、その時点の表示方法(<see cref="NameDisplayMode"/>)で当てる。
+    /// </summary>
+    public static PlayerRosterEntry ApplyNameDisplay(PlayerRosterEntry entry, PlayerNameDisplayMode mode)
+    {
+        return ShouldHideName(entry, mode)
             ? entry with { Name = HiddenPlayerName }
             : entry;
     }

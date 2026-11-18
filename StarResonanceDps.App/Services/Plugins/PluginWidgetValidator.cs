@@ -75,6 +75,12 @@ internal static class PluginWidgetValidator
                 return false;
             }
 
+            if (!Enum.IsDefined(definition.StatusRule))
+            {
+                error = $"The widget '{id}' has the status rule {(int)definition.StatusRule}, which PluginWidgetStatusRule does not define.";
+                return false;
+            }
+
             result.Add(new PluginWidgetDefinition
             {
                 Id = id,
@@ -83,7 +89,9 @@ internal static class PluginWidgetValidator
                 DefaultHeight = definition.DefaultHeight,
                 HasFooter = definition.HasFooter,
                 ScrollsVertically = definition.ScrollsVertically,
-                SettingSections = sections
+                SettingSections = sections,
+                StatusRule = definition.StatusRule,
+                UsesWidgetColors = definition.UsesWidgetColors
             });
         }
 

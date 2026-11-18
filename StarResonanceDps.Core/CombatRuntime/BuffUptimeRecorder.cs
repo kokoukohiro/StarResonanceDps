@@ -23,6 +23,24 @@ public sealed record BuffUptimeRow(int BuffId, BuffGroup Group, bool IsPermanent
 /// <param name="Rows">数える時間の中で付いていた番号の行。並びは決めない(読む側が決める)。</param>
 public sealed record BuffUptimeSnapshot(Encounter Encounter, double ElapsedSeconds, double[] AbsentSpans, double AbsentSeconds, IReadOnlyList<BuffUptimeRow> Rows);
 
+/// <summary>UTC の区間 [始まり, 終わり]。終わりは始まりより後。</summary>
+public readonly record struct UtcInterval(DateTime StartUtc, DateTime EndUtc);
+
+/// <summary>
+/// 1つのバフの番号が付いていた区間(<see cref="Encounter.ReadBuffIntervals"/>)。
+/// </summary>
+/// <param name="BuffId">届いた番号(畳み先・料理と薬剤のまとまりにまとめない)。</param>
+/// <param name="IsPermanent">最後の区間を始めた実体(付いていない状態から付いた状態にした実体)の持続が負(永続)か。</param>
+/// <param name="Intervals">少なくとも1つの実体が付いていた区間。古い順で重ならない。</param>
+public sealed record BuffIntervalRow(int BuffId, bool IsPermanent, IReadOnlyList<UtcInterval> Intervals);
+
+/// <summary>
+/// 1人のバフの区間と周りにいた区間(<see cref="Encounter.ReadBuffIntervals"/>)。戦闘の時計の [起点, 終点] の中だけ。
+/// </summary>
+/// <param name="Buffs">区間のあるバフ。その回で最初に付いた順。</param>
+/// <param name="PresentIntervals">その人の通知が届いていた(周りにいた)区間。古い順。</param>
+public sealed record BuffIntervalsSnapshot(IReadOnlyList<BuffIntervalRow> Buffs, IReadOnlyList<UtcInterval> PresentIntervals);
+
 /// <summary>
 /// プレイヤーごとの、バフが付いていた区間と周りにいた区間の記録(バフ稼働率)。回ごとに1つ持ち、回と一緒に手放す。
 ///

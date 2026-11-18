@@ -2230,6 +2230,9 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>※던전에서 보스 방 진입이나 전멸 등</value>
   </data>
+  <data name="Settings_Aggregation_SplitOnPhases_PluginNote" xml:space="preserve">
+    <value>※플러그인 '{0}'의 지정이 우선됩니다</value>
+  </data>
   <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
     <value>이동 속도</value>
   </data>

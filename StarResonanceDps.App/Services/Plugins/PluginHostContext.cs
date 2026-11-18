@@ -14,7 +14,11 @@ internal sealed class PluginHostContext : IPluginContext
         IPluginGameDataService gameData,
         IPluginNameService names,
         IPluginPacketService packets,
+        IPluginCombatEventService combatEvents,
         IPluginNotificationService notifications,
+        IPluginHistoryService history,
+        IPluginEncounterControlService encounterControl,
+        IPluginWidgetService widgets,
         CancellationToken stopping)
     {
         Settings = settings ?? throw new ArgumentNullException(nameof(settings));
@@ -24,7 +28,11 @@ internal sealed class PluginHostContext : IPluginContext
         GameData = gameData ?? throw new ArgumentNullException(nameof(gameData));
         Names = names ?? throw new ArgumentNullException(nameof(names));
         Packets = packets ?? throw new ArgumentNullException(nameof(packets));
+        CombatEvents = combatEvents ?? throw new ArgumentNullException(nameof(combatEvents));
         Notifications = notifications ?? throw new ArgumentNullException(nameof(notifications));
+        History = history ?? throw new ArgumentNullException(nameof(history));
+        EncounterControl = encounterControl ?? throw new ArgumentNullException(nameof(encounterControl));
+        Widgets = widgets ?? throw new ArgumentNullException(nameof(widgets));
         Stopping = stopping;
     }
 
@@ -42,7 +50,15 @@ internal sealed class PluginHostContext : IPluginContext
 
     public IPluginPacketService Packets { get; }
 
+    public IPluginCombatEventService CombatEvents { get; }
+
     public IPluginNotificationService Notifications { get; }
+
+    public IPluginHistoryService History { get; }
+
+    public IPluginEncounterControlService EncounterControl { get; }
+
+    public IPluginWidgetService Widgets { get; }
 
     public CancellationToken Stopping { get; }
 }

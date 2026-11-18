@@ -15,6 +15,21 @@ namespace StarResonanceDps.Core.CombatRuntime
     public static class BattleStateMachine
     {
         public static ConcurrentQueue<KeyValuePair<EDungeonState, DateTime>> DungeonStateHistory { get; private set; } = new();
+
+        /// <summary>
+        /// マップに入ってからのダンジョンの進行の状態の変化(状態と到着時刻、古い順)。続けて同じ状態が届いても足さない。
+        /// 書き換えない配列を差し替えて持つので、読んだ一覧は後から変わらない。消すのはマップ移動とログアウト(<see cref="DungeonStateHistory"/> と同じ)。
+        /// 書くのはパケットのスレッドだけ。プラグインの接続の状態が読む。
+        /// </summary>
+        public static IReadOnlyList<DungeonFlowChange> DungeonFlowChanges => Volatile.Read(ref _dungeonFlowChanges);
+
+        private static DungeonFlowChange[] _dungeonFlowChanges = [];
+
+        /// <summary>
+        /// 今のダンジョンの開始(直前が Playing でない Playing)の到着時刻(UTC)。プラグインのダンジョンの時計の起点(<see cref="EncounterSplitRules"/>)。
+        /// 書くのはパケットのスレッドだけ。マップ移動・ログアウト・状態 Null・終わりで消す。
+        /// </summary>
+        public static DateTime? DungeonStartArrivalUtc { get; private set; }
         public static DateTime? DeferredEncounterEndFinalTime { get; private set; } = null;
         public static EncounterEndFinalData? DeferredEncounterEndFinalData { get; private set; } = null;
 
@@ -33,6 +48,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             DeferredEncounterEndFinalTime = null;
 
             DungeonStateHistory.Clear();
+            Volatile.Write(ref _dungeonFlowChanges, []);
+            DungeonStartArrivalUtc = null;
+            Services.DungeonTimerStore.Instance.Clear();
             DungeonStateChanged?.Invoke();
 
             EncounterManager.StartNewMap();
@@ -67,6 +85,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             DeferredEncounterEndFinalTime = null;
 
             DungeonStateHistory.Clear();
+            Volatile.Write(ref _dungeonFlowChanges, []);
+            DungeonStartArrivalUtc = null;
             DungeonStateChanged?.Invoke();
         }
 
@@ -80,15 +100,22 @@ namespace StarResonanceDps.Core.CombatRuntime
             DeferredEncounterEndFinalData = null;
         }
 
-        public static void DungeonStateHistoryAdd(EDungeonState dungeonState)
+        /// <param name="arrivalUtc">状態が届いたメッセージの到着時刻。</param>
+        public static void DungeonStateHistoryAdd(EDungeonState dungeonState, DateTime arrivalUtc)
         {
+            var previousFlow = _dungeonFlowChanges;
+            var previousState = previousFlow.Length > 0 ? previousFlow[^1].State : (EDungeonState?)null;
+
             DungeonStateHistory.Enqueue(new KeyValuePair<EDungeonState, DateTime>(dungeonState, DateTime.Now));
             Log.Information($"{DateTime.Now} - BattleStateMachine.DungeonStateHistoryAdd: {dungeonState}");
+            AppendDungeonFlowChange(dungeonState, arrivalUtc);
             DungeonStateChanged?.Invoke();
 
 
             if (dungeonState == EDungeonState.DungeonStateNull)
             {
+                DungeonStartArrivalUtc = null;
+                Services.DungeonTimerStore.Instance.Clear();
 
                 // 届くのはマップ移動の直後で、保持はマップ移動の作り直しから引き継ぐ。
                 EncounterManager.EnterDungeon(keepPastEncounterInMeter: true);
@@ -97,19 +124,27 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             else if (dungeonState == EDungeonState.DungeonStatePlaying)
             {
+                // ダンジョンの開始(直前が Playing でない Playing)を控える。回を作る前に書く(プラグインのダンジョンの時計の起点)。
+                if (previousState != EDungeonState.DungeonStatePlaying)
+                {
+                    DungeonStartArrivalUtc = arrivalUtc;
+                }
+
                 // 開始までの待ち時間の記録を別の戦闘に分けるのは設定「進行で自動リセット」の一部なので、無効なら区切らずに続ける。
                 // 記録が無ければ、作り直しても何も保存されない(回を作った時刻がダンジョンの開始になり、制限時間はそこから測る)ので、設定によらず行う。
                 if (!EncounterManager.Current.HasStatsBeenRecorded())
                 {
-                    EncounterManager.EnterDungeon(keepPastEncounterInMeter: true);
+                    EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, trigger: EncounterSplitTrigger.DungeonStart);
                 }
-                else if (CombatRuntimeSettings.SplitEncountersOnNewPhases)
+                else if (EncounterSplitRules.ShouldSplit(EncounterSplitTrigger.DungeonStart))
                 {
-                    EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: true, reason: EncounterStartReason.Force);
+                    EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: true, reason: EncounterStartReason.Force, trigger: EncounterSplitTrigger.DungeonStart);
                 }
             }
             else if (dungeonState == EDungeonState.DungeonStateEnd)
             {
+                DungeonStartArrivalUtc = null;
+
                 // ダンジョンが終わったら予告のバーを残さない(残すとバーの終わりに通知とタイムラインの行が出る)。計測中も同じ。
                 Services.BossDbmBarStore.Instance.Clear();
 
@@ -123,6 +158,21 @@ namespace StarResonanceDps.Core.CombatRuntime
                 EncounterManager.StopEncounter(true, EncounterStartReason.DungeonStateEnd);
             }
 
+        }
+
+        /// <summary>進行の状態の変化を足す。最後の変化と同じ状態なら足さない。</summary>
+        private static void AppendDungeonFlowChange(EDungeonState state, DateTime arrivalUtc)
+        {
+            var current = _dungeonFlowChanges;
+            if (current.Length > 0 && current[^1].State == state)
+            {
+                return;
+            }
+
+            var next = new DungeonFlowChange[current.Length + 1];
+            current.CopyTo(next, 0);
+            next[^1] = new DungeonFlowChange(state, arrivalUtc);
+            Volatile.Write(ref _dungeonFlowChanges, next);
         }
 
         /// <summary>
@@ -225,4 +275,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         public EncounterStartReason Reason;
         public Encounter? Encounter;
     }
+
+    /// <summary>ダンジョンの進行の状態の変化1つ(<see cref="BattleStateMachine.DungeonFlowChanges"/>)。時刻はメッセージの到着時刻(UTC)。</summary>
+    public readonly record struct DungeonFlowChange(EDungeonState State, DateTime ArrivalUtc);
 }

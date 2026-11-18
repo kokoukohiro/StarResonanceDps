@@ -13,6 +13,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             conn.Execute(Entities.CreateTable);
             conn.Execute(Battles.CreateTable);
             conn.Execute(DbData.CreateTable);
+            conn.Execute(PluginEncounterData.CreateTable);
         }
 
         public static class Encounter
@@ -48,6 +49,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             public const string RemoveEncounter =
                 @"DELETE FROM Encounters WHERE EncounterId = @EncounterId;";
+
+            public const string Exists = @"SELECT COUNT(1) FROM Encounters WHERE EncounterId = @EncounterId";
 
             public const string CreateTable = @"
                 CREATE TABLE IF NOT EXISTS Encounters (
@@ -140,6 +143,46 @@ namespace StarResonanceDps.Core.CombatRuntime
                 );
 
                 INSERT INTO DbData (Version) SELECT (1.2) WHERE NOT EXISTS (SELECT 1 FROM DbData)";
+        }
+
+        /// <summary>
+        /// プラグインが回に残した値(<see cref="EncounterPluginDataStore"/>)。回1つ・プラグイン1つ・キー1つで1行。
+        /// プラグインの鍵とキーは大文字と小文字を区別しない(列の照合 <c>NOCASE</c>、主キーも同じ照合)。
+        /// Data は zstd で縮めた値、RawLength は縮める前の長さ。行は回と一緒に消す(上限の掃除・削除・起動の掃除)。
+        /// </summary>
+        public static class PluginEncounterData
+        {
+            public const string Upsert = @"
+                INSERT OR REPLACE INTO PluginEncounterData (
+                    EncounterId, PluginKey, DataKey, RawLength, Data
+                ) VALUES (
+                    @EncounterId, @PluginKey, @DataKey, @RawLength, @Data
+                )";
+
+            public const string DeleteKey =
+                @"DELETE FROM PluginEncounterData WHERE EncounterId = @EncounterId AND PluginKey = @PluginKey AND DataKey = @DataKey";
+
+            public const string SelectByEncounterId = @"SELECT * FROM PluginEncounterData WHERE EncounterId = @EncounterId";
+
+            public const string SelectSizes =
+                @"SELECT DataKey, RawLength FROM PluginEncounterData WHERE EncounterId = @EncounterId AND PluginKey = @PluginKey";
+
+            public const string RemoveByEncounterId =
+                @"DELETE FROM PluginEncounterData WHERE EncounterId = @EncounterId;";
+
+            // 公開した古い版は回を消してもこの表を消さないので、回の無い行が残りうる。
+            public const string DeleteRowsWithNoEncounters =
+                @"DELETE FROM PluginEncounterData WHERE NOT EXISTS (SELECT 1 FROM Encounters WHERE Encounters.EncounterId = PluginEncounterData.EncounterId);";
+
+            public const string CreateTable = @"
+                CREATE TABLE IF NOT EXISTS PluginEncounterData (
+                    EncounterId INTEGER NOT NULL,
+                    PluginKey TEXT NOT NULL COLLATE NOCASE,
+                    DataKey TEXT NOT NULL COLLATE NOCASE,
+                    RawLength INTEGER NOT NULL,
+                    Data BLOB NOT NULL,
+                    PRIMARY KEY (EncounterId, PluginKey, DataKey)
+                )";
         }
 
     }

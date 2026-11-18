@@ -9,6 +9,8 @@
         Title="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Window_Settings_Title]}"
         Icon="pack://application:,,,/Assets/Images/ApplicationIcon.ico"
         behaviors:WindowWorkingAreaBehavior.ConstrainMaximizeToWorkingArea="True"
+        behaviors:WindowPlacementBehavior.OwnerOffsetX="24"
+        behaviors:WindowPlacementBehavior.OwnerOffsetY="72"
         Width="760"
         Height="640"
         MinWidth="694"
@@ -834,8 +836,8 @@
                                             </Grid>
                                         </Border>
 
-                                        <!-- 2行ぶんの高さ。既定54 + 注記の行(13px)と間隔4 で 75。 -->
-                                        <Border Style="{StaticResource Panel.SettingField}" Height="75">
+                                        <!-- 2行ぶんの高さ。既定54 + 注記の行(13px)と間隔4 で 75。プラグインの注意書きの行が出ると伸びる。 -->
+                                        <Border Style="{StaticResource Panel.SettingField}" MinHeight="75">
                                             <Grid VerticalAlignment="Center">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
@@ -843,6 +845,7 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
                                                     <RowDefinition Height="Auto" />
                                                     <RowDefinition Height="Auto" />
                                                 </Grid.RowDefinitions>
@@ -864,6 +867,23 @@
                                                            FontSize="13"
                                                            FontWeight="SemiBold"
                                                            TextWrapping="Wrap" />
+
+                                                <!-- 区切り方を上書きしているプラグインごとの注意書き。上書きが無ければ何も出さない。体裁は上の注記と同じ。 -->
+                                                <ItemsControl Grid.Row="2"
+                                                              Grid.Column="0"
+                                                              Focusable="False"
+                                                              ItemsSource="{Binding SplitOverridePluginNotes}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Margin="0,4,0,0"
+                                                                       Text="{Binding}"
+                                                                       Foreground="{DynamicResource Brush.TextSecondary}"
+                                                                       FontSize="13"
+                                                                       FontWeight="SemiBold"
+                                                                       TextWrapping="Wrap" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
 
                                                 <!-- スイッチは行0に置く。注記が折り返しても1行目に貼り付いたまま。 -->
                                                 <StackPanel Grid.Row="0"

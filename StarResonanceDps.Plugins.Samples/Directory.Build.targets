@@ -1,6 +1,10 @@
 <Project>
-  <!-- Inside this repository the samples use the SDK projects, so that a change to the SDK breaks their build right away. -->
+  <!--
+    Inside this repository the samples use the SDK projects, so that a change to the SDK breaks their build right away.
+    The version in each sample's package reference is what a plugin outside this repository restores, so the build checks that it is the SDK's version.
+  -->
   <ItemGroup>
+    <_SampleSdkPackageReference Include="@(PackageReference->WithMetadataValue('Identity', 'StarResonanceDps.PluginSdk'))" />
     <PackageReference Remove="StarResonanceDps.PluginSdk" />
   </ItemGroup>
 
@@ -10,6 +14,19 @@
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <Target Name="CheckSampleSdkVersion"
+          BeforeTargets="CoreCompile"
+          Condition="!$(MSBuildProjectName.EndsWith('.Library'))">
+    <XmlPeek XmlInputPath="$(MSBuildThisFileDirectory)..\StarResonanceDps.PluginSdk\StarResonanceDps.PluginSdk.csproj"
+             Query="/Project/PropertyGroup/Version/text()">
+      <Output TaskParameter="Result" PropertyName="_SampleSdkVersion" />
+    </XmlPeek>
+    <Error Condition="'@(_SampleSdkPackageReference)' == ''"
+           Text="$(MSBuildProjectFile) has no package reference to StarResonanceDps.PluginSdk. Write it as a plugin outside this repository does, with the SDK's version $(_SampleSdkVersion)." />
+    <Error Condition="'@(_SampleSdkPackageReference)' != '' And '%(_SampleSdkPackageReference.Version)' != '$(_SampleSdkVersion)'"
+           Text="$(MSBuildProjectFile) references StarResonanceDps.PluginSdk version %(_SampleSdkPackageReference.Version), but the SDK's version is $(_SampleSdkVersion). Write $(_SampleSdkVersion) in the package reference." />
+  </Target>
 
   <!-- The app does not load this folder. To try a sample, add its DLL with the plugin list's "+" button. -->
   <Target Name="CopySampleToRunFolder"

@@ -115,7 +115,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             netCap.ProxyGate = ShouldDispatchProxy;
 
             // 予告のバーが終わった行を、そのあとに届いたパケットの中身より先にタイムラインへ残す。
-            netCap.BeforeParsePacket = EncounterManager.RecordEndedAnnouncementBars;
+            // プラグインの無操作・経過の秒の条件も、パケットの中身より先に判定する(区切った後の最初の出来事が新しい回に入る)。
+            netCap.BeforeParsePacket = EncounterSplitRules.BeforeParsePacket;
 
             netCap.AfterParsePacket = ProcessAfterParsePacket;
 
@@ -199,13 +200,13 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             _pendingWipeSplitEncounterId = null;
             if (EncounterManager.Current.EncounterId != encounterId
-                || !CombatRuntimeSettings.SplitEncountersOnNewPhases
+                || !EncounterSplitRules.ShouldSplit(EncounterSplitTrigger.Wipe)
                 || !EncounterManager.Current.HasStatsBeenRecorded())
             {
                 return;
             }
 
-            EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.Wipe);
+            EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.Wipe, trigger: EncounterSplitTrigger.Wipe);
         }
 
         /// <summary>
@@ -259,6 +260,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             WarningSkillCastStore.Instance.Clear();
             DungeonTargetStore.Instance.Clear();
             DungeonScoreStore.Instance.Clear();
+            DungeonTimerStore.Instance.Clear();
             PartyMemberCache.Instance.Clear();
             SocialDataStore.ResetToStartup();
             SelfEquipmentStore.ResetSelfToStartup();
@@ -1398,6 +1400,201 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 消すときは <see cref="PlayerDeathStates"/> と同じく新しい辞書に差し替える。
         /// </summary>
         private static Dictionary<long, PassiveHealTick> LastPassiveHealTicks = [];
+
+        /// <summary>プラグインへ渡すモンスターのスキルと HP の、差分の属性を当てる前の値。</summary>
+        private readonly record struct ObservedMonsterBefore(bool WatchesSkill, int SkillId, bool WatchesHp, long? Hp);
+
+        /// <summary>
+        /// モンスターの差分の属性を当てる前に、プラグインへ渡すスキル(<c>AttrSkillId</c>)と HP の前の値を読む。
+        /// 受け手がいない・モンスターでない・その属性が差分に無い(HP は状態の死亡でも 0 になるので状態も見る)ときは読まない。
+        /// </summary>
+        private static ObservedMonsterBefore? CaptureObservedMonsterBefore(long uuid, HashSet<EAttrType> changedAttributes)
+        {
+            if ((EEntityType)Utils.UuidToEntityType(uuid) != EEntityType.EntMonster)
+            {
+                return null;
+            }
+
+            var watchesSkill = changedAttributes.Contains(EAttrType.AttrSkillId)
+                && CombatObservationFeed.IsActive(CombatObservationKinds.MonsterSkill);
+            var watchesHp = (changedAttributes.Contains(EAttrType.AttrHp) || changedAttributes.Contains(EAttrType.AttrState))
+                && CombatObservationFeed.IsActive(CombatObservationKinds.MonsterHpZero);
+            if (!watchesSkill && !watchesHp)
+            {
+                return null;
+            }
+
+            EncounterManager.Current.Entities.TryGetValue(uuid, out var entity);
+            return new ObservedMonsterBefore(
+                watchesSkill,
+                entity?.GetAttrKV("AttrSkillId") as int? ?? 0,
+                watchesHp,
+                entity?.GetAttrKV("AttrHp") as long?);
+        }
+
+        /// <summary>差分の属性を当てた後に、モンスターのスキルと、HP の 0 への変化・0 からの戻りをプラグインへ上げる。</summary>
+        private static void PublishObservedMonsterChanges(long uuid, ObservedMonsterBefore? before, DateTime arrivalUtc)
+        {
+            if (before is not { } watched
+                || !EncounterManager.Current.Entities.TryGetValue(uuid, out var entity))
+            {
+                return;
+            }
+
+            var encounter = EncounterManager.Current;
+            var monsterId = encounter.GetMonsterIdOrNull(uuid);
+            if (watched.WatchesSkill)
+            {
+                CombatObservationFeed.Publish(new MonsterSkillObservation(
+                    uuid,
+                    monsterId,
+                    watched.SkillId,
+                    entity.GetAttrKV("AttrSkillId") as int? ?? 0,
+                    entity.GetAttrKV("AttrSkillLevel") as int? ?? 0,
+                    encounter.IsRecorded(arrivalUtc, null),
+                    arrivalUtc));
+            }
+
+            if (watched.WatchesHp && entity.GetAttrKV("AttrHp") is long hpAfter)
+            {
+                var wasZero = watched.Hp == 0;
+                var isZero = hpAfter == 0;
+                if (wasZero != isZero)
+                {
+                    CombatObservationFeed.Publish(new MonsterHpZeroObservation(
+                        uuid,
+                        monsterId,
+                        isZero,
+                        watched.Hp,
+                        entity.GetAttrKV("AttrMaxHp") as long? ?? 0,
+                        IsOnAppear: false,
+                        encounter.IsRecorded(arrivalUtc, null),
+                        arrivalUtc));
+                }
+            }
+        }
+
+        /// <summary>周りに入ったモンスターの HP が 0 なら、プラグインへ上げる(出現の全属性を当てた後)。</summary>
+        private static void PublishAppearedMonsterHpZero(long uuid, DateTime arrivalUtc)
+        {
+            if ((EEntityType)Utils.UuidToEntityType(uuid) != EEntityType.EntMonster
+                || !CombatObservationFeed.IsActive(CombatObservationKinds.MonsterHpZero)
+                || !EncounterManager.Current.Entities.TryGetValue(uuid, out var entity)
+                || entity.GetAttrKV("AttrHp") is not long hp
+                || hp != 0)
+            {
+                return;
+            }
+
+            var encounter = EncounterManager.Current;
+            CombatObservationFeed.Publish(new MonsterHpZeroObservation(
+                uuid,
+                encounter.GetMonsterIdOrNull(uuid),
+                IsZero: true,
+                PreviousHp: null,
+                entity.GetAttrKV("AttrMaxHp") as long? ?? 0,
+                IsOnAppear: true,
+                encounter.IsRecorded(arrivalUtc, null),
+                arrivalUtc));
+        }
+
+        /// <summary>プラグインへ渡すバフの持ち主の種類。プレイヤーとモンスターだけで、ほかの実体は渡さない。</summary>
+        private static CombatObservationKinds GetBuffObservationKind(long holderUuid)
+        {
+            return (EEntityType)Utils.UuidToEntityType(holderUuid) switch
+            {
+                EEntityType.EntChar => CombatObservationKinds.PlayerBuff,
+                EEntityType.EntMonster => CombatObservationKinds.MonsterBuff,
+                _ => CombatObservationKinds.None
+            };
+        }
+
+        /// <summary>バフの付与・一覧の1件をプラグインへ上げる。持ち主の種類の受け手がいるときだけ。</summary>
+        private static void PublishBuffObservation(
+            BuffObservationKind kind,
+            long holderUuid,
+            long buffUuid,
+            int buffId,
+            int? level,
+            int? layer,
+            int? durationMilliseconds,
+            DateTime? serverCreateUtc,
+            long casterUuid,
+            int? fightSourceType,
+            int sourceConfigId,
+            DateTime arrivalUtc)
+        {
+            var observationKind = GetBuffObservationKind(holderUuid);
+            if (observationKind == CombatObservationKinds.None || !CombatObservationFeed.IsActive(observationKind))
+            {
+                return;
+            }
+
+            CombatObservationFeed.Publish(new BuffObservation(
+                kind,
+                holderUuid,
+                buffUuid,
+                buffId,
+                level,
+                layer,
+                durationMilliseconds,
+                serverCreateUtc,
+                casterUuid,
+                fightSourceType,
+                sourceConfigId,
+                EncounterManager.Current.IsRecorded(arrivalUtc, observationKind == CombatObservationKinds.PlayerBuff ? holderUuid : null),
+                arrivalUtc));
+        }
+
+        /// <summary>バフの変化・除去をプラグインへ上げる。通信は番号と付与元を運ばないので、付与のときに控えた値(<see cref="BuffInstanceIndex.TryGet"/>)を使う。</summary>
+        private static void PublishIndexedBuffObservation(
+            BuffObservationKind kind,
+            long holderUuid,
+            int buffUuid,
+            int? layer,
+            int? durationMilliseconds,
+            DateTime? serverCreateUtc,
+            DateTime arrivalUtc)
+        {
+            var observationKind = GetBuffObservationKind(holderUuid);
+            if (observationKind == CombatObservationKinds.None || !CombatObservationFeed.IsActive(observationKind))
+            {
+                return;
+            }
+
+            BuffInstanceIndex.Instance.TryGet(holderUuid, buffUuid, out var baseId, out var fireUuid, out var fightSourceType, out var sourceConfigId);
+            PublishBuffObservation(
+                kind,
+                holderUuid,
+                buffUuid,
+                baseId,
+                level: null,
+                layer,
+                durationMilliseconds,
+                serverCreateUtc,
+                fireUuid,
+                fightSourceType >= 0 ? fightSourceType : null,
+                sourceConfigId,
+                arrivalUtc);
+        }
+
+        /// <summary>付いているバフの一覧(出現時の一覧・自分の付け直し)の終わりをプラグインへ上げる。</summary>
+        private static void PublishBuffListEnd(long holderUuid, DateTime arrivalUtc)
+        {
+            PublishBuffObservation(
+                BuffObservationKind.ListEnd,
+                holderUuid,
+                buffUuid: 0,
+                buffId: 0,
+                level: null,
+                layer: null,
+                durationMilliseconds: null,
+                serverCreateUtc: null,
+                casterUuid: 0,
+                fightSourceType: null,
+                sourceConfigId: 0,
+                arrivalUtc);
+        }
 
         private static PlayerVitals CapturePlayerVitals(long uuid)
         {
@@ -3234,6 +3431,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 if (attrCollection?.Attrs != null)
                 {
                     ProcessAttrs(entity.Uuid, attrCollection.Attrs, extraData.ArrivalTime);
+                    PublishAppearedMonsterHpZero(entity.Uuid, extraData.ArrivalTime);
                     RecordSummonSource(entity.Uuid, attrCollection.Attrs, extraData.ArrivalTime);
                     RecordNearbyMonster(entity.Uuid, attrCollection.Attrs);
                     SetEnemyContributionBaseline(entity.Uuid, entity.EntType, attrCollection.Attrs);
@@ -3351,6 +3549,19 @@ namespace StarResonanceDps.Core.CombatRuntime
                     extraData,
                     BuffEventPayload.BuffInfo,
                     buffInfo.FightSourceInfo?.FightSourceType);
+                PublishBuffObservation(
+                    BuffObservationKind.Present,
+                    entity.Uuid,
+                    buffInfo.BuffUuid,
+                    buffInfo.BaseId,
+                    buffInfo.Level,
+                    buffInfo.Layer,
+                    buffInfo.Duration,
+                    creationTime,
+                    buffInfo.FireUuid,
+                    buffInfo.FightSourceInfo?.FightSourceType,
+                    buffInfo.FightSourceInfo?.SourceConfigId ?? 0,
+                    extraData.ArrivalTime);
             }
 
             // 出現時の一覧は全件なので、一覧に無い項目は見えない間に消えたもの。付与を流した後で、一覧を受けた印と一緒に当てる(0件でも)。
@@ -3361,6 +3572,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 entity.Uuid,
                 buffInfos.Select(info => info.BuffUuid).ToHashSet(),
                 extraData.ArrivalTime);
+            PublishBuffListEnd(entity.Uuid, extraData.ArrivalTime);
 
             // 特化を持つのはプレイヤーだけ。0件の一覧でも「全部を見た」になる(未装着・無効を確定する)。
             if (Utils.UuidToEntityType(entity.Uuid) == (long)EEntityType.EntChar)
@@ -3508,8 +3720,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             HashSet<EAttrType> changedAttributes = [];
 
             // シーン切り替えのたびの自分のバフの付け直しは、能力値の変化として記録しない(SelfAttributeChangeStore)。
+            // プラグインへは、付いているバフの一覧として渡す(付与ではない)。
             // 下の早い return(精算・投票の間)より前で見る。
-            if (isSelfTarget && IsSelfBuffReinitialization(delta))
+            var isSelfBuffReinitialization = isSelfTarget && IsSelfBuffReinitialization(delta);
+            if (isSelfBuffReinitialization)
             {
                 SelfAttributeChangeStore.MarkBuffReinitialized();
             }
@@ -3544,11 +3758,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
 
                 var selfStatsBefore = isSelfTarget ? CaptureSelfStats(targetUuid, attrCollection.Attrs) : null;
+                var observedMonsterBefore = isTargetPlayer ? null : CaptureObservedMonsterBefore(targetUuid, changedAttributes);
                 ProcessAttrs(targetUuid, attrCollection.Attrs, extraData.ArrivalTime);
                 if (selfStatsBefore is not null)
                 {
                     RecordSelfStatChanges(targetUuid, selfStatsBefore, extraData.ArrivalTime);
                 }
+
+                PublishObservedMonsterChanges(targetUuid, observedMonsterBefore, extraData.ArrivalTime);
 
                 if (isTargetPlayer)
                 {
@@ -3672,6 +3889,19 @@ namespace StarResonanceDps.Core.CombatRuntime
                                     extraData.ArrivalTime);
 
                                 EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, buffInfo.BaseId, buffInfo.Level, buffInfo.FireUuid, buffInfo.Layer, buffInfo.Duration, buffInfo.FightSourceInfo?.SourceConfigId ?? 0, creationTime, extraData, BuffEventPayload.BuffInfo, buffInfo.FightSourceInfo?.FightSourceType);
+                                PublishBuffObservation(
+                                    isSelfBuffReinitialization ? BuffObservationKind.Present : BuffObservationKind.Added,
+                                    targetUuid,
+                                    buffEffect.BuffUuid,
+                                    buffInfo.BaseId,
+                                    buffInfo.Level,
+                                    buffInfo.Layer,
+                                    buffInfo.Duration,
+                                    creationTime,
+                                    buffInfo.FireUuid,
+                                    buffInfo.FightSourceInfo?.FightSourceType,
+                                    buffInfo.FightSourceInfo?.SourceConfigId ?? 0,
+                                    extraData.ArrivalTime);
                                 PendingEnemyBuffLogs.Add((targetUuid, buffInfo, delta.SkillEffects?.Damages, new ExtraPacketData(extraData.ArrivalTime)));
                                 handledByLogicEffect = true;
                             }
@@ -3688,6 +3918,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                                 }
 
                                 EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, 0, 0, 0, changeInfo.Layer, (int)changeInfo.Duration, 0, creationTime, extraData, BuffEventPayload.BuffChange, fightSourceType: null);
+                                PublishIndexedBuffObservation(
+                                    BuffObservationKind.Changed,
+                                    targetUuid,
+                                    buffEffect.BuffUuid,
+                                    changeInfo.Layer,
+                                    (int)changeInfo.Duration,
+                                    creationTime,
+                                    extraData.ArrivalTime);
                                 handledByLogicEffect = true;
                             }
                         }
@@ -3705,6 +3943,15 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                     if (buffEffect.Type == EBuffEventType.BuffEventRemove)
                     {
+                        // 番号と付与元は除去を当てる前に引く。
+                        PublishIndexedBuffObservation(
+                            BuffObservationKind.Removed,
+                            targetUuid,
+                            buffEffect.BuffUuid,
+                            layer: null,
+                            durationMilliseconds: null,
+                            serverCreateUtc: null,
+                            extraData.ArrivalTime);
                         BuffInstanceIndex.Instance.Remove(targetUuid, buffEffect.BuffUuid, extraData.ArrivalTime);
                         if (EncounterManager.Current.Entities.TryGetValue(targetUuid, out var targetEntity))
                         {
@@ -3737,6 +3984,11 @@ namespace StarResonanceDps.Core.CombatRuntime
             if (sawBuffAdd && IsSelfPlayer(targetUuid))
             {
                 EncounterManager.Current.GetOrCreateEntity(targetUuid).MarkSelfBuffStreamReceived();
+            }
+
+            if (isSelfBuffReinitialization)
+            {
+                PublishBuffListEnd(targetUuid, extraData.ArrivalTime);
             }
 
             if (shieldListChangedByBuffRemoval)
@@ -3776,13 +4028,13 @@ namespace StarResonanceDps.Core.CombatRuntime
                     BossDbmBarStore.Instance.Clear();
                     _pendingWipeSplitEncounterId = EncounterManager.Current.EncounterId;
                 }
-                else if (CombatRuntimeSettings.SplitEncountersOnNewPhases
+                else if (EncounterSplitRules.ShouldSplit(EncounterSplitTrigger.BossRoom)
                     && EncounterManager.Current.HasStatsBeenRecorded()
                     && !addedBuffIds.Contains(ReviveStartBuffId)
                     && BattleStateMachine.IsDungeonPlaying())
                 {
                     Log.Information("Boss room entry detected: {Uuid} received a reset buff without being resurrected", targetUuid);
-                    EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.NewObjective);
+                    EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.NewObjective, trigger: EncounterSplitTrigger.BossRoom);
                 }
             }
 
@@ -3985,7 +4237,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     // 記録するのはプレイヤーから敵への攻撃だけ。敵の攻撃・自傷・フレンドリーファイアは被ダメログ(AddTakenDamage)にだけ残す。
                     if (isAttackerPlayer && !isTargetPlayer)
                     {
-                        EncounterManager.Current.AddDamage(attackerUuid, targetUuid, skillId, identitySkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
+                        EncounterManager.Current.AddDamage(attackerUuid, targetUuid, skillId, identitySkillId, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, syncDamageInfo.AttackerUuid, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
                     }
 
                     // 敵の攻撃(プレイヤーへの被弾と敵どうし)は、発生源の技を記録の瞬間に控える。
@@ -4518,8 +4770,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                 EncounterManager.ApplyDungeonDifficulty(vData.DungeonSceneInfo.Difficulty);
             }
 
+            // 時計は状態より先に控える(状態で作る回が、時計の止まった区間と開始時刻を使う)。回へ当てるのは状態の後。
+            DungeonTimerStore.Instance.ApplyFull(vData.TimerInfo, extraData.ArrivalTime);
             EncounterManager.Current.DungeonState = vData.FlowInfo.State;
-            BattleStateMachine.DungeonStateHistoryAdd(vData.FlowInfo.State);
+            BattleStateMachine.DungeonStateHistoryAdd(vData.FlowInfo.State, extraData.ArrivalTime);
+            EncounterManager.ApplyDungeonTimer();
 
             int dungeonVarDataIdx = 0;
             foreach (var dungeonVarData in vData.DungeonVar.DungeonVarData)
@@ -4571,14 +4826,21 @@ namespace StarResonanceDps.Core.CombatRuntime
                 System.Diagnostics.Debug.WriteLine(dun?.PlayerList.PlayerInfos);
             }
 
+            // 時計は状態より先に控える(状態で作る回が、時計の止まった区間と開始時刻を使う)。回へ当てるのは状態の後。
+            DungeonTimerStore.Instance.ApplyDirty(dun?.TimerInfo, extraData.ArrivalTime);
             if (dun?.FlowInfo != null)
             {
                 if (dun.FlowInfo?.State != null)
                 {
                     EDungeonState dungeonState = (EDungeonState)dun.FlowInfo.State;
                     EncounterManager.Current.DungeonState = dungeonState;
-                    BattleStateMachine.DungeonStateHistoryAdd(dungeonState);
+                    BattleStateMachine.DungeonStateHistoryAdd(dungeonState, extraData.ArrivalTime);
                 }
+            }
+
+            if (dun?.TimerInfo != null || dun?.FlowInfo?.State != null)
+            {
+                EncounterManager.ApplyDungeonTimer();
             }
 
             if (dun?.Damage != null)

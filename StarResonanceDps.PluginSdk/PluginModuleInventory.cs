@@ -27,5 +27,7 @@ public sealed record PluginModuleItem(
 /// One effect of a module.
 /// </summary>
 /// <param name="EffectId">The module effect ID.</param>
-/// <param name="LinkCount">The link count, or <c>null</c> when the game has not sent it.</param>
+/// <param name="LinkCount">
+/// The link count, or <c>null</c> when the game has not sent it. In <see cref="PluginPlayerBuild.ModuleEffects"/>, the sum over the equipped modules.
+/// </param>
 public sealed record PluginModuleEffect(int EffectId, int? LinkCount);

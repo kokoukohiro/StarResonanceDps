@@ -93,6 +93,19 @@ public static class SkillCooldownStateStore
     }
 
     /// <summary>
+    /// この端末の時計からサーバの時計を引いた差(ミリ秒、<c>ClientMilliseconds - ServerMilliseconds</c>)。
+    /// サーバの時刻(Unixミリ秒)にこれを足すと、この端末の時刻になる。<c>SyncServerTime</c> をまだ受け取っていなければ false。
+    /// </summary>
+    public static bool TryGetClientServerDeltaMilliseconds(out long deltaMilliseconds)
+    {
+        lock (Sync)
+        {
+            deltaMilliseconds = _clientServerTimeDeltaMilliseconds;
+            return _hasClientServerTimeDelta;
+        }
+    }
+
+    /// <summary>
     /// いまのサーバ時刻(Unixミリ秒)。<c>SyncServerTime</c> をまだ受け取っていなければ false。
     ///
     /// <para>

@@ -6,9 +6,11 @@ namespace StarResonanceDps.PluginSdk;
 ///
 /// <para>
 /// Properties and methods can be read from any thread. Events are raised on the UI thread.
-/// <see cref="SessionChanged"/>, <see cref="PlayersChanged"/>, <see cref="EntitiesChanged"/> and <see cref="SelfModulesChanged"/>
+/// <see cref="SessionChanged"/>, <see cref="PlayersChanged"/>, <see cref="EntitiesChanged"/>, <see cref="SelfModulesChanged"/>,
+/// <see cref="ShownEncounterChanged"/> and <see cref="AggregationSettingsChanged"/>
 /// are combined into one call per UI update; the other events are raised once for each occurrence.
-/// Buffs and encounter totals have no change event; read them again when needed, as the host's widgets do.
+/// Buffs, encounter totals, <see cref="GetPlayer"/> and <see cref="GetPlayerBuild"/> have no change event; read them again when needed, as the host's widgets do.
+/// The moments buffs are applied and removed come with <see cref="IPluginContext.CombatEvents"/>.
 /// </para>
 /// </summary>
 public interface IPluginGameDataService
@@ -81,8 +83,27 @@ public interface IPluginGameDataService
     IReadOnlyList<PluginBuff> GetEntityBuffs(long entityUuid);
 
     /// <summary>
+    /// One player by character ID, with the same values as the host's player widgets:
+    /// a player of <see cref="Players"/> has the same row; another player has the last values after leaving the list
+    /// (<see cref="PluginPlayer.IsNearby"/> is <c>false</c>), or the values received from a namecard or chat.
+    /// <c>null</c> when the host has none of them; they are discarded on logout.
+    /// The name follows the host's display settings, as in <see cref="Players"/>.
+    /// It has no change event: the values of a player who is not in <see cref="Players"/> change only with namecards and chat.
+    /// </summary>
+    PluginPlayer? GetPlayer(long characterId);
+
+    /// <summary>
+    /// The build of the player <see cref="GetPlayer"/> returns, or <c>null</c> when it returns <c>null</c>.
+    /// Each call makes a new snapshot; it has no change event.
+    /// While a history encounter is open in the host, a player who is only in that encounter has the values saved with it,
+    /// and the others have live values (the same as the host's player widgets).
+    /// </summary>
+    PluginPlayerBuild? GetPlayerBuild(long characterId);
+
+    /// <summary>
     /// The totals of the encounter the host's meters show: the opened history encounter, the previous encounter the meters keep showing,
-    /// or the current one.
+    /// or the current one. The same as <c>GetShownEncounter()?.GetTotals()</c>; when the host has no encounter yet,
+    /// an empty snapshot whose <see cref="PluginEncounterSnapshot.EncounterKey"/> is 0.
     /// </summary>
     PluginEncounterSnapshot GetEncounter();
 
@@ -94,9 +115,33 @@ public interface IPluginGameDataService
     IReadOnlyList<PluginSkillTotals> GetSkillTotals(long characterId, PluginCombatKind kind);
 
     /// <summary>
+    /// The encounter <see cref="GetEncounter"/> reads (the opened history encounter, the previous encounter the meters keep showing,
+    /// or the current one), as an object that keeps reading that encounter. <c>null</c> when the host has no encounter yet.
+    /// <see cref="ShownEncounterChanged"/> is raised when it changes.
+    /// </summary>
+    IPluginEncounterRecord? GetShownEncounter();
+
+    /// <summary>
+    /// The current live encounter, also while a history encounter is open and while the meters keep showing the previous encounter.
+    /// <c>null</c> when the host has no encounter yet. <see cref="EncounterStarted"/> is raised when the host creates the next one.
+    /// </summary>
+    IPluginEncounterRecord? GetLiveEncounter();
+
+    /// <summary>
+    /// The host's aggregation settings (the "Aggregation" section of the general settings).
+    /// </summary>
+    PluginAggregationSettings AggregationSettings { get; }
+
+    /// <summary>
+    /// Raised after <see cref="AggregationSettings"/> has changed.
+    /// </summary>
+    event EventHandler? AggregationSettingsChanged;
+
+    /// <summary>
     /// Raised after the host has created a new encounter: on a map change (possibly several times for one map change),
     /// at the start of a dungeon, at a split of the progress-based reset (a boss room or a wipe), on a manual reset,
-    /// when a benchmark starts or stops, and on logout. The combat clock starts later; read <see cref="PluginEncounterSnapshot.StartUtc"/>.
+    /// when a benchmark starts or stops, on logout, and at a split requested by a plugin (<see cref="IPluginEncounterControlService"/>).
+    /// The combat clock usually starts later; read <see cref="PluginEncounterSnapshot.StartUtc"/>.
     /// </summary>
     event EventHandler? EncounterStarted;
 
@@ -104,8 +149,28 @@ public interface IPluginGameDataService
     /// Raised when the host closes an encounter that has records and creates the next one, with the closed encounter's final result.
     /// Not raised for the last encounter when the app exits.
     /// Keep what you need from the result: <see cref="GetEncounter"/> reads the closed encounter only while the meters keep showing it.
+    /// The host saves the encounter right after this; <see cref="EncounterSaved"/> follows with its number in the saved history,
+    /// and <see cref="IPluginHistoryService.LoadAsync"/> reads it again.
+    /// Data stored with <see cref="IPluginHistoryService.TrySetEncounterData"/> in this handler may or may not be saved with the encounter;
+    /// store the final values with <see cref="IPluginHistoryService.SetSavedEncounterDataAsync"/> after <see cref="EncounterSaved"/>.
     /// </summary>
     event EventHandler<PluginEncounterResult>? EncounterClosed;
+
+    /// <summary>
+    /// Raised once for each encounter the host saves to the history, after <see cref="EncounterClosed"/> of the same encounter
+    /// and before the next <see cref="EncounterStarted"/>. An encounter without records is not saved, so nothing is raised for it.
+    /// Not raised for the last encounter when the app exits: the host stops the plugins right after saving it.
+    /// </summary>
+    event EventHandler<PluginEncounterSaved>? EncounterSaved;
+
+    /// <summary>
+    /// Raised after the encounter <see cref="GetEncounter"/> and <see cref="GetShownEncounter"/> read has changed:
+    /// a history encounter was opened (by the user or with <see cref="IPluginHistoryService.OpenAsync"/>), the host returned to the live encounter
+    /// (also automatically), the host started showing a new encounter, or it stopped showing the previous encounter it kept.
+    /// Opening a history encounter reads it again, so opening the same one again also raises it.
+    /// Not raised when the host creates a new encounter while the meters keep showing the previous one, and not when opening failed.
+    /// </summary>
+    event EventHandler? ShownEncounterChanged;
 
     /// <summary>
     /// Raised after the player has moved to another map or channel. Not raised for the first map after the app starts or after logging in again.

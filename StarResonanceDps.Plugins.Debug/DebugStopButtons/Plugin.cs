@@ -22,8 +22,20 @@ public sealed class Plugin : IStarResonancePlugin, IPluginWindowProvider
         new PluginPacketType(PluginPacketKind.Notify, ServiceId: 1664308034, MethodId: 0x6)
     ];
 
+    // 戦闘のできごとの全部の種類。
+    private const PluginCombatEventKinds AllCombatEventKinds =
+        PluginCombatEventKinds.Damage
+        | PluginCombatEventKinds.SkillActivation
+        | PluginCombatEventKinds.TakenHit
+        | PluginCombatEventKinds.CombatLog
+        | PluginCombatEventKinds.PlayerBuff
+        | PluginCombatEventKinds.MonsterBuff
+        | PluginCombatEventKinds.MonsterSkill
+        | PluginCombatEventKinds.MonsterHpZero;
+
     private IPluginContext? _context;
     private IAsyncEnumerator<PluginPacketMessage>? _unreadMessages;
+    private IAsyncEnumerator<PluginCombatEvent>? _unreadCombatEvents;
 
     public void Initialize(IPluginContext context)
     {
@@ -38,6 +50,7 @@ public sealed class Plugin : IStarResonancePlugin, IPluginWindowProvider
         panel.Children.Add(CreateButton("自分のスレッドの例外(アプリが落ちる)", ThrowOnOwnThread));
         panel.Children.Add(CreateButton("取り残しを上限まで進める(次の受信で止まる)", FillPendingToLimit));
         panel.Children.Add(CreateButton("通信を取らずに溜める(実際に 64MB まで)", StartLeavingMessagesUnread));
+        panel.Children.Add(CreateButton("戦闘のできごとを読まずに溜める(実際に 64MB まで)", StartLeavingCombatEventsUnread));
         return panel;
     }
 
@@ -93,6 +106,19 @@ public sealed class Plugin : IStarResonancePlugin, IPluginWindowProvider
         _context.Logger.Info("Started leaving game messages unread");
         _unreadMessages = _context.Packets.ReadAsync(BusyMessageTypes).GetAsyncEnumerator();
         await _unreadMessages.MoveNextAsync();
+    }
+
+    /// <summary>戦闘のできごとを全部の種類で読み始めて、その先を読まない。ゲームのメッセージと同じ勘定で上限に届くと止まる。</summary>
+    private async void StartLeavingCombatEventsUnread()
+    {
+        if (_context is null || _unreadCombatEvents is not null)
+        {
+            return;
+        }
+
+        _context.Logger.Info("Started leaving combat events unread");
+        _unreadCombatEvents = _context.CombatEvents.ReadAsync(AllCombatEventKinds).GetAsyncEnumerator();
+        await _unreadCombatEvents.MoveNextAsync();
     }
 
     /// <summary>読み始めて先を読まず、取り残しの勘定をちょうど上限にする。次に届いたメッセージで上限を越える。</summary>

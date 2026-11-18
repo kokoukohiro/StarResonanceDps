@@ -21,6 +21,11 @@ internal sealed class PluginNameService : IPluginNameService
         return NullIfEmpty(CombatDataCatalog.GetSkillNameWithoutInternalId(skillId));
     }
 
+    public string? GetSkillActivationName(int skillId)
+    {
+        return NullIfEmpty(CombatDataCatalog.GetSkillActivationNameWithoutInternalId(skillId));
+    }
+
     public string? GetBuffName(int buffId)
     {
         return NullIfEmpty(CombatDataCatalog.GetBuffNameWithoutInternalId(buffId));

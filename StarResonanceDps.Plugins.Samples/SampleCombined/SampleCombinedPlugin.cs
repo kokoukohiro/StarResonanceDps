@@ -2,11 +2,11 @@ using System.Windows;
 using System.Windows.Controls;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(SampleAll.SampleAllPlugin), PluginSdkVersion.Current)]
-[assembly: PluginDisplayName("en-US", "Sample: Everything")]
-[assembly: PluginDisplayName("ja-JP", "サンプル: 全部")]
-[assembly: PluginDisplayName("ko-KR", "샘플: 전부")]
-[assembly: PluginDisplayName("zh-CN", "示例: 全部")]
+[assembly: PluginRegistration(typeof(SampleCombined.SampleCombinedPlugin), PluginSdkVersion.Current)]
+[assembly: PluginDisplayName("en-US", "Sample: Combined")]
+[assembly: PluginDisplayName("ja-JP", "サンプル: 組み合わせ")]
+[assembly: PluginDisplayName("ko-KR", "샘플: 조합")]
+[assembly: PluginDisplayName("zh-CN", "示例: 组合")]
 [assembly: PluginGenre("en-US", "Sample")]
 [assembly: PluginGenre("ja-JP", "サンプル")]
 [assembly: PluginGenre("ko-KR", "샘플")]
@@ -14,13 +14,13 @@ using StarResonanceDps.PluginSdk;
 [assembly: PluginAuthor("kokoukohiro")]
 [assembly: PluginVersion("1.0.0")]
 
-namespace SampleAll;
+namespace SampleCombined;
 
 /// <summary>
 /// One plugin with a window, a widget and a notification item.
 /// The window and the widget each have a button that sends the notification.
 /// </summary>
-public sealed class SampleAllPlugin : IStarResonancePlugin, IPluginWindowProvider, IPluginWidgetProvider, IPluginNotificationProvider
+public sealed class SampleCombinedPlugin : IStarResonancePlugin, IPluginWindowProvider, IPluginWidgetProvider, IPluginNotificationProvider
 {
     private const string WidgetId = "widget";
     private const string NotificationId = "button-pressed";
@@ -47,7 +47,7 @@ public sealed class SampleAllPlugin : IStarResonancePlugin, IPluginWindowProvide
             new PluginWidgetDefinition
             {
                 Id = WidgetId,
-                Names = Texts("Sample widget", "サンプルのウィジェット"),
+                Names = Texts("Combined widget", "組み合わせのウィジェット"),
                 DefaultWidth = 240,
                 DefaultHeight = 80
             }

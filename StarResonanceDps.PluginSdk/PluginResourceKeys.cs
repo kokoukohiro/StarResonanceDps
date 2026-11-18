@@ -10,7 +10,8 @@ public static class PluginResourceKeys
 {
     /// <summary>
     /// Brushes of the app's theme. All but <see cref="Success"/> are made from the window color of the theme and change with it.
-    /// Inside a widget window they follow the app's theme, not the widget's color.
+    /// Inside a widget window they follow the app's theme, not the widget's color, except in a widget with
+    /// <see cref="PluginWidgetDefinition.UsesWidgetColors"/>, where they use the colors of the widget.
     /// </summary>
     public static class Brushes
     {

@@ -124,6 +124,31 @@ public sealed class BuffInstanceIndex
         }
     }
 
+    /// <summary>
+    /// 付与のときに控えた番号・付与者・付与元を引く(変化と除去の知らせは番号と付与元を運ばない)。除去の後でも、掃除されるまでは引ける。
+    /// 付与を見ていない実体は false(出力は 0、付与元の種類は -1)。
+    /// </summary>
+    public bool TryGet(long holderUuid, int buffUuid, out int baseId, out long fireUuid, out int fightSourceType, out int sourceConfigId)
+    {
+        lock (_sync)
+        {
+            if (_instances.TryGetValue((holderUuid, buffUuid), out var instance))
+            {
+                baseId = instance.BaseId;
+                fireUuid = instance.FireUuid;
+                fightSourceType = instance.FightSourceType;
+                sourceConfigId = instance.SourceConfigId;
+                return true;
+            }
+        }
+
+        baseId = 0;
+        fireUuid = 0;
+        fightSourceType = -1;
+        sourceConfigId = 0;
+        return false;
+    }
+
     /// <summary>マップ切替と計測の停止で空にする。</summary>
     public void Clear()
     {

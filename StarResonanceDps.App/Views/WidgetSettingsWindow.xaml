@@ -9,6 +9,8 @@
         Title="{Binding WindowTitle}"
         Icon="pack://application:,,,/Assets/Images/ApplicationIcon.ico"
         behaviors:WindowWorkingAreaBehavior.ConstrainMaximizeToWorkingArea="True"
+        behaviors:WindowPlacementBehavior.OwnerOffsetX="24"
+        behaviors:WindowPlacementBehavior.OwnerOffsetY="72"
         Width="760"
         Height="640"
         MinWidth="694"

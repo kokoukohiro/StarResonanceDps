@@ -7,7 +7,7 @@ using StarResonanceDps.PluginSdk;
 [assembly: PluginGenre("en-US", "Sample")]
 [assembly: PluginGenre("ja-JP", "サンプル")]
 [assembly: PluginAuthor("kokoukohiro")]
-[assembly: PluginVersion("1.0.0")]
+[assembly: PluginVersion("1.1.0")]
 
 namespace SampleGameData;
 

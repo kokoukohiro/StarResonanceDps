@@ -1046,18 +1046,11 @@ public static class CombatDataCatalog
     /// </summary>
     public static (string Name, string IconName, SkillIconFrame Frame, bool UsesImagineAsset) GetSkillActivationDisplay(int skillId)
     {
-        var cultureName = Volatile.Read(ref _cultureName);
-        var name = string.Empty;
+        var name = GetSkillActivationNameWithoutInternalId(skillId);
         var iconName = string.Empty;
         if (TryResolveSkillActivationRow(skillId, out var rowKey))
         {
-            name = ResolveText(_recountNames, cultureName, rowKey);
             iconName = GetSkillIconName(SourceKeyOwnerId(rowKey));
-        }
-
-        if (string.IsNullOrEmpty(name))
-        {
-            name = ResolveText(_skillNames, cultureName, skillId);
         }
 
         if (string.IsNullOrEmpty(iconName))
@@ -1065,17 +1058,10 @@ public static class CombatDataCatalog
             iconName = GetSkillIconName(skillId);
         }
 
-        if (_skillActivationOverrides.TryGetValue(skillId, out var activationOverride))
+        if (_skillActivationOverrides.TryGetValue(skillId, out var activationOverride)
+            && activationOverride.Icon is { } overrideIcon)
         {
-            if (activationOverride.Names.TryGetValue(cultureName, out var overrideName))
-            {
-                name = overrideName;
-            }
-
-            if (activationOverride.Icon is { } overrideIcon)
-            {
-                iconName = overrideIcon;
-            }
+            iconName = overrideIcon;
         }
 
         if (string.IsNullOrEmpty(name) && ShowsUnnamedSkillInternalNames)
@@ -1088,6 +1074,33 @@ public static class CombatDataCatalog
             iconName,
             GetSkillIconFrame(skillId),
             IsImagineArtIcon(iconName));
+    }
+
+    /// <summary>
+    /// 押した技の名前(<see cref="GetSkillActivationDisplay"/> の名前の決め方)を、内部IDの注記と内部名の補いを付けずに返す。
+    /// 見出し表の行の名前 → 技の名前 → 手修正(<see cref="_skillActivationOverrides"/>、書いてある言語だけ)の順。無ければ空。
+    /// </summary>
+    public static string GetSkillActivationNameWithoutInternalId(int skillId)
+    {
+        var cultureName = Volatile.Read(ref _cultureName);
+        var name = string.Empty;
+        if (TryResolveSkillActivationRow(skillId, out var rowKey))
+        {
+            name = ResolveText(_recountNames, cultureName, rowKey);
+        }
+
+        if (string.IsNullOrEmpty(name))
+        {
+            name = ResolveText(_skillNames, cultureName, skillId);
+        }
+
+        if (_skillActivationOverrides.TryGetValue(skillId, out var activationOverride)
+            && activationOverride.Names.TryGetValue(cultureName, out var overrideName))
+        {
+            name = overrideName;
+        }
+
+        return name;
     }
 
     /// <summary>

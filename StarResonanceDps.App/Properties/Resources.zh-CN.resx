@@ -2233,6 +2233,9 @@
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>※例如在副本中进入BOSS房间或团灭等</value>
   </data>
+  <data name="Settings_Aggregation_SplitOnPhases_PluginNote" xml:space="preserve">
+    <value>※插件“{0}”的指定优先</value>
+  </data>
   <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
     <value>移动速度</value>
   </data>

@@ -42,6 +42,19 @@ public sealed class PluginWidgetDefinition
     /// Read the values with <see cref="IPluginWidgetContext.Settings"/>.
     /// </summary>
     public IReadOnlyList<PluginWidgetSettingSection> SettingSections { get; init; } = [];
+
+    /// <summary>
+    /// What the host checks by itself for the status circle of the window, together with <see cref="IPluginWidgetContext.SetStatusReasons"/>.
+    /// The default is <see cref="PluginWidgetStatusRule.None"/>. The host stops the plugin when the value is not defined.
+    /// </summary>
+    public PluginWidgetStatusRule StatusRule { get; init; }
+
+    /// <summary>
+    /// Whether the brushes of <see cref="PluginResourceKeys.Brushes"/> inside the window (body and footer) use the colors of this widget
+    /// (its theme in the settings window) instead of the app's theme. Brushes taken with <c>DynamicResource</c> or from code follow color changes.
+    /// While the widget uses a background image, the app's theme is used. The default is <c>false</c>.
+    /// </summary>
+    public bool UsesWidgetColors { get; init; }
 }
 
 /// <summary>A section of a widget's own settings, with its button in the settings window's navigation.</summary>

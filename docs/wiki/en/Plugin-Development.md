@@ -10,7 +10,7 @@ This page explains how to add windows, widgets, and notification items to this a
 | Background only | None | Has no screen and only does processing, such as reading game data and writing it to the log. |
 
 - One plugin can combine a window, widgets, and notifications. The entry class implements all the interfaces you use.
-- How to read game data, names, and game messages is described in [Plugin Development (Data)](Plugin-Development-(Data)).
+- How to read game data, names, and game messages is described in [Plugin Development (Data)](Plugin-Development-(Data)), and how to read saved battles (history) and save a plugin's values with a battle is described in [Plugin Development (History)](Plugin-Development-(History)).
 
 ## What you need
 
@@ -48,7 +48,7 @@ csproj:
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StarResonanceDps.PluginSdk" Version="1.0.0" />
+    <PackageReference Include="StarResonanceDps.PluginSdk" Version="1.1.0" />
   </ItemGroup>
 </Project>
 ```
@@ -132,7 +132,11 @@ You receive it through `IPluginContext`, the argument of `Initialize`.
 | `GameData` | Game data ([Plugin Development (Data)](Plugin-Development-(Data))) |
 | `Names` | Looks up names from game IDs ([Plugin Development (Data)](Plugin-Development-(Data))) |
 | `Packets` | Reads game messages ([Plugin Development (Data)](Plugin-Development-(Data))) |
+| `CombatEvents` | Reads combat events ([Plugin Development (Data)](Plugin-Development-(Data))) |
 | `Notifications` | Sends the notifications you defined ([Plugin Development (Notification)](Plugin-Development-(Notification))) |
+| `History` | Reads and opens saved battles (history), and saves the plugin's values with a battle ([Plugin Development (History)](Plugin-Development-(History))) |
+| `EncounterControl` | Changes how battles are split and how the battle clock runs ([Plugin Development (Battle Splits)](Plugin-Development-(Battle-Splits))) |
+| `Widgets` | Opens the plugin's own widgets and the app's widgets ([Plugin Development (Widget)](Plugin-Development-(Widget))) |
 | `Stopping` | Canceled when the app stops this plugin ("How it runs" below) |
 
 ### Settings
@@ -250,13 +254,17 @@ The repository's [StarResonanceDps.Plugins.Samples](https://github.com/kokoukohi
 | Sample | Contents |
 |---|---|
 | [SampleWindow](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleWindow) | The smallest window plugin. The window size, a `.ico` icon, and a list of the `PluginResourceKeys` keys |
-| [SampleWidget](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleWidget) | Four widgets (one with everything, a minimal one, and two that open a window per target) and a `.png` icon |
+| [SampleWidget](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleWidget) | Two single-window widgets (one with everything and a minimal one) and a `.png` icon. The widget with everything has the state circle and the widget colors |
+| [SampleMultiWidget](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleMultiWidget) | Two widgets that open a window per target (fixed targets, and the players around you). Buttons that open, from code, another target of your own widget and the app's Player Info |
 | [SampleNotification](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleNotification) | Two notification items (one with insertable items and extra settings, and a minimal one) |
 | [SampleGameData](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleGameData) | A window that shows all the game data and names as text |
+| [SampleHistory](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleHistory) | The list of saved battles and loading them, opening a battle in the app and returning to the current battle, and saving a plugin's values with a battle |
 | [SamplePackets](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SamplePackets) | Has no screen; reads game messages and writes only their sizes to the log |
+| [SampleCombatEvents](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleCombatEvents) | Has no screen; reads combat events and writes only the player who dealt the most damage to a defeated monster to the log |
+| [SampleEncounterControl](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleEncounterControl) | A button that splits the current battle, registering split rules and a dungeon clock, and showing the battle clock's origin and the game's dungeon timer |
 | [SampleLocalization](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleLocalization) | resx files for four languages, a settings file, and a message window |
 | [SampleDependency](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleDependency) | Uses the types and XAML resources of another DLL ([SampleDependency.Library](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleDependency.Library)) |
-| [SampleAll](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleAll) | A window, widgets, and notifications in one plugin |
+| [SampleCombined](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleCombined) | A window, widgets, and notifications in one plugin |
 
 - The csproj files of the samples use the same `PackageReference` form as in "Creating the project" above. When you copy a sample folder to use it, make the SDK `.nupkg` available with the `nuget.config` form above (inside the repository, `Directory.Build.targets` replaces it with a reference to the SDK project).
 

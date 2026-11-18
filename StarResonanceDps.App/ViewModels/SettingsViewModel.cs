@@ -154,6 +154,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             new ObservableCollection<GameCapturePreferenceOption>(CreateGameCapturePreferences()));
         WindowColors = new ColorPaletteViewModel(AppConfigDefaults.CreateDefaultWindowColors(), AppConfigDefaults.MaxPaletteColorCount);
         WindowColors.PaletteChanged += WindowColors_PaletteChanged;
+        PluginEncounterRuleRegistry.Instance.Changed += PluginEncounterRuleRegistry_Changed;
+        RefreshSplitOverridePluginNotes();
 
         // 開いたときに動いている VOICEVOX があれば、起動設定のインストール先をその場所に合わせてから読む。
         if (!IsInDesignMode)
@@ -197,6 +199,34 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         _hotkeyService.PreviewGameProcessNames(null);
         WindowColors.PaletteChanged -= WindowColors_PaletteChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
+        PluginEncounterRuleRegistry.Instance.Changed -= PluginEncounterRuleRegistry_Changed;
+    }
+
+    /// <summary>
+    /// 「進行で自動リセット」の行の注意書き。区切り方を上書きしているプラグインごとに1行(上書きが無ければ空で、行を出さない)。
+    /// プラグインの規則と言語が変わったら作り直す。
+    /// </summary>
+    public IReadOnlyList<string> SplitOverridePluginNotes { get; private set; } = Array.Empty<string>();
+
+    private void PluginEncounterRuleRegistry_Changed(object? sender, EventArgs e)
+    {
+        RefreshSplitOverridePluginNotes();
+    }
+
+    private void RefreshSplitOverridePluginNotes()
+    {
+        var culture = LocalizationManager.Instance.CurrentCulture;
+        var format = LocalizationManager.Instance.GetString("Settings_Aggregation_SplitOnPhases_PluginNote");
+        var notes = PluginEncounterRuleRegistry.Instance.OverridingPlugins
+            .Select(plugin => string.Format(culture, format, plugin.GetDisplayName(culture)))
+            .ToArray();
+        if (notes.SequenceEqual(SplitOverridePluginNotes))
+        {
+            return;
+        }
+
+        SplitOverridePluginNotes = notes;
+        OnPropertyChanged(nameof(SplitOverridePluginNotes));
     }
 
     [RelayCommand]
@@ -594,6 +624,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(KeepPastEncounterInMeterUntilNextDamageStateText));
         OnPropertyChanged(nameof(ClearHistorySelectionOnNextEventStateText));
         OnPropertyChanged(nameof(BenchmarkFirstTargetOnlyStateText));
+        RefreshSplitOverridePluginNotes();
 
         RebuildRetentionPolicyOptions();
         RebuildCombatExitOptions();

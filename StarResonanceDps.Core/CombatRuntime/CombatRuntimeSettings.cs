@@ -148,8 +148,16 @@ public static class CombatRuntimeSettings
             {
                 EncounterManager.ReleaseHeldPastEncounter();
             }
+
+            AggregationSettingsApplied?.Invoke();
         });
     }
+
+    /// <summary>
+    /// 集計の設定(<see cref="Apply"/> の集計の8項目)を書き終えた。値が変わらなくても上がる。
+    /// パケット処理のスレッドで上がる(キャプチャが動いていなければ <see cref="Apply"/> を呼んだスレッド)。
+    /// </summary>
+    public static event Action? AggregationSettingsApplied;
 
     /// <summary>
     /// キャプチャの3項目だけを差し替える。アダプターを選び直したときに

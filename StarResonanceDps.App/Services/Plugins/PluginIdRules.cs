@@ -3,7 +3,7 @@
 namespace StarResonanceDps.App.Services;
 
 /// <summary>
-/// プラグインが定義で渡す ID(ウィジェット・通知の項目・設定・選択肢)の決まり。SDK の各定義の説明と同じ。
+/// プラグインが渡す ID(定義のウィジェット・通知の項目・設定・選択肢と、回に残す値のキー)の決まり。SDK の各定義の説明と同じ。
 /// </summary>
 internal static class PluginIdRules
 {

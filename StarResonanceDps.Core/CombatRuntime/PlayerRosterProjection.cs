@@ -359,6 +359,55 @@ internal static class PlayerRosterProjection
         }
     }
 
+    /// <summary>
+    /// 回の記録だけで作った参加者の行(DB から読んだ回の、プラグインの回の読み口)。名簿に載せる条件(<see cref="IsShownInMeterOrTimeline"/>)を通る人を、
+    /// キャラ番号ごとに1行(<see cref="RebuildRoster"/> の記録の行と同じまとめ方)。並びは決めない。
+    /// 今のパーティと控えは重ねない(同じ回の行が、今だれとパーティを組んでいるかで変わらないように)。
+    /// <see cref="PlayerRosterEntry.IsSelf"/> は付けない(今ログインしているキャラは読む側が読むたびに当てる)。名前も伏せない。
+    /// </summary>
+    internal static IReadOnlyList<PlayerRosterEntry> CreateRecordEntries(Encounter encounter)
+    {
+        var players = encounter.Entities
+            .Select(pair => pair.Value)
+            .Where(IsCharacterEntity)
+            .Select(entity => (
+                Entity: entity,
+                CharacterId: entity.UID != 0
+                    ? entity.UID
+                    : Utils.UuidToEntityId(entity.UUID)))
+            .Where(player => player.CharacterId > 0)
+            .GroupBy(player => player.CharacterId)
+            .Select(group => group.Last());
+
+        var entries = new List<PlayerRosterEntry>();
+        foreach (var (entity, characterId) in players)
+        {
+            if (!IsShownInMeterOrTimeline(encounter, entity))
+            {
+                continue;
+            }
+
+            if (TryCreateEntry(
+                characterId,
+                nearbyEntity: null,
+                metadataEntity: entity,
+                isSelf: false,
+                out var entry,
+                useHistoryHealth: true,
+                seasonId: encounter.ExData.SeasonId,
+                gameServer: encounter.ExData.GameServer,
+                recordedAvatar: entity.RecordedAvatar,
+                recordedSelf: entity.RecordedSelf,
+                isFromRecord: true,
+                useLiveSupplements: false))
+            {
+                entries.Add(entry);
+            }
+        }
+
+        return entries;
+    }
+
     private static void UpsertPlayer(long playerUuid, bool isSelfHint)
     {
         if (!TryGetCharacterEntity(playerUuid, out var entity))
@@ -417,12 +466,17 @@ internal static class PlayerRosterProjection
     /// ライブの行は null で、名刺の店の今の値を使う。
     /// </param>
     /// <param name="recordedSelf">
-    /// 開いている履歴の回の記録から来た行のとき、その回に保存した自分にしか届かない値(<see cref="Entity.RecordedSelf"/>。保存の時点でログインしていたキャラだけが持つ)。
-    /// 今ログインしているキャラの行は記録から作らないので、記録から来た行はいつも他のキャラの行。ライブの行は null。
+    /// 履歴の回の記録から来た行のとき、その回に保存した自分にしか届かない値(<see cref="Entity.RecordedSelf"/>。保存の時点でログインしていたキャラだけが持つ)。
+    /// 名簿(<see cref="RebuildRoster"/>)は今ログインしているキャラの行を記録から作らないので、名簿の記録の行はいつも他のキャラの行。
+    /// 回の記録だけで作る行(<see cref="CreateRecordEntries"/>)は、今ログインしているキャラの行も記録から作る。ライブの行は null。
     /// </param>
     /// <param name="isFromRecord">
-    /// 素性が開いている履歴の回の記録から来たとき true(<see cref="PlayerRosterEntry.IsFromRecord"/>)。
+    /// 素性が履歴の回(開いている回か、<see cref="CreateRecordEntries"/> に渡した回)の記録から来たとき true(<see cref="PlayerRosterEntry.IsFromRecord"/>)。
     /// 欠けの印は付けない(欠けは実行中にしか分からない印で決まり、記録の実体では意味を持たない)。
+    /// </param>
+    /// <param name="useLiveSupplements">
+    /// 今のパーティの値と控え(特化・潜在心相晶)を重ねるか。偽なら記録の実体の値だけで作り、パーティの項目(場所・メンバーか・番号)も空にする
+    /// (<see cref="CreateRecordEntries"/>)。
     /// </param>
     private static bool TryCreateEntry(
         long characterId,
@@ -435,7 +489,8 @@ internal static class PlayerRosterProjection
         GameServer? gameServer = null,
         SocialAvatarState? recordedAvatar = null,
         RecordedSelfData? recordedSelf = null,
-        bool isFromRecord = false)
+        bool isFromRecord = false,
+        bool useLiveSupplements = true)
     {
         if (characterId == 0)
         {
@@ -443,9 +498,9 @@ internal static class PlayerRosterProjection
             return false;
         }
 
-        var source = PlayerDataSourceResolver.Resolve(characterId, nearbyEntity, metadataEntity, isSelf);
+        var source = PlayerDataSourceResolver.Resolve(characterId, nearbyEntity, metadataEntity, isSelf, useLiveSupplements);
         var party = PartyStateStore.Instance.Current;
-        var (partySceneId, partyLineId) = party.TryGetSupplement(characterId, out var partySupplement)
+        var (partySceneId, partyLineId) = useLiveSupplements && party.TryGetSupplement(characterId, out var partySupplement)
             ? (partySupplement.SceneId, partySupplement.LineId)
             : (0, 0);
         var combatAttributes = nearbyEntity is null
@@ -488,8 +543,8 @@ internal static class PlayerRosterProjection
             source.EquipmentData,
             source.IsNpc,
             nearbyEntity is null ? 0 : Utils.GetCurrentShield(nearbyEntity),
-            party.GetMembership(characterId) == PartyMembershipState.Member,
-            party.GetPartyNumber(characterId),
+            useLiveSupplements && party.GetMembership(characterId) == PartyMembershipState.Member,
+            useLiveSupplements ? party.GetPartyNumber(characterId) : null,
             source.IsLive,
             CreateAttributeEntries(isSelf, nearbyEntity),
             source.SeasonTalentBuffId,

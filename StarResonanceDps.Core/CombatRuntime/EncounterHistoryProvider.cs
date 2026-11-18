@@ -50,6 +50,48 @@ public enum HistorySelectResult
     Failed
 }
 
+/// <summary>選択を変えない読み込みの結果(<see cref="EncounterHistoryProvider.LoadSummariesDetachedAsync"/>・<see cref="EncounterHistoryProvider.LoadDetachedAsync"/>)。</summary>
+public enum HistoryReadStatus
+{
+    /// <summary>読めた。</summary>
+    Succeeded,
+
+    /// <summary>DB にその回が無い。</summary>
+    NotFound,
+
+    /// <summary>読み込みで例外が起きた(ログに書いた)。</summary>
+    Failed,
+
+    /// <summary>アプリを閉じた後なので読まなかった。</summary>
+    Unavailable
+}
+
+/// <param name="Status">読めたか。</param>
+/// <param name="Value">読めたときの値。それ以外は null。</param>
+public sealed record HistoryRead<T>(HistoryReadStatus Status, T? Value);
+
+/// <summary>保存した回のプラグインの値の書き込みの結果(<see cref="EncounterHistoryProvider.SetSavedPluginDataAsync"/>)。</summary>
+public enum SavedPluginDataStatus
+{
+    /// <summary>書いた(長さ0なら消した)。</summary>
+    Stored,
+
+    /// <summary>DB にその回が無い。</summary>
+    NotFound,
+
+    /// <summary>そのプラグインのキーの数が上限を越えるので書かなかった。</summary>
+    TooManyKeys,
+
+    /// <summary>そのプラグインの値の長さの合計が上限を越えるので書かなかった。</summary>
+    TooLarge,
+
+    /// <summary>書き込みで例外が起きた(ログに書いた)。</summary>
+    Failed,
+
+    /// <summary>アプリを閉じた後なので書かなかった。</summary>
+    Unavailable
+}
+
 /// <summary>
 /// 集計タブが読む、保存済みエンカウンターの一覧と選択。
 ///
@@ -65,6 +107,11 @@ public enum HistorySelectResult
 /// <c>MessageManager.RunOnPacketThread</c> で積む。自動でライブへ戻す処理とログアウトもパケットのスレッドで走る。
 /// 選ぶたびに要求の番号を進め、反映するのは最新の要求だけ(読み込みは途中で止められないので、古い結果は捨てる)。
 /// </para>
+///
+/// <para>
+/// 設定「履歴表示を自動解除」の自動の戻しは、プラグインが保持(<see cref="KeepOpen"/>)している間は行わない。
+/// 選択を変えない読み書き(プラグインが回を読む・保存した回に値を書く)も、選択の読み込みと同じく裏のスレッドで走らせ、閉じるときに終わりを待つ。
+/// </para>
 /// </summary>
 public static class EncounterHistoryProvider
 {
@@ -76,11 +123,26 @@ public static class EncounterHistoryProvider
     /// <summary>アプリを閉じている(<see cref="ShutdownLoads"/> の後)。新しい読み込みを受けず、反映もしない。</summary>
     private static bool _isShutDown;
 
-    /// <summary>走っている読み込み。閉じるときに終わりを待つ(閉じた接続に当てない)。</summary>
+    /// <summary>走っている読み込みと、選択を変えない読み書き。閉じるときに終わりを待つ(閉じた接続に当てない)。</summary>
     private static readonly List<Task> PendingLoads = [];
 
     /// <summary>最新の要求の回を読めなかった(<see cref="HasLoadFailed"/>)。</summary>
     private static bool _hasLoadFailed;
+
+    /// <summary>自動の戻しを止めている保持の数(<see cref="KeepOpen"/>)。</summary>
+    private static int _keepOpenCount;
+
+    /// <summary>アプリを閉じている(<see cref="ShutdownLoads"/> の後)。新しい読み書きを受けない。</summary>
+    public static bool IsShutDown
+    {
+        get
+        {
+            lock (RequestGate)
+            {
+                return _isShutDown;
+            }
+        }
+    }
 
     /// <summary>
     /// 最新の要求の回を読めなかった(例外か、DB にその回が無い)。選択は変わらず、窓は前の表示のまま。
@@ -126,6 +188,11 @@ public static class EncounterHistoryProvider
     /// 引きに行くと、あれを呼ぶのはメーター・スキル詳細・詳細・グラフのウィジェット4種の
     /// 更新だけなので、<b>1枚も開いていないと一度も走らず集計タブの「表示中」が残る。</b>
     /// </para>
+    ///
+    /// <para>
+    /// プラグインが保持(<see cref="KeepOpen"/>)している間も何もしない。保持が全部外れても、すぐには戻さず次の出来事で戻す。
+    /// 保持の数は、出来事のたびにロックを取らないよう、上の条件を通った後で見る。
+    /// </para>
     /// </summary>
     public static void NotifyLiveEncounterEvent()
     {
@@ -133,6 +200,14 @@ public static class EncounterHistoryProvider
             || AppState.OpenedHistoricalEncounter is null)
         {
             return;
+        }
+
+        lock (RequestGate)
+        {
+            if (_keepOpenCount > 0)
+            {
+                return;
+            }
         }
 
         // 要求の番号は進めない。読み込み中の回があれば、それは読み終えてから開く(押した操作は残す)。
@@ -176,16 +251,27 @@ public static class EncounterHistoryProvider
     /// </summary>
     public static Task<HistorySelectResult> SelectAsync(ulong encounterId)
     {
+        return SelectAsync(encounterId, out _);
+    }
+
+    /// <summary>
+    /// <see cref="SelectAsync(ulong)"/> と同じで、出した要求の番号も返す(取り下げに使う、<see cref="WithdrawSelection"/>)。
+    /// アプリを閉じている間は要求を出さず、番号は 0。
+    /// </summary>
+    public static Task<HistorySelectResult> SelectAsync(ulong encounterId, out long request)
+    {
         Task<HistorySelectResult> load;
         lock (RequestGate)
         {
             if (_isShutDown)
             {
+                request = 0;
                 return Task.FromResult(HistorySelectResult.Superseded);
             }
 
-            var request = ++_latestRequest;
-            load = Task.Run(() => LoadAndApply(encounterId, request));
+            var issued = ++_latestRequest;
+            request = issued;
+            load = Task.Run(() => LoadAndApply(encounterId, issued));
             PendingLoads.Add(load);
         }
 
@@ -282,6 +368,22 @@ public static class EncounterHistoryProvider
         }
     }
 
+    /// <summary>
+    /// 出した選択の要求(<see cref="SelectAsync(ulong, out long)"/>)を取り下げる。その要求がまだ最新なら番号だけ進め、
+    /// 読み込み中・反映待ちの回を開かない(表示は変えない。<see cref="SelectLive"/> と違いライブへ戻さない)。
+    /// 後から別の回かライブが選ばれていれば何もしない。反映した後なら、開いた回はそのまま。止めたプラグインの要求に使う。
+    /// </summary>
+    public static void WithdrawSelection(long request)
+    {
+        lock (RequestGate)
+        {
+            if (request != 0 && request == _latestRequest)
+            {
+                _latestRequest++;
+            }
+        }
+    }
+
     /// <summary>現在の戦闘へ戻す(集計タブの操作)。読み込み中の選択は捨てる。反映はパケットのスレッドで。</summary>
     public static void SelectLive()
     {
@@ -291,6 +393,200 @@ public static class EncounterHistoryProvider
         }
 
         MessageManager.RunOnPacketThread(ApplyLive);
+    }
+
+    /// <summary>
+    /// <see cref="SelectLive"/> と同じで、戻し終えたら終わる Task を返す(プラグインの口)。戻しで例外が起きたら、ログに書いて Task をその例外で終える
+    /// (呼んだスレッドで走るときも、例外は Task で返す)。キャプチャが止まっていれば呼んだスレッドで戻す。
+    /// </summary>
+    public static Task SelectLiveAsync()
+    {
+        lock (RequestGate)
+        {
+            _latestRequest++;
+        }
+
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        MessageManager.RunOnPacketThread(() =>
+        {
+            try
+            {
+                ApplyLive();
+                completion.SetResult();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Returning to the live encounter failed");
+                completion.SetException(ex);
+            }
+        });
+        return completion.Task;
+    }
+
+    /// <summary>
+    /// 設定「履歴表示を自動解除」の自動の戻し(<see cref="NotifyLiveEncounterEvent"/>)を、返した物を Dispose するまで止める(プラグインの口)。
+    /// 呼ぶたびに別の物を返し、Dispose の2回目は何もしない。集計タブ・<see cref="SelectLive"/>・ログアウトの戻しは止めない。
+    /// </summary>
+    public static IDisposable KeepOpen()
+    {
+        lock (RequestGate)
+        {
+            _keepOpenCount++;
+        }
+
+        return new KeepOpenHandle();
+    }
+
+    private sealed class KeepOpenHandle : IDisposable
+    {
+        private int _isDisposed;
+
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _isDisposed, 1) != 0)
+            {
+                return;
+            }
+
+            lock (RequestGate)
+            {
+                _keepOpenCount--;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 保存した回の要約の一覧(新しい順)を、選択を変えずに読む(プラグインの口)。読み込みは裏のスレッドで、閉じるときに終わりを待つ。
+    /// 読めなければログに書いて <see cref="HistoryReadStatus.Failed"/>、アプリを閉じた後は <see cref="HistoryReadStatus.Unavailable"/>。
+    /// </summary>
+    public static Task<HistoryRead<IReadOnlyList<Encounter>>> LoadSummariesDetachedAsync()
+    {
+        return RunDetached(
+            () =>
+            {
+                try
+                {
+                    return new HistoryRead<IReadOnlyList<Encounter>>(HistoryReadStatus.Succeeded, DB.LoadEncounterSummaries());
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Encounter history could not be listed for a plugin");
+                    return new HistoryRead<IReadOnlyList<Encounter>>(HistoryReadStatus.Failed, null);
+                }
+            },
+            new HistoryRead<IReadOnlyList<Encounter>>(HistoryReadStatus.Unavailable, null));
+    }
+
+    /// <summary>
+    /// 保存した回を1件、選択を変えずに読む(プラグインの口)。読み込みは裏のスレッドで、閉じるときに終わりを待つ。
+    /// その番号の回が無ければ <see cref="HistoryReadStatus.NotFound"/>、読めなければログに書いて <see cref="HistoryReadStatus.Failed"/>。
+    /// </summary>
+    public static Task<HistoryRead<Encounter>> LoadDetachedAsync(ulong encounterId)
+    {
+        return RunDetached(
+            () =>
+            {
+                try
+                {
+                    return DB.LoadEncounter(encounterId) is { } encounter
+                        ? new HistoryRead<Encounter>(HistoryReadStatus.Succeeded, encounter)
+                        : new HistoryRead<Encounter>(HistoryReadStatus.NotFound, null);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Encounter {EncounterId} could not be loaded from history for a plugin", encounterId);
+                    return new HistoryRead<Encounter>(HistoryReadStatus.Failed, null);
+                }
+            },
+            new HistoryRead<Encounter>(HistoryReadStatus.Unavailable, null));
+    }
+
+    /// <summary>
+    /// 保存した回のプラグインの値を1キー置き換える(プラグインの口、長さ0は消す)。書き込みは裏のスレッドで、閉じるときに終わりを待つ。
+    /// 書けたら、本体が持っている同じ回の写し(開いている履歴の回・保持している前の回)にも入れる。プラグインが前に読んだ回の写しには入らない。
+    /// 書けなければログに書いて <see cref="SavedPluginDataStatus.Failed"/>。
+    /// </summary>
+    public static Task<SavedPluginDataStatus> SetSavedPluginDataAsync(
+        ulong encounterId,
+        string pluginKey,
+        string dataKey,
+        byte[] data,
+        int maxKeys,
+        int maxTotalBytes)
+    {
+        ArgumentNullException.ThrowIfNull(pluginKey);
+        ArgumentNullException.ThrowIfNull(dataKey);
+        ArgumentNullException.ThrowIfNull(data);
+
+        return RunDetached(
+            () =>
+            {
+                SavedPluginDataResult result;
+                try
+                {
+                    result = DB.ReplaceSavedPluginData(encounterId, pluginKey, dataKey, data, maxKeys, maxTotalBytes);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Plugin data {PluginKey}/{DataKey} could not be written to encounter {EncounterId}", pluginKey, dataKey, encounterId);
+                    return SavedPluginDataStatus.Failed;
+                }
+
+                if (result == SavedPluginDataResult.Stored)
+                {
+                    ReplaceHeldSavedPluginData(encounterId, pluginKey, dataKey, data);
+                }
+
+                return result switch
+                {
+                    SavedPluginDataResult.Stored => SavedPluginDataStatus.Stored,
+                    SavedPluginDataResult.NotFound => SavedPluginDataStatus.NotFound,
+                    SavedPluginDataResult.TooManyKeys => SavedPluginDataStatus.TooManyKeys,
+                    SavedPluginDataResult.TooLarge => SavedPluginDataStatus.TooLarge,
+                    _ => throw new ArgumentOutOfRangeException(nameof(result), result, null)
+                };
+            },
+            SavedPluginDataStatus.Unavailable);
+    }
+
+    /// <summary>本体が持っている、保存した同じ回の写し(開いている履歴の回・保持している前の回)へ、DB に書いた値を入れる。</summary>
+    private static void ReplaceHeldSavedPluginData(ulong encounterId, string pluginKey, string dataKey, byte[] data)
+    {
+        Encounter?[] held = [AppState.OpenedHistoricalEncounter, EncounterManager.Current?.PastEncounterForMeter];
+        foreach (var encounter in held.Distinct())
+        {
+            if (encounter is { IsPersisted: true } && encounter.EncounterId == encounterId)
+            {
+                encounter.PluginData.ReplaceSaved(pluginKey, dataKey, data);
+            }
+        }
+    }
+
+    /// <summary>選択を変えない読み書きを裏のスレッドで走らせ、閉じるときに終わりを待つ一覧へ入れる。アプリを閉じた後は走らせず <paramref name="unavailable"/>。</summary>
+    private static Task<T> RunDetached<T>(Func<T> work, T unavailable)
+    {
+        Task<T> task;
+        lock (RequestGate)
+        {
+            if (_isShutDown)
+            {
+                return Task.FromResult(unavailable);
+            }
+
+            task = Task.Run(work);
+            PendingLoads.Add(task);
+        }
+
+        task.ContinueWith(
+            finished =>
+            {
+                lock (RequestGate)
+                {
+                    PendingLoads.Remove(finished);
+                }
+            },
+            TaskScheduler.Default);
+        return task;
     }
 
     /// <summary>ログアウト(起動直後へ戻す)。読み込み中の選択は捨て、開いていれば現在の戦闘へ戻す。パケットのスレッドから呼ぶ。</summary>
@@ -316,7 +612,7 @@ public static class EncounterHistoryProvider
     }
 
     /// <summary>
-    /// アプリを閉じる。新しい読み込みを受けなくし、走っている読み込みの終わりを待つ(読み終えた結果は反映しない)。
+    /// アプリを閉じる。新しい読み込みと読み書きを受けなくし、走っているものの終わりを待つ(読み終えた結果は反映しない)。
     /// DB を閉じる前に呼ぶ。
     /// </summary>
     public static void ShutdownLoads()

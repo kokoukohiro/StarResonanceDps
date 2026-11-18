@@ -33,7 +33,7 @@ This tab lets you split the combat aggregation or aggregate for a set length of 
 
 - When a history entry is open, the following widgets show that battle: [DPS Meter](DPS-Meter), [HPS Meter](HPS-Meter), [Timeline](Timeline), [Damage Taken Log](Damage-Taken-Log), [Skill Details (Damage)](Skill-Details-(Damage)), [Skill Details (Healing)](Skill-Details-(Healing)), [Damage Details](Damage-Details), [Healing Details](Healing-Details), [Damage Taken Details](Damage-Taken-Details), [DPS Trend Graph](DPS-Trend-Graph), [HPS Trend Graph](HPS-Trend-Graph), [Threat Meter](Threat-Meter), [Break Meter](Break-Meter), [Skill Details (Threat)](Skill-Details-(Threat)), [Skill Details (Break)](Skill-Details-(Break)), [TPS Trend Graph](TPS-Trend-Graph), and [BPS Trend Graph](BPS-Trend-Graph).
 - The players who were in that battle are added to the [Player List](Player-List) as gray rows.
-- While a history entry is open, the app automatically returns to the current battle when damage, healing, or a hit taken occurs in the current battle, or when the aggregation is split.
+- While a history entry is open, the app automatically returns to the current battle when damage, healing, or a hit taken occurs in the current battle, or when the aggregation is split. While a plugin keeps the history entry open, the app does not return.
 
 ## Notes
 

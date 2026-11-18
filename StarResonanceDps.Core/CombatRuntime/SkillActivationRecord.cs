@@ -38,9 +38,12 @@ internal sealed class PlayerSkillActivationLog(long firstTicks)
 
     public int Count => _rows.Count;
 
-    public void Add(int skillId, DateTime arrivalUtc)
+    /// <summary>1件足し、読むときと同じ形(時刻はミリ秒に切った値)を返す。</summary>
+    public SkillActivation Add(int skillId, DateTime arrivalUtc)
     {
-        _rows.Add(new Row(skillId, checked((int)((arrivalUtc.Ticks - firstTicks) / TimeSpan.TicksPerMillisecond))));
+        var row = new Row(skillId, checked((int)((arrivalUtc.Ticks - firstTicks) / TimeSpan.TicksPerMillisecond)));
+        _rows.Add(row);
+        return new SkillActivation(skillId, ToUtc(row));
     }
 
     /// <summary><paramref name="startIndex"/> 番目から後の全部。無ければ空。</summary>

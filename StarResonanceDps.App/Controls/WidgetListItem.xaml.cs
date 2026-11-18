@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using StarResonanceDps.App.Behaviors;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Views;
@@ -162,13 +163,8 @@ public partial class WidgetListItem : UserControl
 
         if (owner is not null)
         {
-            const double leftOffset = 24;
-            const double topOffset = 72;
-
             settingsWindow.Owner = owner;
-            settingsWindow.WindowStartupLocation = WindowStartupLocation.Manual;
-            settingsWindow.Left = owner.Left + leftOffset;
-            settingsWindow.Top = owner.Top + topOffset;
+            WindowPlacementBehavior.PlaceNearOwner(settingsWindow, owner);
         }
 
         OwnerModalWindow.Show(settingsWindow, owner);

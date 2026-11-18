@@ -2234,6 +2234,9 @@ VOICEVOXを起動し直してください。</value>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>※ダンジョンでボス部屋進入や全滅など</value>
   </data>
+  <data name="Settings_Aggregation_SplitOnPhases_PluginNote" xml:space="preserve">
+    <value>※プラグイン「{0}」の指定が優先されます</value>
+  </data>
   <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
     <value>移動速度</value>
   </data>

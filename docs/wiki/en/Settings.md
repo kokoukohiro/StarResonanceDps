@@ -45,7 +45,7 @@ These are the settings for the whole app. Open them with "Settings" at the botto
 - Auto Pause: Stops the elapsed time this many seconds after combat stops. It continues counting in the next battle (default: 10s).
 - Auto Reset by Progress: Splits the aggregation when a dungeon starts, when you enter a boss room, and on a wipe (default: on).
 - Hold Results Until Next Event: Even when the aggregation is split, keeps showing the previous result until the next battle starts (default: on).
-- Auto-exit History View: If something happens in the current battle while a history entry is open, returns to the current battle (default: on).
+- Auto-exit History View: If something happens in the current battle while a history entry is open, returns to the current battle. While a plugin keeps the history entry open, it does not return (default: on).
 - Max History Entries: The number of history entries to save. When it is exceeded, the oldest are deleted first (default: 99 entries).
 - Benchmark Duration: The length of time aggregated by "Benchmark". Enter 30 to 1200 seconds (default: 180s).
 - Measure Only the First Enemy Attacked: During a benchmark, aggregates only damage to the first enemy you damage (default: on).

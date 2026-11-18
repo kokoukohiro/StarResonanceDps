@@ -190,7 +190,7 @@ public partial class WidgetWindow : Window
         // そこで 0 を書かせないために復元に使った値を控えておく。
         _restoredBounds = savedBounds.Clone();
 
-        ApplySavedBounds(savedBounds, owner, widget.OriginalIndex);
+        ApplySavedBounds(savedBounds, owner);
         ApplyPinState(widget.IsPinned);
 
         _saveBoundsTimer = new DispatcherTimer
@@ -307,7 +307,48 @@ public partial class WidgetWindow : Window
             return;
         }
 
+        if (!IsActivationSuppressed)
+        {
+            Show();
+            return;
+        }
+
+        var showActivated = ShowActivated;
+        ShowActivated = false;
         Show();
+        ShowActivated = showActivated;
+    }
+
+    /// <summary>
+    /// プラグインの口(<see cref="StarResonanceDps.PluginSdk.IPluginWidgetService"/>)から開いている間、窓をアクティブにしないか。
+    /// このアプリの窓がアクティブでないとき(ゲームか他のアプリが前面)に立て、ゲームの操作を奪わない。画面のスレッドだけで使う。
+    /// </summary>
+    internal static bool IsActivationSuppressed => s_activationSuppressedDepth > 0;
+
+    private static int s_activationSuppressedDepth;
+
+    /// <summary><paramref name="activate"/> が偽なら、返した値を捨てるまで窓をアクティブにしない(<see cref="IsActivationSuppressed"/>)。</summary>
+    internal static ActivationSuppression SuppressActivationUnless(bool activate)
+    {
+        if (activate)
+        {
+            return default;
+        }
+
+        s_activationSuppressedDepth++;
+        return new ActivationSuppression(isActive: true);
+    }
+
+    /// <summary><see cref="SuppressActivationUnless"/> の範囲。</summary>
+    internal readonly struct ActivationSuppression(bool isActive) : IDisposable
+    {
+        public void Dispose()
+        {
+            if (isActive)
+            {
+                s_activationSuppressedDepth--;
+            }
+        }
     }
 
     /// <summary>
@@ -1299,7 +1340,7 @@ public partial class WidgetWindow : Window
         Top = Math.Clamp(Top, minY, Math.Max(minY, maxY - height));
     }
 
-    private void ApplySavedBounds(WidgetWindowConfig savedBounds, Window? owner, int originalIndex)
+    private void ApplySavedBounds(WidgetWindowConfig savedBounds, Window? owner)
     {
         // 大きさを保存しない辺は、保存先に値が残っていてもいつも既定の大きさで開く。
         var fixedSize = WidgetConfigDefaults.GetFixedWindowSize(_widget.Kind);
@@ -1319,16 +1360,8 @@ public partial class WidgetWindow : Window
             return;
         }
 
-        if (owner is null)
-        {
-            WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            return;
-        }
-
-        const double initialOffset = 44;
-        const double cascadeOffset = 20;
-        Left = owner.Left + initialOffset + (cascadeOffset * originalIndex);
-        Top = owner.Top + initialOffset + (cascadeOffset * originalIndex);
+        // 位置を保存していない窓は、メイン画面からずらした場所(XAML の数字)に置き、一度も動かしていないほかのウィジェットがあればさらにずらす。
+        WindowPlacementBehavior.PlaceNearOwner(this, owner);
     }
 
     private static bool IsFinitePositive(double? value)

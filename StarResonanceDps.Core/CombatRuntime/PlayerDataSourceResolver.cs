@@ -43,18 +43,22 @@ internal static class PlayerDataSourceResolver
         return Resolve(characterId, entity, entity, isSelf);
     }
 
+    /// <param name="useLiveSupplements">
+    /// 今のパーティの値と、特化・潜在心相晶の控えで補うか。偽なら実体の値だけで決める(回の記録だけで作る行、<c>PlayerRosterProjection.CreateRecordEntries</c>)。
+    /// </param>
     public static PlayerDataSourceSnapshot Resolve(
         long characterId,
         Entity? nearbyEntity,
         Entity? metadataEntity,
-        bool isSelf)
+        bool isSelf,
+        bool useLiveSupplements = true)
     {
         // PT補完は自分にも使う。<b>ただし最後の手段</b>で、空の項目しか埋めない。
         // ロード済みで起動すると自分の HP/最大HP は AttrHp/AttrMaxHp が来ず、
         // マップ移動まで 0 のままになる。PT側は最初から値を持っている。
         var party = PartyStateStore.Instance.Current;
         PartyMemberSupplement? partySupplement = null;
-        if (party.TryGetSupplement(characterId, out var supplement))
+        if (useLiveSupplements && party.TryGetSupplement(characterId, out var supplement))
         {
             partySupplement = supplement;
         }
@@ -155,8 +159,8 @@ internal static class PlayerDataSourceResolver
             : partySupplement is { ProfessionId: > 0 }
                 ? partySupplement.ProfessionId
                 : metadataProfessionId;
-        var subProfessionId = ResolveSubProfessionId(characterId, nearbyEntity, metadataEntity, isSelf);
-        var isSpecAbilityUnequipped = ResolveSpecAbilityUnequipped(characterId, nearbyEntity, metadataEntity, isSelf);
+        var subProfessionId = ResolveSubProfessionId(characterId, nearbyEntity, metadataEntity, isSelf, useLiveSupplements);
+        var isSpecAbilityUnequipped = ResolveSpecAbilityUnequipped(characterId, nearbyEntity, metadataEntity, isSelf, useLiveSupplements);
 
         return new PlayerDataSourceSnapshot(
             characterId,
@@ -216,8 +220,8 @@ internal static class PlayerDataSourceResolver
             // <b>自分だけは常にライブ。</b> 作り直した直後のエンカウンターには自分の
             // エンティティがまだ無く、導出だと一瞬だけ灰に落ちる。
             isSelf || nearbyEntity is not null || partySupplement is not null,
-            ResolveSeasonTalentBuffId(characterId, nearbyEntity, metadataEntity, isSelf),
-            ResolveSeasonTalentInactive(characterId, nearbyEntity, metadataEntity, isSelf),
+            ResolveSeasonTalentBuffId(characterId, nearbyEntity, metadataEntity, isSelf, useLiveSupplements),
+            ResolveSeasonTalentInactive(characterId, nearbyEntity, metadataEntity, isSelf, useLiveSupplements),
             ResolveSeasonRankLevel(nearbyEntity, metadataEntity),
             ResolveRootBuffData(nearbyEntity, metadataEntity),
             ResolveTalentNodeIds(nearbyEntity, metadataEntity, professionId),
@@ -309,13 +313,14 @@ internal static class PlayerDataSourceResolver
 
     /// <summary>
     /// 有効化しているシーズンタレントの型(根ノードのバフID)を解決する。特化(<see cref="ResolveSubProfessionId"/>)と同じ順で、
-    /// 実体 → 控え(パーティ → メーター)。自分は控えを見ない。変身中でも型は変わらないので、変身の関門は置かない。
+    /// 実体 → 控え(パーティ → メーター)。自分と、控えを使わない行は控えを見ない。変身中でも型は変わらないので、変身の関門は置かない。
     /// </summary>
     private static int ResolveSeasonTalentBuffId(
         long characterId,
         Entity? nearbyEntity,
         Entity? metadataEntity,
-        bool isSelf)
+        bool isSelf,
+        bool useLiveSupplements)
     {
         if (nearbyEntity is { SeasonTalentBuffId: > 0 })
         {
@@ -327,7 +332,7 @@ internal static class PlayerDataSourceResolver
             return metadataEntity.SeasonTalentBuffId;
         }
 
-        if (isSelf)
+        if (isSelf || !useLiveSupplements)
         {
             return 0;
         }
@@ -384,7 +389,8 @@ internal static class PlayerDataSourceResolver
         long characterId,
         Entity? nearbyEntity,
         Entity? metadataEntity,
-        bool isSelf)
+        bool isSelf,
+        bool useLiveSupplements)
     {
         if (nearbyEntity?.IsSeasonTalentInactive == true
             || metadataEntity?.IsSeasonTalentInactive == true)
@@ -393,6 +399,7 @@ internal static class PlayerDataSourceResolver
         }
 
         return !isSelf
+            && useLiveSupplements
             && TryResolveCachedSeasonTalent(characterId, out _, out var cachedInactive)
             && cachedInactive;
     }
@@ -403,14 +410,15 @@ internal static class PlayerDataSourceResolver
     /// <para>
     /// 真値は特化マーカーバフの観測結果で、エンティティが持っている値。相手がAOI外に出ると
     /// 観測できなくなるので、自分以外のパーティメンバーだけキャッシュから補完する
-    /// (イマジン/ロールスキルと同じ扱い)。自分はキャッシュを見ない。
+    /// (イマジン/ロールスキルと同じ扱い)。自分と、控えを使わない行はキャッシュを見ない。
     /// </para>
     /// </summary>
     private static int ResolveSubProfessionId(
         long characterId,
         Entity? nearbyEntity,
         Entity? metadataEntity,
-        bool isSelf)
+        bool isSelf,
+        bool useLiveSupplements)
     {
         // 変身クラス(8/14/15)は特化を持たない。キャッシュも見ない。
         // Entity 側の関門だけでは、変身前の特化がキャッシュから補完されて残ってしまう。
@@ -432,7 +440,7 @@ internal static class PlayerDataSourceResolver
             return metadataEntity.SubProfessionId;
         }
 
-        if (isSelf)
+        if (isSelf || !useLiveSupplements)
         {
             return 0;
         }
@@ -505,7 +513,8 @@ internal static class PlayerDataSourceResolver
         long characterId,
         Entity? nearbyEntity,
         Entity? metadataEntity,
-        bool isSelf)
+        bool isSelf,
+        bool useLiveSupplements)
     {
         if (nearbyEntity?.IsSpecAbilityUnequipped == true
             || metadataEntity?.IsSpecAbilityUnequipped == true)
@@ -514,6 +523,7 @@ internal static class PlayerDataSourceResolver
         }
 
         return !isSelf
+            && useLiveSupplements
             && TryResolveCachedSpec(characterId, out _, out var cachedUnequipped)
             && cachedUnequipped;
     }

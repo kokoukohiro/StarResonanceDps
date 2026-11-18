@@ -561,6 +561,7 @@ public sealed class PluginManager
         var runtime = new PluginRuntime(
             guard,
             entry.Key,
+            entry.Info,
             PluginPacketHub.Instance.CreateAccount(() => OnPacketBacklog(entry)));
         var context = new PluginHostContext(
             new PluginSettingsStore(entry.Folder, logger),
@@ -570,7 +571,11 @@ public sealed class PluginManager
             runtime.GameData,
             PluginNameService.Instance,
             runtime.Packets,
+            runtime.Packets,
             runtime.Notifications,
+            runtime.History,
+            runtime.EncounterControl,
+            runtime.Widgets,
             runtime.Stopping);
 
         entry.Instance = instance;
@@ -601,6 +606,7 @@ public sealed class PluginManager
             guard,
             instance as IPluginWidgetProvider,
             instance as IPluginMultiWidgetProvider);
+        runtime.Widgets.Attach(widgetDefinitions, multiWidgetDefinitions);
     }
 
     /// <summary>
@@ -744,7 +750,7 @@ public sealed class PluginManager
     private void OnPacketBacklog(PluginEntry entry)
     {
         Log.Error(
-            "[Plugin:{Plugin}] The plugin did not read game messages; unread messages exceeded {Limit} bytes",
+            "[Plugin:{Plugin}] The plugin did not read game messages or combat events; unread items exceeded {Limit} bytes",
             entry.Key,
             PluginPacketHub.MaxPendingBytesPerPlugin);
         entry.Runtime?.Packets.Close();
@@ -1145,19 +1151,25 @@ public sealed class PluginManager
         public PluginRuntime? Runtime { get; set; }
     }
 
-    /// <summary>プラグイン1つに渡した、本体の知らせを受ける口と通信の受け取りと通知の口と止める合図。止める・終えるときにまとめて外す。</summary>
+    /// <summary>
+    /// プラグイン1つに渡した、本体の知らせを受ける口と通信の受け取りと通知の口と履歴の口と区切りの口と止める合図。止める・終えるときにまとめて外す。
+    /// 履歴の口は、外すときにそのプラグインの保持を外し、まだ開いていない開く要求を取り下げる。区切りの口は、規則を外し、まだ走っていない要求を終える。
+    /// </summary>
     private sealed class PluginRuntime
     {
         private readonly PluginCallGuard _guard;
         private readonly CancellationTokenSource _stopping = new();
 
-        public PluginRuntime(PluginCallGuard guard, string pluginKey, PluginPacketHub.Account packets)
+        public PluginRuntime(PluginCallGuard guard, string pluginKey, PluginInfo plugin, PluginPacketHub.Account packets)
         {
             _guard = guard;
             Packets = packets;
             Localization = new PluginLocalizationService(guard);
-            GameData = new PluginGameDataService(guard, PluginGameDataSource.Instance);
+            GameData = new PluginGameDataService(guard, PluginGameDataSource.Instance, pluginKey);
             Notifications = new PluginNotificationService(guard, pluginKey);
+            History = new PluginHistoryService(guard, pluginKey, PluginGameDataSource.Instance);
+            EncounterControl = new PluginEncounterControlService(guard, pluginKey, plugin);
+            Widgets = new PluginWidgetService(pluginKey);
         }
 
         public PluginLocalizationService Localization { get; }
@@ -1167,6 +1179,12 @@ public sealed class PluginManager
         public PluginPacketHub.Account Packets { get; }
 
         public PluginNotificationService Notifications { get; }
+
+        public PluginHistoryService History { get; }
+
+        public PluginEncounterControlService EncounterControl { get; }
+
+        public PluginWidgetService Widgets { get; }
 
         public CancellationToken Stopping => _stopping.Token;
 
@@ -1178,6 +1196,9 @@ public sealed class PluginManager
             Localization.Detach();
             GameData.Detach();
             Notifications.Detach();
+            History.Release();
+            EncounterControl.Release();
+            Widgets.Release();
         }
     }
 

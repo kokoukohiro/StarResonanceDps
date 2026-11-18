@@ -6,17 +6,24 @@
   <Project Path="StarResonanceDps.PluginSdk/StarResonanceDps.PluginSdk.csproj" />
   <Project Path="StarResonanceDps.PluginSdk.Analyzers/StarResonanceDps.PluginSdk.Analyzers.csproj" />
   <Folder Name="/SamplePlugins/">
-    <Project Path="StarResonanceDps.Plugins.Samples/SampleAll/SampleAll.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Samples/SampleCombatEvents/SampleCombatEvents.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Samples/SampleCombined/SampleCombined.csproj"><Build Solution="Release|*" Project="false" /></Project>
     <Project Path="StarResonanceDps.Plugins.Samples/SampleDependency/SampleDependency.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Samples/SampleEncounterControl/SampleEncounterControl.csproj"><Build Solution="Release|*" Project="false" /></Project>
     <Project Path="StarResonanceDps.Plugins.Samples/SampleDependency.Library/SampleDependency.Library.csproj"><Build Solution="Release|*" Project="false" /></Project>
     <Project Path="StarResonanceDps.Plugins.Samples/SampleGameData/SampleGameData.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Samples/SampleHistory/SampleHistory.csproj"><Build Solution="Release|*" Project="false" /></Project>
     <Project Path="StarResonanceDps.Plugins.Samples/SampleLocalization/SampleLocalization.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Samples/SampleMultiWidget/SampleMultiWidget.csproj"><Build Solution="Release|*" Project="false" /></Project>
     <Project Path="StarResonanceDps.Plugins.Samples/SampleNotification/SampleNotification.csproj"><Build Solution="Release|*" Project="false" /></Project>
     <Project Path="StarResonanceDps.Plugins.Samples/SamplePackets/SamplePackets.csproj"><Build Solution="Release|*" Project="false" /></Project>
     <Project Path="StarResonanceDps.Plugins.Samples/SampleWidget/SampleWidget.csproj"><Build Solution="Release|*" Project="false" /></Project>
     <Project Path="StarResonanceDps.Plugins.Samples/SampleWindow/SampleWindow.csproj"><Build Solution="Release|*" Project="false" /></Project>
   </Folder>
   <Folder Name="/DebugPlugins/">
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugEncounterRulesConflict/DebugEncounterRulesConflict.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugEncounterRulesInvalid/DebugEncounterRulesInvalid.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugHistory/DebugHistory.csproj"><Build Solution="Release|*" Project="false" /></Project>
     <Project Path="StarResonanceDps.Plugins.Debug/DebugIconMissing/DebugIconMissing.csproj"><Build Solution="Release|*" Project="false" /></Project>
     <Project Path="StarResonanceDps.Plugins.Debug/DebugInvalid/DebugInvalid.csproj"><Build Solution="Release|*" Project="false" /></Project>
     <Project Path="StarResonanceDps.Plugins.Debug/DebugInvalidNotification/DebugInvalidNotification.csproj"><Build Solution="Release|*" Project="false" /></Project>

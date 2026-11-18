@@ -53,7 +53,7 @@ public sealed record PlayerRosterEntry(
     bool IsInCombat = false,
     // 他のプレイヤーについて、まだ届いていない情報(ウィジェットの状態の印の材料)。自分の行と、記録から来た行(IsFromRecord)はいつも無し。
     PlayerDataGaps DataGaps = PlayerDataGaps.None,
-    // 素性が開いている履歴の回の記録から来た行。窓の中身は全部が履歴で、ライブの受信の欠けは表さない。
+    // 素性が回の記録から来た行(開いている履歴の回の名簿と、プラグインが読む回の記録の行 CreateRecordEntries)。中身は全部が記録で、ライブの受信の欠けは表さない。
     bool IsFromRecord = false,
     // 戦闘不能か。HP を取った出所で決める(実体なら最大HPが分かっていて HP 0、パーティの同期なら同期の状態が戦闘不能)。
     // パーティの同期の HP は読み込み中などの生きている人にも 0 で届くので、HP 0 だけでは決めない。
@@ -64,6 +64,7 @@ public sealed record PlayerRosterEntry(
     // バフを付けないアビリティの節の技の置き換えに出てくる技の、元の技 → 最後に使ったほう(元の技か置き換え後の技)。
     // どれもまだ使っていなければ null。履歴の行はその回に保存した値。
     IReadOnlyDictionary<int, int>? LastReplaceableSkills = null,
-    // 開いている履歴の回の記録から来た行で、その回に保存した自分にしか届かない値(Entity.RecordedSelf)を持つ人の行だけ。
-    // 今ログインしているキャラの行(IsSelf)は記録から作らないので、いつも null(ライブの値を使う)。
+    // 回の記録から来た行で、その回に保存した自分にしか届かない値(Entity.RecordedSelf)を持つ人の行だけ。
+    // 開いている履歴の名簿では、今ログインしているキャラの行(IsSelf)は記録から作らないので null(ライブの値を使う)。
+    // プラグインが読む回の記録の行(CreateRecordEntries)は、その人の行も記録から作るので値を持つ。
     RecordedSelfData? RecordedSelf = null);

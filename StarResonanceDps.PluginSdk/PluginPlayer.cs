@@ -1,7 +1,8 @@
 namespace StarResonanceDps.PluginSdk;
 
 /// <summary>
-/// One player of the list the Player List widget is built from (<see cref="IPluginGameDataService.Players"/>).
+/// One player: of the list the Player List widget is built from (<see cref="IPluginGameDataService.Players"/>),
+/// or of a saved history encounter (<see cref="IPluginEncounterRecord.GetPlayers"/>).
 /// </summary>
 /// <param name="CharacterId">The character ID. Use it to identify the player.</param>
 /// <param name="Name">
@@ -19,7 +20,7 @@ namespace StarResonanceDps.PluginSdk;
 /// <param name="SeasonStrength">The season strength, or 0 when unknown.</param>
 /// <param name="CurrentHp">
 /// The current HP. For a party member who is not nearby, the value the party sync sends; for another player who is not nearby,
-/// the last value the host received. For a row that comes from the opened history encounter
+/// the last value the host received. For a row that comes from a saved history encounter (<see cref="IsFromRecord"/>)
 /// or from the previous encounter the meters keep showing, it equals <see cref="MaxHp"/>.
 /// </param>
 /// <param name="MaxHp">The maximum HP.</param>
@@ -31,7 +32,7 @@ namespace StarResonanceDps.PluginSdk;
 /// <param name="IsNearby">The host currently receives the player's values from the surroundings (the player is on the same map).</param>
 /// <param name="IsInCombat">The player is in the combat state. Known only for the local player and nearby players.</param>
 /// <param name="IsIncapacitated">
-/// The player is incapacitated. Always <c>false</c> for a row that comes from the opened history encounter
+/// The player is incapacitated. Always <c>false</c> for a row that comes from a saved history encounter (<see cref="IsFromRecord"/>)
 /// or from the previous encounter the meters keep showing.
 /// </param>
 /// <param name="PsychoscopeRootBuffId">
@@ -39,7 +40,8 @@ namespace StarResonanceDps.PluginSdk;
 /// </param>
 /// <param name="IsPsychoscopeInactive">The player has no active Deep-Slumber Psychoscope type.</param>
 /// <param name="IsFromRecord">
-/// The row comes from the opened history encounter (a player who is only in the record), not from live data.
+/// The row comes from a saved history encounter, not from live data: in <see cref="IPluginGameDataService.Players"/>,
+/// a player who is only in the history encounter opened in the host; in <see cref="IPluginEncounterRecord.GetPlayers"/>, every row.
 /// </param>
 public sealed record PluginPlayer(
     long CharacterId,

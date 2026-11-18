@@ -11,6 +11,12 @@ public interface IPluginNameService
     /// <summary>The name of a skill.</summary>
     string? GetSkillName(int skillId);
 
+    /// <summary>
+    /// The name of a skill as the host's graphs show it for a skill activation (<see cref="PluginSkillActivation.SkillId"/>):
+    /// the name of the meter row the skill is counted in, otherwise the skill's name, with the host's own names for some skills.
+    /// </summary>
+    string? GetSkillActivationName(int skillId);
+
     /// <summary>The name of a buff. For a food or potion buff, the name of the item that gives it (several items are joined with <c> / </c>).</summary>
     string? GetBuffName(int buffId);
 

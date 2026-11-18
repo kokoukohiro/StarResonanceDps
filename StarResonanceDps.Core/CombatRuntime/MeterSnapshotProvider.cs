@@ -79,7 +79,7 @@ public sealed record BenchmarkStateSnapshot(
     bool IsCompleted);
 
 /// <summary>
-/// 推移の区切り1つ。<see cref="EndSeconds"/> は区切りの終わりの <c>FirstDamageTimeStamp</c> からの秒、
+/// 推移の区切り1つ。<see cref="EndSeconds"/> は区切りの終わりの戦闘の時計の起点(<see cref="Encounter.ClockStartUtc"/>)からの秒、
 /// <see cref="ValuePerSecond"/> はその区切りの合計 ÷ 区切りの長さ。
 /// </summary>
 public readonly record struct MetricGraphPoint(double EndSeconds, double ValuePerSecond);
@@ -171,7 +171,7 @@ public sealed record MetricSkillTableSnapshot(
 /// <summary>
 /// 回1つの全員の集計(与ダメ・回復・被ダメ)。メーター・スキル詳細と同じ数で、時計は1回だけ読む。
 /// </summary>
-/// <param name="IsHistory">開いている履歴の回か。</param>
+/// <param name="IsHistory">DB から読んだ回か(<see cref="Encounter.IsFromHistory"/>)。</param>
 /// <param name="StartUtc">戦闘の時計の起点。まだ起点が無ければ null。</param>
 /// <param name="IsClosed">閉じた回(終了時刻がある)か、計測の窓が終わった。</param>
 /// <param name="Players">どれかの合計が 0 より大きいプレイヤー。パーティで絞らない。</param>
@@ -180,7 +180,38 @@ public sealed record EncounterTotalsSnapshot(
     DateTime? StartUtc,
     TimeSpan Elapsed,
     bool IsClosed,
-    IReadOnlyList<EncounterPlayerTotals> Players);
+    IReadOnlyList<EncounterPlayerTotals> Players)
+{
+    /// <summary>回の通し番号(<see cref="Encounter.RuntimeKey"/>)。回が無ければ 0。</summary>
+    public long EncounterKey { get; init; }
+
+    /// <summary>保存の番号(<see cref="Encounter.EncounterId"/>)。保存する前は null。</summary>
+    public ulong? HistoryId { get; init; }
+
+    /// <summary>最後の戦闘の出来事の到着時刻(UTC)。まだ無ければ null。</summary>
+    public DateTime? LastCombatEventUtc { get; init; }
+
+    /// <summary>今記録している回で、集計を止めている(<see cref="Encounter.IsAggregationStopped"/>)。閉じた回・保持している前の回・DB から読んだ回は偽。</summary>
+    public bool IsAggregationStopped { get; init; }
+
+    /// <summary>計測の最初の敵(実行中の回だけ)。決まる前・ほかの回・DB から読んだ回は null。</summary>
+    public long? BenchmarkFirstTargetUuid { get; init; }
+
+    /// <summary>戦闘の時計の起点の種類(<see cref="EncounterExData.ClockOrigin"/>)。</summary>
+    public EncounterClockOrigin ClockOrigin { get; init; }
+
+    /// <summary>最初の戦闘の出来事の到着時刻(<see cref="EncounterExData.FirstDamageTimeStamp"/>)。まだ無ければ null。</summary>
+    public DateTime? FirstCombatEventUtc { get; init; }
+}
+
+/// <summary>
+/// 回が持っているモンスター1体(<see cref="MeterSnapshotProvider.GetRecordedMonsters"/>)。
+/// </summary>
+/// <param name="MonsterId">種別ID(属性 <c>AttrId</c>)。届いていなければ null。</param>
+/// <param name="Hp">最後に届いた HP。届いていなければ 0。DB から読んだ回は保存したときの値。</param>
+/// <param name="MaxHp">最後に届いた最大 HP。届いていなければ 0。DB から読んだ回は保存したときの値。</param>
+/// <param name="Casts">記録した詠唱(<see cref="Entity.SkillCasts"/> の写し)。届いた順。</param>
+public sealed record RecordedMonsterSnapshot(long EntityUuid, int? MonsterId, long Hp, long MaxHp, IReadOnlyList<SkillCastRecord> Casts);
 
 /// <param name="CharacterId">キャラ番号(名簿の <c>PlayerRosterEntry.CharacterId</c> と同じ)。</param>
 public sealed record EncounterPlayerTotals(
@@ -366,7 +397,11 @@ public sealed record MeterPlayerIdentity(string Name, long UserId, bool IsNpc, i
 /// プレイヤーでも仮想体でもなく、実体か種別ID(AttrId)が無くて何者か分からない加害者。表示側が「未知の敵」と出す(名前は空)。
 /// AttrId は実体が現れたときの通知でしか届かないので、アプリの起動前から居た敵がこうなる。
 /// </param>
-public sealed record CombatEventLogParty(long Uuid, long CharacterId, string Name, bool IsPlayer, bool IsSelf, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec, bool IsSystem = false, bool IsUnnamedEnemy = false, bool IsUnknownEnemy = false);
+/// <param name="MonsterId">モンスターの種別ID(AttrId)。モンスターでないか受けていなければ 0。プラグインへ渡す記録が使う。</param>
+public sealed record CombatEventLogParty(long Uuid, long CharacterId, string Name, bool IsPlayer, bool IsSelf, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec, bool IsSystem = false, bool IsUnnamedEnemy = false, bool IsUnknownEnemy = false, int MonsterId = 0);
+
+/// <summary>1人の、戦闘の時計の1秒ごとの合計(<see cref="MeterSnapshotProvider.GetPlayerPerSecondTotals"/>)。<see cref="Totals"/>[i] は (i, i+1] 秒。</summary>
+public sealed record PlayerPerSecondTotals(TimeSpan Elapsed, bool IsClosed, ulong[] Totals);
 
 /// <summary>
 /// タイムラインの1件(予告か予告のバーの終わりか詠唱か、敵の回復・敵から敵へのダメージ・敵が付けたバフ)。
@@ -744,7 +779,7 @@ public static class MeterSnapshotProvider
             startIndex = 0;
         }
 
-        var combatStartUtc = encounter.ExData.FirstDamageTimeStamp;
+        var combatStartUtc = encounter.ClockStartUtc;
         var records = encounter.GetCombatEventLogRecords(startIndex);
         var parties = new Dictionary<long, CombatEventLogParty>();
         var lines = new List<TimelineLine>(records.Length);
@@ -1031,6 +1066,132 @@ public static class MeterSnapshotProvider
         return ResolveCombatEventLogParty(encounter, uuid, []);
     }
 
+    /// <summary>
+    /// プラグインへ渡す被弾の記録1件。加害者を <paramref name="encounter"/> の実体から解く(被ダメログと同じ決め方)。
+    /// <paramref name="parties"/> は同じ読み出しの中で解いた登場人物の控え(1件だけなら null)。
+    /// </summary>
+    internal static TakenHitObservation CreateTakenHitObservation(
+        Encounter encounter,
+        int recordIndex,
+        TakenHitRecord hit,
+        Dictionary<long, CombatEventLogParty>? parties)
+    {
+        return new TakenHitObservation(
+            encounter.RuntimeKey,
+            recordIndex,
+            hit,
+            ResolveCombatEventLogParty(encounter, hit.OtherUuid, parties ?? []));
+    }
+
+    /// <summary>
+    /// プラグインへ渡すタイムラインの記録1件。登場人物を <paramref name="encounter"/> の実体から解く(タイムラインと同じ決め方)。
+    /// 詠唱・敵の回復・与ダメ・バフは行動した敵と相手を持ち、予告と戦闘不能は持たない。
+    /// </summary>
+    internal static CombatLogObservation CreateCombatLogObservation(
+        Encounter encounter,
+        int recordIndex,
+        CombatEventLogRecord record,
+        Dictionary<long, CombatEventLogParty>? parties)
+    {
+        long? actorUuid = null;
+        long? targetUuid = null;
+        switch (record.Kind)
+        {
+            case CombatEventLogRecordKind.Cast:
+                actorUuid = record.EntityUuid;
+                break;
+            case CombatEventLogRecordKind.EnemyHeal:
+                actorUuid = record.EnemyHeal!.HealerUuid;
+                targetUuid = record.EnemyHeal.TargetUuid;
+                break;
+            case CombatEventLogRecordKind.EnemyDamage:
+                actorUuid = record.EnemyDamage!.AttackerUuid;
+                targetUuid = record.EnemyDamage.TargetUuid;
+                break;
+            case CombatEventLogRecordKind.EnemyBuff:
+                actorUuid = record.EnemyBuff!.CasterUuid;
+                targetUuid = record.EnemyBuff.TargetUuid;
+                break;
+        }
+
+        parties ??= [];
+        return new CombatLogObservation(
+            encounter.RuntimeKey,
+            recordIndex,
+            record,
+            actorUuid is { } actor ? ResolveCombatEventLogParty(encounter, actor, parties) : null,
+            targetUuid is { } target ? ResolveCombatEventLogParty(encounter, target, parties) : null);
+    }
+
+    /// <summary>
+    /// プラグインの読み口: <paramref name="encounter"/> のその人のスキルの記録の、<paramref name="startIndex"/> 番目から後(届いた順)。
+    /// 負か、その人の記録の数より大きければ <see cref="ArgumentOutOfRangeException"/>。回にいない人の記録の数は 0。
+    /// </summary>
+    public static SkillActivation[] GetPlayerSkillActivationRecords(Encounter encounter, long characterId, int startIndex)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(startIndex);
+        var activations = Array.Empty<SkillActivation>();
+        var count = 0;
+        if (TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out _))
+        {
+            activations = encounter.GetSkillActivationsFrom(entityUuid, startIndex, out count);
+        }
+
+        // 数は増えるだけなので、読んだ後の数より大きければ読んだときも範囲の外。
+        if (startIndex > count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(startIndex), startIndex, $"The player has {count} skill activations.");
+        }
+
+        return activations;
+    }
+
+    /// <summary>
+    /// プラグインの読み口: <paramref name="encounter"/> の被弾の記録の、<paramref name="startIndex"/> 番目から後(記録の順)と、解いた加害者。
+    /// 負か、記録の数より大きければ <see cref="ArgumentOutOfRangeException"/>。
+    /// </summary>
+    public static TakenHitObservation[] GetTakenHitObservations(Encounter encounter, int startIndex)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(startIndex);
+        var hits = encounter.GetTakenHitRecords(startIndex);
+        if (hits.Length == 0 && startIndex > encounter.TakenHitCount)
+        {
+            throw new ArgumentOutOfRangeException(nameof(startIndex), startIndex, $"The encounter has {encounter.TakenHitCount} damage-taken records.");
+        }
+
+        var parties = new Dictionary<long, CombatEventLogParty>();
+        var observations = new TakenHitObservation[hits.Length];
+        for (var index = 0; index < hits.Length; index++)
+        {
+            observations[index] = CreateTakenHitObservation(encounter, startIndex + index, hits[index], parties);
+        }
+
+        return observations;
+    }
+
+    /// <summary>
+    /// プラグインの読み口: <paramref name="encounter"/> のタイムラインの記録の、<paramref name="startIndex"/> 番目から後(記録の順)と、解いた登場人物。
+    /// 負か、記録の数より大きければ <see cref="ArgumentOutOfRangeException"/>。
+    /// </summary>
+    public static CombatLogObservation[] GetCombatLogObservations(Encounter encounter, int startIndex)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(startIndex);
+        var records = encounter.GetCombatEventLogRecords(startIndex);
+        if (records.Length == 0 && startIndex > encounter.CombatEventLogCount)
+        {
+            throw new ArgumentOutOfRangeException(nameof(startIndex), startIndex, $"The encounter has {encounter.CombatEventLogCount} Timeline records.");
+        }
+
+        var parties = new Dictionary<long, CombatEventLogParty>();
+        var observations = new CombatLogObservation[records.Length];
+        for (var index = 0; index < records.Length; index++)
+        {
+            observations[index] = CreateCombatLogObservation(encounter, startIndex + index, records[index], parties);
+        }
+
+        return observations;
+    }
+
     private static CombatEventLogParty ResolveCombatEventLogParty(
         Encounter encounter,
         long uuid,
@@ -1088,7 +1249,7 @@ public static class MeterSnapshotProvider
                     || (entityType == EEntityType.EntMonster
                         && !isUnnamedEnemy
                         && !CombatDataCatalog.HasEntityName(EEntityType.EntMonster, monsterId)));
-            party = new CombatEventLogParty(uuid, 0, name, false, false, false, 0, PlayerClassSpec.Unknown, isSystem, isUnnamedEnemy, isUnknownEnemy);
+            party = new CombatEventLogParty(uuid, 0, name, false, false, false, 0, PlayerClassSpec.Unknown, isSystem, isUnnamedEnemy, isUnknownEnemy, (int)monsterId);
         }
 
         cache[uuid] = party;
@@ -2527,7 +2688,7 @@ public static class MeterSnapshotProvider
         var clock = encounter.ReadCombatClock();
         var endTime = clock.EndUtc
             ?? throw new InvalidOperationException(
-                $"Per-second totals exist without FirstDamageTimeStamp (encounter={encounter.EncounterId}).");
+                $"Per-second totals exist without a combat clock start (encounter={encounter.EncounterId}).");
 
         // 記録は時計の終点より前にしか入らないはず(ライブは今、閉じた回は閉じた時刻、計測は窓の終わり)。
         // 後ろにあれば時刻の出所が食い違っているので、伸ばさずに終点まで描き、回ごとに1回だけ残す。
@@ -2573,6 +2734,56 @@ public static class MeterSnapshotProvider
 
         changed |= buffer.SetCount(bucketCount);
         return changed;
+    }
+
+    /// <summary>
+    /// プラグインの読み口: <paramref name="encounter"/> のその人の、戦闘の時計の1秒ごとの合計(推移グラフの区切りを1秒にした値の合計のまま)。
+    /// ライブは満ちた秒だけ、閉じた回は最後の半端な秒も入れる。人が居ないか、戦闘の時計の起点が無ければ null。
+    /// 起点が無いのに合計があるなら記録側が壊れているので例外(<see cref="ReadPlayerGraph"/> と同じ)。
+    /// </summary>
+    public static PlayerPerSecondTotals? GetPlayerPerSecondTotals(Encounter encounter, MeterSnapshotKind kind, long characterId)
+    {
+        if (!TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
+        {
+            return null;
+        }
+
+        var stats = kind switch
+        {
+            MeterSnapshotKind.Damage => entity.DamageStats,
+            MeterSnapshotKind.Healing => entity.HealingStats,
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "The kind has no per-second totals for plugins.")
+        };
+
+        var clock = encounter.ReadCombatClock();
+        if (clock.EndUtc is null)
+        {
+            if (stats is not null && stats.TryGetLastPerSecondTimestamp(out _))
+            {
+                throw new InvalidOperationException(
+                    $"Per-second totals exist without a combat clock start (encounter={encounter.EncounterId}).");
+            }
+
+            return null;
+        }
+
+        var elapsedSeconds = clock.Elapsed.TotalSeconds;
+        var fullSecondCount = (int)Math.Floor(elapsedSeconds);
+        var secondCount = fullSecondCount + (clock.IsClosed && elapsedSeconds - fullSecondCount > 0d ? 1 : 0);
+        var buckets = new double[secondCount];
+        if (secondCount > 0 && stats is not null)
+        {
+            stats.AddPerSecondTotalsTo(buckets, secondCount, 1);
+        }
+
+        // 足すのは整数の与ダメ・回復だけなので、double の合計は 2^53 まで整数のまま。
+        var totals = new ulong[secondCount];
+        for (var second = 0; second < secondCount; second++)
+        {
+            totals[second] = (ulong)buckets[second];
+        }
+
+        return new PlayerPerSecondTotals(clock.Elapsed, clock.IsClosed, totals);
     }
 
     /// <summary>
@@ -2946,17 +3157,112 @@ public static class MeterSnapshotProvider
     public static EncounterTotalsSnapshot GetEncounterTotals()
     {
         return ResolveActiveEncounter() is { } encounter
-            ? CreateEncounterTotals(encounter, isHistory: AppState.OpenedHistoricalEncounter is not null)
+            ? CreateEncounterTotals(encounter)
             : new EncounterTotalsSnapshot(false, null, TimeSpan.Zero, false, Array.Empty<EncounterPlayerTotals>());
     }
 
-    /// <summary>渡したライブの回の全員の集計(閉じた回の結果に使う)。</summary>
+    /// <summary>渡した回の全員の集計(閉じた回の結果と、プラグインの回の読み口に使う)。</summary>
     public static EncounterTotalsSnapshot GetEncounterTotals(Encounter encounter)
     {
-        return CreateEncounterTotals(encounter, isHistory: false);
+        return CreateEncounterTotals(encounter);
     }
 
-    private static EncounterTotalsSnapshot CreateEncounterTotals(Encounter encounter, bool isHistory)
+    /// <summary>メーターが映している回(<see cref="ResolveActiveEncounter"/>)。履歴を開いていればその回、保持している前の回、今の回の順。</summary>
+    public static Encounter? GetShownEncounter()
+    {
+        return ResolveActiveEncounter();
+    }
+
+    /// <summary>
+    /// DB から読んだ回の参加者の行(<see cref="PlayerRosterProjection.CreateRecordEntries"/>)。記録に保存した値だけで作り、
+    /// 今のパーティと控えは重ねない。<see cref="PlayerRosterEntry.IsSelf"/> は付けず、名前も伏せない(読む側が読むたびに当てる)。
+    /// </summary>
+    public static IReadOnlyList<PlayerRosterEntry> GetRecordedPlayers(Encounter encounter)
+    {
+        return PlayerRosterProjection.CreateRecordEntries(encounter);
+    }
+
+    /// <summary>
+    /// 回が持っているモンスター(並びは決めない)。実行中の回は今の値で、HP と最大 HP は実体の値、種別IDは属性から。
+    /// DB から読んだ回は保存した属性(<c>AttrHp</c>・<c>AttrMaxHp</c>・<c>AttrId</c>)から。実体の種類は UUID で見る(読んだ実体も同じ見方)。
+    /// 実行中の回の属性の辞書はロックを持たず、パケットのスレッドの書き込みと並んで読む(タイムラインの名前の引きと同じ読み方)。
+    /// </summary>
+    public static IReadOnlyList<RecordedMonsterSnapshot> GetRecordedMonsters(Encounter encounter)
+    {
+        var monsters = new List<RecordedMonsterSnapshot>();
+        foreach (var (uuid, entity) in encounter.Entities)
+        {
+            if (Utils.UuidToEntityType(uuid) != (long)EEntityType.EntMonster)
+            {
+                continue;
+            }
+
+            var monsterId = entity.GetAttrKV("AttrId") is { } attrId && Convert.ToInt64(attrId) is > 0 and var id
+                ? (int?)checked((int)id)
+                : null;
+            var (hp, maxHp) = encounter.IsFromHistory
+                ? (ReadAttributeInt64(entity, "AttrHp"), ReadAttributeInt64(entity, "AttrMaxHp"))
+                : (entity.Hp, entity.MaxHp);
+            monsters.Add(new RecordedMonsterSnapshot(uuid, monsterId, hp, maxHp, entity.GetSkillCastsCopy()));
+        }
+
+        return monsters;
+    }
+
+    private static long ReadAttributeInt64(Entity entity, string key)
+    {
+        return entity.GetAttrKV(key) is { } value ? Convert.ToInt64(value) : 0;
+    }
+
+    /// <summary>
+    /// <paramref name="characterId"/> のバフの区間(<see cref="Encounter.ReadBuffIntervals"/>)。人が居ないか、記録・戦闘の時計の起点が無ければ null。
+    /// </summary>
+    public static BuffIntervalsSnapshot? GetPlayerBuffIntervals(Encounter encounter, long characterId)
+    {
+        return TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out _)
+            ? encounter.ReadBuffIntervals(entityUuid, DateTime.UtcNow)
+            : null;
+    }
+
+    /// <summary>
+    /// <paramref name="characterId"/> の技の一覧(プラグインのビルド)。プレイヤーリストの技の枠と同じ実体の引き方
+    /// (<see cref="TryGetPlayerListImagineRoleSkillSourceState"/> と <see cref="TryResolveDetailEntity"/>)で読む。出所が無ければ null。
+    /// </summary>
+    public static IReadOnlyList<DataTypes.Skills.SkillLevelInfo>? GetPlayerSkillLevels(long characterId)
+    {
+        if (!TryGetPlayerListImagineRoleSkillSourceState(characterId, 0, out var entityUuid, out _, out _, out _))
+        {
+            return null;
+        }
+
+        TryResolveDetailEntity(characterId, entityUuid, out var entity, out _);
+        return ResolvePlayerSkillLevelsOrNull(entityUuid, entity, characterId);
+    }
+
+    /// <summary>
+    /// 回に保存した <paramref name="characterId"/> の技の一覧。実体の <c>AttrSkillLevelIdList</c> だけを読み、今の控えとパーティの補完は通さない。
+    /// 人か一覧が無ければ null。
+    /// </summary>
+    public static IReadOnlyList<DataTypes.Skills.SkillLevelInfo>? GetRecordedSkillLevels(Encounter encounter, long characterId)
+    {
+        return TryResolvePlayerEntity(encounter, characterId, out _, out var entity)
+            ? ReadSkillLevelAttribute(entity)
+            : null;
+    }
+
+    /// <summary>
+    /// 集計を止めている回として知らせるか。今記録している回(今の回で、保存も閉じもしていない)だけで決め、ほかの回は偽。
+    /// <see cref="Encounter.IsAggregationStopped"/> は読むたびに今の設定とシーンで決まるので、閉じた回で設定を変えると値が変わるため。
+    /// </summary>
+    private static bool IsAggregationStoppedNow(Encounter encounter)
+    {
+        return ReferenceEquals(encounter, EncounterManager.Current)
+            && !encounter.IsPersisted
+            && encounter.EndTime == DateTime.MinValue
+            && encounter.IsAggregationStopped;
+    }
+
+    private static EncounterTotalsSnapshot CreateEncounterTotals(Encounter encounter)
     {
         var clock = encounter.ReadCombatClock();
         var elapsedSeconds = clock.Elapsed.TotalSeconds;
@@ -2975,7 +3281,16 @@ public static class MeterSnapshotProvider
             })
             .ToArray();
 
-        return new EncounterTotalsSnapshot(isHistory, clock.StartUtc, clock.Elapsed, clock.IsClosed, players);
+        return new EncounterTotalsSnapshot(encounter.IsFromHistory, clock.StartUtc, clock.Elapsed, clock.IsClosed, players)
+        {
+            EncounterKey = encounter.RuntimeKey,
+            HistoryId = encounter.IsPersisted ? encounter.EncounterId : null,
+            LastCombatEventUtc = encounter.ReadLastCombatEventUtc() is { } lastEvent ? DateTime.SpecifyKind(lastEvent, DateTimeKind.Utc) : null,
+            IsAggregationStopped = IsAggregationStoppedNow(encounter),
+            BenchmarkFirstTargetUuid = encounter.IsFromHistory ? null : encounter.BenchmarkFirstTargetUuid,
+            ClockOrigin = encounter.ExData.ClockOrigin,
+            FirstCombatEventUtc = encounter.ExData.FirstDamageTimeStamp is { } first ? DateTime.SpecifyKind(first, DateTimeKind.Utc) : null,
+        };
     }
 
     private static CombatTotalsSnapshot CreateCombatTotals(ulong total, CombatStats stats, double elapsedSeconds, double activeSeconds)
@@ -3239,6 +3554,19 @@ public static class MeterSnapshotProvider
         Entity? entity,
         long characterId)
     {
+        return ResolvePlayerSkillLevelsOrNull(entityUuid, entity, characterId)
+            ?? Array.Empty<DataTypes.Skills.SkillLevelInfo>();
+    }
+
+    /// <summary>
+    /// プレイヤーの技の一覧。自分は今の職業の習得スキルの控え、他の人は実体の <c>AttrSkillLevelIdList</c>、
+    /// それが無いか空ならパーティの控え。どれも無ければ null(受信して空の一覧と分ける)。
+    /// </summary>
+    private static IReadOnlyList<DataTypes.Skills.SkillLevelInfo>? ResolvePlayerSkillLevelsOrNull(
+        long entityUuid,
+        Entity? entity,
+        long characterId)
+    {
         if (IsSelfEntity(entityUuid)
             && PlayerSkillLevelStateStore.TryGetSelfCurrentSkillLevels(
                 out var currentSkillLevels))
@@ -3246,19 +3574,11 @@ public static class MeterSnapshotProvider
             return currentSkillLevels;
         }
 
-        var receivedSkillLevels = entity?.GetAttrKV("AttrSkillLevelIdList") switch
-        {
-            List<DataTypes.Skills.SkillLevelInfo> typedList => typedList,
-            JArray jsonArray =>
-                (IReadOnlyList<DataTypes.Skills.SkillLevelInfo>?)
-                jsonArray.ToObject<List<DataTypes.Skills.SkillLevelInfo>>()
-                ?? Array.Empty<DataTypes.Skills.SkillLevelInfo>(),
-            _ => Array.Empty<DataTypes.Skills.SkillLevelInfo>()
-        };
+        var receivedSkillLevels = ReadSkillLevelAttribute(entity);
 
         // AOI外へ出ると AttrSkillLevelIdList が届かなくなるので、
         // 自分以外のパーティメンバーは保持しておいた分で補完する。
-        if (receivedSkillLevels.Count == 0
+        if (receivedSkillLevels is not { Count: > 0 }
             && !IsSelfEntity(entityUuid)
             && PartyMemberCache.Instance.TryGetSkillLevels(
                 characterId,
@@ -3280,6 +3600,20 @@ public static class MeterSnapshotProvider
         // 「装備中の4枠」を出すのはプレイヤーリスト側だけなので、
         // ロールスキルの絞り込みは CreatePlayerImagineRoleSkillLoadout で行う。
         return receivedSkillLevels;
+    }
+
+    /// <summary>実体の <c>AttrSkillLevelIdList</c>(DB から読んだ回は JSON の配列)。属性が無ければ null。</summary>
+    private static IReadOnlyList<DataTypes.Skills.SkillLevelInfo>? ReadSkillLevelAttribute(Entity? entity)
+    {
+        return entity?.GetAttrKV("AttrSkillLevelIdList") switch
+        {
+            List<DataTypes.Skills.SkillLevelInfo> typedList => typedList,
+            JArray jsonArray =>
+                (IReadOnlyList<DataTypes.Skills.SkillLevelInfo>?)
+                jsonArray.ToObject<List<DataTypes.Skills.SkillLevelInfo>>()
+                ?? Array.Empty<DataTypes.Skills.SkillLevelInfo>(),
+            _ => null
+        };
     }
 
     private static bool TryResolvePlayerEntityByUuid(

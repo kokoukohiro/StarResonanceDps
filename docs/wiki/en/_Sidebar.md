@@ -77,3 +77,5 @@
 - [Plugin Development (Widget)](Plugin-Development-(Widget))
 - [Plugin Development (Notification)](Plugin-Development-(Notification))
 - [Plugin Development (Data)](Plugin-Development-(Data))
+- [Plugin Development (History)](Plugin-Development-(History))
+- [Plugin Development (Battle Splits)](Plugin-Development-(Battle-Splits))

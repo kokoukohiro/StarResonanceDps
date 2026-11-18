@@ -2108,6 +2108,38 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.PlayerStatus or WidgetKind.BuffDebuffGroup;
     }
 
+    /// <summary>プラグインの口(<c>OpenHostAsync</c>)で開ける本体の種別か。1枚だけの窓と、自分だけを出す窓。</summary>
+    public static bool IsPluginOpenableSingleWindowKind(WidgetKind kind)
+    {
+        return kind is WidgetKind.DpsMeter
+                or WidgetKind.HpsMeter
+                or WidgetKind.HateMeter
+                or WidgetKind.BreakMeter
+                or WidgetKind.Timeline
+                or WidgetKind.PlayerList
+                or WidgetKind.EntityList
+                or WidgetKind.ReviveList
+                or WidgetKind.DamageTakenLog
+                or WidgetKind.Map
+                or WidgetKind.EntityInfo
+            || IsSelfOnlyPlayerWindowKind(kind);
+    }
+
+    /// <summary>
+    /// プラグインの口(<c>OpenHostForPlayerAsync</c>)で人を指定して開ける本体の種別か。複数開ける種別のうち、
+    /// バフの指定が要るバフ・デバフカードと、チャンネルの指定が要るチャットを除いたもの。
+    /// </summary>
+    public static bool IsPluginOpenablePlayerWindowKind(WidgetKind kind)
+    {
+        return SupportsOpenTargets(kind) && kind is not (WidgetKind.BuffDebuffCard or WidgetKind.Chat);
+    }
+
+    /// <summary>プラグインの口(<c>OpenHostForEntityAsync</c>)で敵を指定して開ける本体の種別か。エンティティリストの行から開ける種別と同じ。</summary>
+    public static bool IsPluginOpenableEntityWindowKind(WidgetKind kind)
+    {
+        return kind is WidgetKind.EntityInfo or WidgetKind.BuffList or WidgetKind.DebuffList;
+    }
+
     /// <summary>
     /// 窓の管理がプレイヤーの窓の仕組み(相手ごとの窓)で開く本体の種別か。複数開ける種別(<see cref="SupportsOpenTargets"/>)と、
     /// 自分だけを出す1枚の窓(<see cref="IsSelfOnlyPlayerWindowKind"/>)。プラグインの複数起動のウィジェットは別に判定する。

@@ -3,6 +3,7 @@
 using System;
 using System.Windows;
 using System.Windows.Interop;
+using StarResonanceDps.App.Behaviors;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.PluginSdk;
 
@@ -47,7 +48,8 @@ public partial class PluginWindow : Window
 
         // This is a top-level tool window, not an owned window. An owned WPF window is
         // always kept above its owner, which prevented the manager from being brought forward.
-        PositionRelativeToOwner(owner, plugin.OriginalIndex);
+        // 全体設定と同じく、メイン画面からずらした決まった場所(XAML の数字)に置く。プラグインのウィンドウはずらさない。
+        WindowPlacementBehavior.PlaceNearOwner(this, owner);
 
         SourceInitialized += PluginWindow_SourceInitialized;
     }
@@ -135,22 +137,6 @@ public partial class PluginWindow : Window
 
         handled = true;
         return new IntPtr(hitTest);
-    }
-
-    private void PositionRelativeToOwner(Window? owner, int originalIndex)
-    {
-        if (owner is null)
-        {
-            WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            return;
-        }
-
-        const double leftOffset = 24;
-        const double topOffset = 72;
-        const double cascadeOffset = 20;
-
-        Left = owner.Left + leftOffset + (cascadeOffset * originalIndex);
-        Top = owner.Top + topOffset + (cascadeOffset * originalIndex);
     }
 
     private static Point GetScreenPoint(IntPtr lParam)

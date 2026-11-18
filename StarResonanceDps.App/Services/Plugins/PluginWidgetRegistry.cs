@@ -66,14 +66,14 @@ public sealed class PluginWidgetRegistration
     /// <param name="targetId">相手ごとに窓を開くウィジェットの相手の ID。窓が1枚だけのウィジェットは null。</param>
     internal PluginWidgetWindowViewModel? CreateWindowViewModel(WidgetListItemViewModel widget, string? targetId)
     {
-        var viewModel = CreateEmptyWindowViewModel();
+        var viewModel = CreateEmptyWindowViewModel(widget);
         return TrySetWindowContent(viewModel, widget, targetId) ? viewModel : null;
     }
 
     /// <summary>中身の無い窓の値を作る(相手ごとに窓を開くウィジェットの空の窓)。プラグインは呼ばない。</summary>
-    internal PluginWidgetWindowViewModel CreateEmptyWindowViewModel()
+    internal PluginWidgetWindowViewModel CreateEmptyWindowViewModel(WidgetListItemViewModel widget)
     {
-        return new PluginWidgetWindowViewModel(Definition.ScrollsVertically, _guard);
+        return new PluginWidgetWindowViewModel(Definition, _guard, widget);
     }
 
     /// <summary>
@@ -82,7 +82,7 @@ public sealed class PluginWidgetRegistration
     /// </summary>
     internal bool TrySetWindowContent(PluginWidgetWindowViewModel viewModel, WidgetListItemViewModel widget, string? targetId)
     {
-        var context = new PluginWidgetContext(Definition.Id, this, widget, _guard);
+        var context = new PluginWidgetContext(Definition.Id, this, widget, _guard, viewModel.IsWindowHidden);
         if (!_guard.TryInvoke(
                 "Widget content creation",
                 () => Validate(_multiProvider is not null

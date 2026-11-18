@@ -2,7 +2,9 @@
 
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 using StarResonanceDps.App.Controls;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.ViewModels;
@@ -16,7 +18,8 @@ namespace StarResonanceDps.App.Views.Widgets;
 /// <para>
 /// ホイールは一覧を縦に流す(一覧のテンプレートの <see cref="ScrollViewer"/> が受ける)。横軸の縮尺は設定「1秒の幅」だけで変え、
 /// 見える秒数はバーの列の幅から VM が決める(<see cref="BuffUptimeWidgetViewModel.SetPlotWidth"/>)。
-/// 一覧は仮想化して見えている行だけを作るので、名前と稼働率の列の幅(SharedSizeGroup)は見えている行で決まり、スクロールで変わる。
+/// 名前と稼働率の列の幅(SharedSizeGroup)は見えている行で決まり、スクロールで変わる。一覧は仮想化しているが、窓を低くしたときや行が押し出されたときは
+/// 見えない行の部品も残るので、配置が決まるたびに見えない行の文字を畳む(<see cref="RowsItemsControl_LayoutUpdated"/>)。
 /// </para>
 ///
 /// <para>
@@ -29,10 +32,18 @@ public partial class BuffUptimeWidgetView : UserControl, IWidgetVerticalScrollCo
     /// <summary>行の作りの中のバーの名前。</summary>
     private const string UptimeBarName = "UptimeBar";
 
+    /// <summary>行の作りの中の、列の幅を決める文字(名前・稼働率)の名前。</summary>
+    private const string NameTextName = "NameText";
+    private const string RateTextName = "RateText";
+
     private BuffUptimeRailLayer? _railLayer;
     private WidgetWindow? _frameOverlayOwner;
     private BuffUptimeWidgetViewModel? _viewModel;
     private ScrollViewer? _scrollViewer;
+
+    /// <summary>行を並べる部品(一覧のテンプレートの ItemsPresenter の下)。最初に見つけたものを持つ。</summary>
+    private Panel? _rowsPanel;
+
     private ContextMenu? _openMenu;
     private BuffUptimeEntry? _openMenuEntry;
 
@@ -139,6 +150,8 @@ public partial class BuffUptimeWidgetView : UserControl, IWidgetVerticalScrollCo
             _scrollViewer.ScrollChanged += RowsScrollViewer_ScrollChanged;
         }
 
+        RowsItemsControl.LayoutUpdated -= RowsItemsControl_LayoutUpdated;
+        RowsItemsControl.LayoutUpdated += RowsItemsControl_LayoutUpdated;
         AttachRailLayer();
         NotifyVerticalScrollMetricsChanged();
         HorizontalScrollMetricsChanged?.Invoke(this, EventArgs.Empty);
@@ -146,7 +159,60 @@ public partial class BuffUptimeWidgetView : UserControl, IWidgetVerticalScrollCo
 
     private void BuffUptimeWidgetView_Unloaded(object sender, RoutedEventArgs e)
     {
+        RowsItemsControl.LayoutUpdated -= RowsItemsControl_LayoutUpdated;
         DetachRailLayer();
+    }
+
+    /// <summary>
+    /// 配置が決まるたびに、作られている行のうち見えている範囲に少しもかからない行の名前と稼働率の文字を畳み、かかる行は戻す。
+    /// 仮想化の一覧は窓を低くしたときや行が押し出されたときに見えない行の部品を残し、その文字も列の幅(SharedSizeGroup)に入るため。
+    /// 見えるかは行の置き場所の四角で決める(行を並べる部品が自分で流すので、四角は見えている範囲の上端からの位置)。値は変わったときだけ書く。
+    /// </summary>
+    private void RowsItemsControl_LayoutUpdated(object? sender, EventArgs e)
+    {
+        if (_scrollViewer is not { } scrollViewer)
+        {
+            return;
+        }
+
+        _rowsPanel ??= FindRowsPanel(scrollViewer);
+        if (_rowsPanel is not { } panel)
+        {
+            return;
+        }
+
+        var viewportHeight = scrollViewer.ViewportHeight;
+        var count = VisualTreeHelper.GetChildrenCount(panel);
+        for (var index = 0; index < count; index++)
+        {
+            if (VisualTreeHelper.GetChild(panel, index) is not ContentPresenter presenter
+                || presenter.ContentTemplate is not { } template)
+            {
+                continue;
+            }
+
+            var slot = LayoutInformation.GetLayoutSlot(presenter);
+            var visibility = slot.Bottom > 0 && slot.Top < viewportHeight
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            SetVisibilityIfChanged(template.FindName(NameTextName, presenter), visibility);
+            SetVisibilityIfChanged(template.FindName(RateTextName, presenter), visibility);
+        }
+    }
+
+    private static Panel? FindRowsPanel(ScrollViewer scrollViewer)
+    {
+        return scrollViewer.Content is ItemsPresenter presenter && VisualTreeHelper.GetChildrenCount(presenter) > 0
+            ? VisualTreeHelper.GetChild(presenter, 0) as Panel
+            : null;
+    }
+
+    private static void SetVisibilityIfChanged(object? element, Visibility visibility)
+    {
+        if (element is UIElement target && target.Visibility != visibility)
+        {
+            target.Visibility = visibility;
+        }
     }
 
     private void BuffUptimeWidgetView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)

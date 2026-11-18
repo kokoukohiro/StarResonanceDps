@@ -278,6 +278,7 @@ public sealed partial class MainViewModel : ViewModelBase
         foreach (var widget in removedWidgets)
         {
             _widgetWindowManager.CloseKeepingState(widget);
+            _widgetWindowManager.UnregisterPluginWidget(widget);
             widget.PropertyChanged -= OnWidgetPropertyChanged;
             widget.BuffListHiddenBuffsChanged -= Widget_BuffListHiddenBuffsChanged;
             widget.EntityInfoHiddenBuffsChanged -= Widget_EntityInfoHiddenBuffsChanged;

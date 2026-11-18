@@ -2,6 +2,7 @@
 
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
+using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
@@ -81,6 +82,26 @@ public static class WidgetDataStatusRules
         return isHistory
             ? status
             : status.WithIf(reception.IsMidLaunch, MapOrRelogin);
+    }
+
+    /// <summary>
+    /// プラグインのウィジェット。定義の <see cref="PluginWidgetStatusRule"/> で本体が数える受信の事実と、プラグインが渡した中身の欠けを足す。
+    /// <see cref="PluginWidgetStatusRule.Encounter"/> はタイムラインと同じ、<see cref="PluginWidgetStatusRule.Live"/> は途中起動だけ(中身がいつもライブ)。
+    /// </summary>
+    public static WidgetDataStatus ForPluginWidget(
+        GameReceptionSnapshot reception,
+        PluginWidgetStatusRule rule,
+        bool isHistory,
+        bool hasHistoryLoadFailed,
+        WidgetDataStatusReasons pluginReasons)
+    {
+        var status = rule switch
+        {
+            PluginWidgetStatusRule.Encounter => ForTimeline(reception, isHistory, hasHistoryLoadFailed),
+            PluginWidgetStatusRule.Live => WidgetDataStatus.Complete.WithIf(reception.IsMidLaunch, MapOrRelogin),
+            _ => WidgetDataStatus.Complete
+        };
+        return status.With(pluginReasons);
     }
 
     /// <summary>

@@ -46,6 +46,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             DbConn.Open();
 
             DBSchema.CreateTables(DbConn);
+
+            // 公開した古い版が上限の掃除で回を消すと、プラグインの値の行が残る。上限が無制限の設定では掃除が回らないので、起動ごとに消す。
+            DbConn.Execute(DBSchema.PluginEncounterData.DeleteRowsWithNoEncounters);
         }
 
         public static void CloseAndSave()
@@ -83,8 +86,23 @@ namespace StarResonanceDps.Core.CombatRuntime
             lock (DBLock)
             {
                 using var transaction = DbConn.BeginTransaction();
-                var result = InsertEncounter(encounter, transaction);
-                transaction.Commit();
+
+                // プラグインの値は、写すのと同時に封をする(後から書いた値が DB に入らないまま成功にならない)。失敗したら封を戻す。
+                var pluginRows = encounter.PluginData.SealForSave();
+                ulong result;
+                try
+                {
+                    result = InsertEncounter(encounter, transaction);
+                    InsertPluginData(result, pluginRows, transaction);
+                    transaction.Commit();
+                }
+                catch
+                {
+                    encounter.PluginData.UnsealAfterFailedSave();
+                    throw;
+                }
+
+                encounter.MarkPersisted();
 
                 // 上限を超えたぶんはその場で落とす。終了時だけの掃除だと、稼働中は上限を超えて溜まる。
                 if (CombatRuntimeSettings.DatabaseMaxEncounterCount > 0)
@@ -96,6 +114,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        /// <summary>
+        /// 回の行と実体の blob を書き、付いた番号を回に入れる。プラグインの値は書かない(外側の <see cref="InsertEncounter(Encounter)"/> が同じトランザクションで書く)。
+        /// </summary>
         public static ulong InsertEncounter(Encounter encounter, SqliteTransaction tx)
         {
             var sw = Stopwatch.StartNew();
@@ -103,6 +124,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 using var encMs = new MemoryStream();
                 encounter.FillSkillActivationsForSave();
+                // 下の実体の blob はバフ稼働率を記録の判定で絞って書く(Encounter.FillBuffUptimeForSave)。ExData は blob より先に書くので、印はここで立てる。
+                encounter.ExData.BuffUptimeFilteredOnSave = true;
                 try
                 {
                     ProtoBuf.Serializer.Serialize(encMs, encounter.ExData);
@@ -128,6 +151,81 @@ namespace StarResonanceDps.Core.CombatRuntime
                 Log.Information("Saving encounter {encounterId} to DB took: {duration}", encounterId, sw.Elapsed);
 
                 return encounterId;
+            }
+        }
+
+        /// <summary>プラグインが回に残した値を、回と同じトランザクションで書く。<see cref="DBLock"/> の中で呼ぶ(共有の圧縮器を使う)。</summary>
+        private static void InsertPluginData(ulong encounterId, IReadOnlyList<EncounterPluginDataRow> rows, SqliteTransaction tx)
+        {
+            foreach (var row in rows)
+            {
+                DbConn.Execute(DBSchema.PluginEncounterData.Upsert, CreatePluginDataRow(encounterId, row.PluginKey, row.DataKey, row.Data), tx);
+            }
+        }
+
+        /// <summary>表の1行。値は回の ExData と同じ zstd で縮め、縮める前の長さを残す。<see cref="DBLock"/> の中で呼ぶ。</summary>
+        private static PluginEncounterDataTable CreatePluginDataRow(ulong encounterId, string pluginKey, string dataKey, byte[] data)
+        {
+            return new PluginEncounterDataTable
+            {
+                EncounterId = encounterId,
+                PluginKey = pluginKey,
+                DataKey = dataKey,
+                RawLength = data.Length,
+                Data = Compressor.Wrap(data).ToArray(),
+            };
+        }
+
+        /// <summary>
+        /// 保存した回のプラグインの値を1キー置き換える(長さ0は消す)。上限は、置き換えた後のそのプラグインのキーの数と縮める前の長さの合計で比べ、
+        /// 越えるなら書かない。回が無ければ書かない。裏のスレッドから呼ぶ(<c>EncounterHistoryProvider.SetSavedPluginDataAsync</c>)。
+        /// </summary>
+        public static SavedPluginDataResult ReplaceSavedPluginData(ulong encounterId, string pluginKey, string dataKey, byte[] data, int maxKeys, int maxTotalBytes)
+        {
+            lock (DBLock)
+            {
+                using var transaction = DbConn.BeginTransaction();
+                if (DbConn.QuerySingle<long>(DBSchema.Encounter.Exists, new { EncounterId = encounterId }, transaction) == 0)
+                {
+                    return SavedPluginDataResult.NotFound;
+                }
+
+                if (data.Length == 0)
+                {
+                    DbConn.Execute(DBSchema.PluginEncounterData.DeleteKey, new { EncounterId = encounterId, PluginKey = pluginKey, DataKey = dataKey }, transaction);
+                }
+                else
+                {
+                    var keyCount = 1;
+                    long totalBytes = data.Length;
+                    var sizes = DbConn.Query<PluginEncounterDataTable>(
+                        DBSchema.PluginEncounterData.SelectSizes,
+                        new { EncounterId = encounterId, PluginKey = pluginKey },
+                        transaction);
+                    foreach (var size in sizes)
+                    {
+                        if (!string.Equals(size.DataKey, dataKey, StringComparison.OrdinalIgnoreCase))
+                        {
+                            keyCount++;
+                            totalBytes += size.RawLength;
+                        }
+                    }
+
+                    if (keyCount > maxKeys)
+                    {
+                        return SavedPluginDataResult.TooManyKeys;
+                    }
+
+                    if (totalBytes > maxTotalBytes)
+                    {
+                        return SavedPluginDataResult.TooLarge;
+                    }
+
+                    DbConn.Execute(DBSchema.PluginEncounterData.Upsert, CreatePluginDataRow(encounterId, pluginKey, dataKey, data), transaction);
+                }
+
+                transaction.Commit();
+                return SavedPluginDataResult.Stored;
             }
         }
 
@@ -234,13 +332,15 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// 保存済みの回を1件読む。履歴の選択では裏のスレッドから呼ぶ(<c>EncounterHistoryProvider.SelectAsync</c>)。
-        /// 接続と共有の展開器を触る間(問い合わせ2つと ExData の展開)はロックの中、実体の JSON の復元は呼ぶたびに別のストリームなのでロックの外。
+        /// 接続と共有の展開器を触る間(問い合わせ3つと ExData・プラグインの値の展開)はロックの中、実体の JSON の復元は呼ぶたびに別のストリームなのでロックの外。
+        /// 読んだ回は DB から読んだ回の印(<see cref="Encounter.IsFromHistory"/>)とプラグインの値を持ち、プラグインの値は封をしてある。
         /// </summary>
         public static Encounter? LoadEncounter(ulong encounterId)
         {
             var sw = Stopwatch.StartNew();
             Encounter? encounter;
             EntityBlobTable? entityBlob;
+            List<EncounterPluginDataRow> pluginRows;
             lock (DBLock)
             {
                 encounter = DbConn.QuerySingleOrDefault<Encounter>(DBSchema.Encounter.SelectById, new { EncounterId = encounterId });
@@ -253,6 +353,10 @@ namespace StarResonanceDps.Core.CombatRuntime
                 var decompressedEncEx = Decompressor.Unwrap(encounter.ExDataBlob);
                 ProtoBuf.Serializer.Deserialize<EncounterExData>(decompressedEncEx, encounter.ExData);
                 encounter.ExDataBlob = null!;
+
+                pluginRows = DbConn.Query<PluginEncounterDataTable>(DBSchema.PluginEncounterData.SelectByEncounterId, new { EncounterId = encounterId })
+                    .Select(row => new EncounterPluginDataRow(row.PluginKey, row.DataKey, Decompressor.Unwrap(row.Data).ToArray()))
+                    .ToList();
 
                 entityBlob = DbConn.QuerySingleOrDefault<EntityBlobTable>(DBSchema.Entities.SelectByEncounterId, new { EncounterId = encounterId });
             }
@@ -292,6 +396,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 encounter.Entities = new ConcurrentDictionary<long, Entity>();
             }
 
+            encounter.PluginData.LoadSaved(pluginRows);
+            encounter.MarkLoadedFromHistory();
+
             sw.Stop();
             Log.Information("Loading encounter {encounterId} from DB took: {duration}", encounterId, sw.Elapsed);
 
@@ -308,6 +415,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                     var decompressedEncEx = Decompressor.Unwrap(encounter.ExDataBlob);
                     ProtoBuf.Serializer.Deserialize<EncounterExData>(decompressedEncEx, encounter.ExData);
                     encounter.ExDataBlob = null!;
+
+                    // 一覧の要約。プラグインの値と実体は読まない。
+                    encounter.MarkLoadedFromHistory();
                 }
 
                 return encounters;
@@ -346,14 +456,15 @@ namespace StarResonanceDps.Core.CombatRuntime
                 results.EncountersDeleted = DbConn.Execute(DBSchema.Encounter.RemoveEncountersOverLimit, new { Keep = maxCount });
                 results.EntitiesCachesDeleted = DbConn.Execute(DBSchema.Entities.DeleteEntitiesCachesWithNoEncounters);
                 results.BattlesDeleted = DbConn.Execute(DBSchema.Battles.DeleteBattlesWithNoEncounters);
+                var pluginDataRowsDeleted = DbConn.Execute(DBSchema.PluginEncounterData.DeleteRowsWithNoEncounters);
 
                 if (vacuum)
                 {
                     DbConn.Execute("VACUUM");
                 }
 
-                Log.Information("Cleaned up {EncountersDeleted} encounters and {BattlesDeleted} battles, with {EntitesCachesDeleted} cachedEntities",
-                        results.EncountersDeleted, results.BattlesDeleted, results.EntitiesCachesDeleted);
+                Log.Information("Cleaned up {EncountersDeleted} encounters and {BattlesDeleted} battles, with {EntitesCachesDeleted} cachedEntities and {PluginDataRowsDeleted} plugin data rows",
+                        results.EncountersDeleted, results.BattlesDeleted, results.EntitiesCachesDeleted, pluginDataRowsDeleted);
 
                 return results;
             }
@@ -366,6 +477,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 var tx = DbConn.BeginTransaction();
                 DbConn.Execute(DBSchema.Encounter.RemoveEncounter, new { EncounterId = encounterId }, tx);
                 DbConn.Execute(DBSchema.Entities.RemoveByEncounterId, new { EncounterId = encounterId }, tx);
+                DbConn.Execute(DBSchema.PluginEncounterData.RemoveByEncounterId, new { EncounterId = encounterId }, tx);
                 tx.Commit();
 
                 Log.Information("Deleted Encounter: {encounterId}", encounterId);
@@ -520,6 +632,22 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             MigrationStatus.State = MigrationStatusState.Done;
         }
+    }
+
+    /// <summary><see cref="DB.ReplaceSavedPluginData"/> の結果。</summary>
+    public enum SavedPluginDataResult
+    {
+        /// <summary>書いた(長さ0なら消した)。</summary>
+        Stored,
+
+        /// <summary>その番号の回が無い。</summary>
+        NotFound,
+
+        /// <summary>そのプラグインのキーの数が上限を越えるので書かなかった。</summary>
+        TooManyKeys,
+
+        /// <summary>そのプラグインの値の長さの合計が上限を越えるので書かなかった。</summary>
+        TooLarge
     }
 
     public class DBCleanUpResults

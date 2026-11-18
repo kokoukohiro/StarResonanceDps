@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
 using Serilog;
+using StarResonanceDps.App.Behaviors;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
@@ -16,13 +17,12 @@ using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Services;
 using StarResonanceDps.App.Views.Widgets;
+using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.App.Services;
 
 public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardShortcutAdder
 {
-    private const double PlayerWindowCascadeOffset = 20d;
-
     /// <summary>1枚だけ開く窓。鍵はカード(本体の種別は1枚ずつ、プラグインのウィジェットは同じ種別でカードが分かれる)。</summary>
     private readonly Dictionary<WidgetListItemViewModel, WidgetWindow> _openSingleWindows = new();
     private readonly List<PlayerWidgetWindowSession> _openPlayerWindows = [];
@@ -60,6 +60,12 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
     /// <summary>ターゲット情報(内部名はエンティティ情報)のカード。エンティティリストとマップから敵を選んで開くのに使う(<see cref="ShowEntityInTargetInfo"/>)。</summary>
     private WidgetListItemViewModel? _entityInfoWidget;
+
+    /// <summary>本体のカード(種別ごとに1枚、アプリの寿命の間)。プラグインの口(<see cref="IPluginWidgetService"/>)から本体の1枚の窓を開くのに使う。</summary>
+    private readonly Dictionary<WidgetKind, WidgetListItemViewModel> _hostWidgets = new();
+
+    /// <summary>プラグインのウィジェットのカード。プラグインの口から開くのに使う。プラグインを止めてカードを外したら外す。</summary>
+    private readonly Dictionary<WidgetKey, WidgetListItemViewModel> _pluginWidgetCards = new();
 
     /// <summary>開いているターゲット情報の窓の中身。周りの実体と名簿を当てる先。閉じていれば null。</summary>
     private EntityInfoWidgetViewModel? _entityInfoViewModel;
@@ -128,6 +134,15 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
     /// </summary>
     public void RegisterWidget(WidgetListItemViewModel widget)
     {
+        if (widget.PluginWidget is { } pluginWidget)
+        {
+            _pluginWidgetCards[pluginWidget.Key] = widget;
+        }
+        else
+        {
+            _hostWidgets[widget.Kind] = widget;
+        }
+
         if (WidgetConfigDefaults.IsPlayerWindowKind(widget.Kind))
         {
             TrackPlayerWidget(widget);
@@ -155,19 +170,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             return;
         }
 
-        if (_entityInfoWidget.State != WidgetState.Running)
-        {
-            _entityInfoWidget.State = WidgetState.Running;
-        }
-        else if (_openSingleWindows.TryGetValue(_entityInfoWidget, out var window))
-        {
-            RestoreAndActivate(window);
-        }
-        else
-        {
-            Open(_entityInfoWidget);
-        }
-
+        OpenSingleWindow(_entityInfoWidget);
         _entityInfoViewModel?.ShowEntity(entity);
     }
 
@@ -203,19 +206,135 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             return false;
         }
 
-        if (_mapWidget.State != WidgetState.Running)
+        OpenSingleWindow(_mapWidget);
+        return true;
+    }
+
+    /// <summary>1枚の窓を開くか前に出す。起動していないカードは起動する(窓はその場で開く)。</summary>
+    private void OpenSingleWindow(WidgetListItemViewModel widget)
+    {
+        if (widget.State != WidgetState.Running)
         {
-            _mapWidget.State = WidgetState.Running;
+            widget.State = WidgetState.Running;
         }
-        else if (_openSingleWindows.TryGetValue(_mapWidget, out var window))
+        else if (_openSingleWindows.TryGetValue(widget, out var window))
         {
             RestoreAndActivate(window);
         }
         else
         {
-            Open(_mapWidget);
+            Open(widget);
+        }
+    }
+
+    /// <summary>止めたプラグインのカードを一覧から外した。プラグインの口から開く控えから外す。</summary>
+    public void UnregisterPluginWidget(WidgetListItemViewModel widget)
+    {
+        if (widget.PluginWidget is { } pluginWidget
+            && _pluginWidgetCards.TryGetValue(pluginWidget.Key, out var registered)
+            && ReferenceEquals(registered, widget))
+        {
+            _pluginWidgetCards.Remove(pluginWidget.Key);
+        }
+    }
+
+    /// <summary>
+    /// プラグインの口から本体の1枚の窓を開くか前に出す(自分だけの窓の種別はその窓)。<paramref name="activate"/> が偽なら窓をアクティブにしない。
+    /// 窓が開いているか(隠したまま開いた窓も含む)を返す。画面のスレッドで呼ぶ。
+    /// </summary>
+    public bool OpenHostWidgetFromPlugin(WidgetKind kind, bool activate)
+    {
+        using var activation = WidgetWindow.SuppressActivationUnless(activate);
+        if (WidgetConfigDefaults.IsSelfOnlyPlayerWindowKind(kind))
+        {
+            if (!_trackedPlayerWidgets.TryGetValue(kind, out var selfWidget))
+            {
+                return false;
+            }
+
+            OpenPlayerWindow(selfWidget, characterId: 0);
+            return _openPlayerWindows.Any(session => ReferenceEquals(session.Widget, selfWidget));
         }
 
+        if (!_hostWidgets.TryGetValue(kind, out var widget))
+        {
+            return false;
+        }
+
+        OpenSingleWindow(widget);
+        return _openSingleWindows.ContainsKey(widget);
+    }
+
+    /// <summary>プラグインの口から本体の人の窓をその人で開くか前に出す。窓が開いているかを返す。画面のスレッドで呼ぶ。</summary>
+    public bool OpenHostPlayerWidgetFromPlugin(WidgetKind kind, long characterId, bool activate)
+    {
+        if (!_trackedPlayerWidgets.TryGetValue(kind, out var widget))
+        {
+            return false;
+        }
+
+        using var activation = WidgetWindow.SuppressActivationUnless(activate);
+        OpenPlayerWindow(widget, characterId);
+        return FindPlayerWindow(widget, WidgetTargetOption.CreatePlayer(characterId), buff: null) is not null;
+    }
+
+    /// <summary>
+    /// プラグインの口から本体の敵の窓を開くか前に出す。周りにいない敵は開かない(本体の行から開くときと同じく、周りの一覧の行から相手を作る)。
+    /// 窓が開いているかを返す。画面のスレッドで呼ぶ。
+    /// </summary>
+    public bool OpenHostEntityWidgetFromPlugin(WidgetKind kind, long entityUuid, bool activate)
+    {
+        var nearby = NearbyEntityStore.Instance.Current.Entries.FirstOrDefault(entry => entry.EntityUuid == entityUuid);
+        if (nearby is null)
+        {
+            return false;
+        }
+
+        var entity = EntityListEntry.CreateTarget(nearby);
+        using var activation = WidgetWindow.SuppressActivationUnless(activate);
+        OpenEntityWindow(kind, entity);
+        if (kind == WidgetKind.EntityInfo)
+        {
+            return _entityInfoWidget is not null && _openSingleWindows.ContainsKey(_entityInfoWidget);
+        }
+
+        return _trackedPlayerWidgets.TryGetValue(kind, out var widget)
+            && FindEntityWindow(widget, entity, buff: null) is not null;
+    }
+
+    /// <summary>
+    /// プラグインの口からプラグインのウィジェットを開くか前に出す。<paramref name="targetId"/> は相手ごとに窓を開くウィジェットの相手で、1枚の窓は null。
+    /// 相手の名前は今の一覧の同じ ID の名前で、一覧に無ければ名前なし(タイトルはウィジェット名だけ)。窓が開いているかを返す。画面のスレッドで呼ぶ。
+    /// </summary>
+    public bool OpenPluginWidgetFromPlugin(WidgetKey key, string? targetId, bool activate)
+    {
+        if (!_pluginWidgetCards.TryGetValue(key, out var widget) || widget.PluginWidget is not { IsStopped: false } registration)
+        {
+            return false;
+        }
+
+        using var activation = WidgetWindow.SuppressActivationUnless(activate);
+        if (targetId is null)
+        {
+            OpenSingleWindow(widget);
+            return _openSingleWindows.ContainsKey(widget);
+        }
+
+        var names = registration.ReadTargets()
+            .FirstOrDefault(target => WidgetTargetOption.IsSamePluginTargetId(target.Id, targetId))?.Names;
+        var option = new WidgetTargetOption
+        {
+            Kind = WidgetTargetOptionKind.Plugin,
+            PluginTargetId = targetId,
+            PluginTargetNames = names
+        };
+        OpenTarget(widget, option, buff: null);
+        if (FindPluginWindow(widget, targetId) is null)
+        {
+            return false;
+        }
+
+        RaiseTargetOpenedFromWidget(widget, (option, null));
         return true;
     }
 
@@ -1575,10 +1694,10 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             ? () => SaveOpenTargets(playerWidget)
             : null;
 
-        // 復元した位置があるならカスケードで動かさない。
+        // 復元した位置で開く窓はずらさない。新しい窓は、置いた場所に一度も動かしていないほかのウィジェットがあればずらす。
         if (savedWindowBounds is null)
         {
-            ApplyPlayerWindowCascade(window, CountOpenTargetWindows(playerWidget));
+            WindowPlacementBehavior.MoveToFreeSpot(window);
         }
 
         // 一覧へ足すのは Show の前(Show の中で上がる知らせが窓を引く)。カードへの知らせ(UpdatePlayerWindowCount)は Show の後
@@ -1683,7 +1802,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
         if (savedWindowBounds is null)
         {
-            ApplyPlayerWindowCascade(window, CountOpenTargetWindows(widget));
+            WindowPlacementBehavior.MoveToFreeSpot(window);
         }
 
         // 知らせと保存の順は CreatePlayerWindow と同じ(知らせは Show の後)。
@@ -1737,7 +1856,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
         if (savedWindowBounds is null)
         {
-            ApplyPlayerWindowCascade(window, CountOpenTargetWindows(widget));
+            WindowPlacementBehavior.MoveToFreeSpot(window);
         }
 
         // 知らせと保存の順は CreatePlayerWindow と同じ(知らせは Show の後)。
@@ -1775,7 +1894,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         // 中身を作れないのはプラグインの例外のとき。受け止めがプラグインを止め、カードも外れる。
         // カードの知らせはもう解除されているので、次の起動で同じ例外を繰り返さないよう保存を直接直す。
         var createdComposition = targetId is null
-            ? CreateEmptyPluginWidgetComposition(pluginWidget)
+            ? CreateEmptyPluginWidgetComposition(widget, pluginWidget)
             : CreatePluginWidgetComposition(widget, targetId);
         if (createdComposition is not { } composition)
         {
@@ -1804,7 +1923,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
         if (savedWindowBounds is null)
         {
-            ApplyPlayerWindowCascade(window, CountOpenTargetWindows(widget));
+            WindowPlacementBehavior.MoveToFreeSpot(window);
         }
 
         _openPluginWindows.Add(new PluginTargetWindowSession(
@@ -2171,16 +2290,16 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             viewModel,
             hasHeaderButtons ? new PluginWidgetHeaderLabelsView { DataContext = viewModel } : null,
             hasHeaderButtons ? new PluginWidgetHeaderActionsView { DataContext = viewModel } : null,
-            viewModel.Footer is null ? null : new PluginWidgetBodyView(viewModel.Footer));
+            viewModel.Footer is null ? null : new PluginWidgetBodyView(viewModel.Footer) { DataContext = viewModel });
     }
 
     /// <summary>
     /// プラグインの空の窓の中身。本体とフッターの置き場は定義で決まるので最初から作り、プラグインの中身だけを後から入れる
     /// (<see cref="FillEmptyPluginWindow"/>)。ヘッダーのボタンは中身が入るまで無い。
     /// </summary>
-    private static WidgetWindowComposition CreateEmptyPluginWidgetComposition(PluginWidgetRegistration pluginWidget)
+    private static WidgetWindowComposition CreateEmptyPluginWidgetComposition(WidgetListItemViewModel widget, PluginWidgetRegistration pluginWidget)
     {
-        var viewModel = pluginWidget.CreateEmptyWindowViewModel();
+        var viewModel = pluginWidget.CreateEmptyWindowViewModel(widget);
         FrameworkElement content = viewModel.ScrollsVertically
             ? new PluginWidgetScrollBodyView(null)
             : new PluginWidgetBodyView(null);
@@ -2190,7 +2309,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             viewModel,
             null,
             null,
-            pluginWidget.Definition.HasFooter ? new PluginWidgetBodyView(null) : null);
+            pluginWidget.Definition.HasFooter ? new PluginWidgetBodyView(null) { DataContext = viewModel } : null);
     }
 
     private WidgetWindowComposition CreateReviveListComposition(WidgetListItemViewModel widget)
@@ -2675,6 +2794,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
     }
 
 
+    /// <summary>最小化を戻して前に出す。プラグインの口がアクティブにしない間(<see cref="WidgetWindow.IsActivationSuppressed"/>)は、最小化を戻すだけ。</summary>
     private static void RestoreAndActivate(WidgetWindow window)
     {
         if (window.WindowState == WindowState.Minimized)
@@ -2682,24 +2802,15 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             window.WindowState = WindowState.Normal;
         }
 
-        Activate(window);
+        if (!WidgetWindow.IsActivationSuppressed)
+        {
+            Activate(window);
+        }
     }
 
     private static void Activate(WidgetWindow window)
     {
         window.Activate();
-    }
-
-    private static void ApplyPlayerWindowCascade(WidgetWindow window, int cascadeIndex)
-    {
-        if (cascadeIndex <= 0)
-        {
-            return;
-        }
-
-        var offset = PlayerWindowCascadeOffset * cascadeIndex;
-        window.Left += offset;
-        window.Top += offset;
     }
 
     private void TrackManagerWindow(Window? managerWindow)

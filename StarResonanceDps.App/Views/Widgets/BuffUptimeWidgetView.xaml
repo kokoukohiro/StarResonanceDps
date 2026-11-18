@@ -139,9 +139,9 @@
 
     <!--
         行と横軸の数字の行は同じ列の組み方(アイコン 30・名前・バー *・稼働率)で、バーの列と数字の列の左右がそろう。
-        名前の列と稼働率の列は、作られている行の一番長い文字の幅で、全部の行で同じ幅(SharedSizeGroup)。
-        一覧は仮想化して先読みを 0 にし、見えている行(端が少しでも見える行を含む)だけを作るので、幅は見えている行だけで決まる。
-        外れた行の部品が残ると幅が縮まないので、使い回し(Recycling)にする。余白はバフリストと同じ(左5・右0)。
+        名前の列と稼働率の列は、見えている行(端が少しでも見える行を含む)の一番長い文字の幅で、全部の行で同じ幅(SharedSizeGroup)。
+        一覧は仮想化して先読みを 0 にし、使い回し(Recycling)にして作る行を減らす。それでも窓を低くしたときや行が押し出されたときは
+        見えない行の部品が残るので、見えない行の名前(NameText)と稼働率(RateText)の文字は画面のコードが畳み、幅に入れない。余白はバフリストと同じ(左5・右0)。
     -->
     <Grid Grid.IsSharedSizeScope="True">
         <Grid.RowDefinitions>
@@ -281,7 +281,8 @@
                             </Rectangle>
                         </Grid>
 
-                        <TextBlock Grid.Column="1"
+                        <TextBlock x:Name="NameText"
+                                   Grid.Column="1"
                                    Margin="5,0,5,0"
                                    Style="{StaticResource BuffUptime.RowText}"
                                    Text="{Binding Name}" />
@@ -297,7 +298,8 @@
                                                 HorizontalOffset="{Binding DataContext.HorizontalOffset, RelativeSource={RelativeSource AncestorType={x:Type local:BuffUptimeWidgetView}}}"
                                                 VisibleSeconds="{Binding DataContext.VisibleSeconds, RelativeSource={RelativeSource AncestorType={x:Type local:BuffUptimeWidgetView}}}" />
 
-                        <TextBlock Grid.Column="3"
+                        <TextBlock x:Name="RateText"
+                                   Grid.Column="3"
                                    Margin="6,0,5,0"
                                    Style="{StaticResource BuffUptime.Rate}"
                                    Text="{Binding RateText}" />

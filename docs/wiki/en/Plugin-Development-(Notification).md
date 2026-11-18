@@ -148,4 +148,4 @@ Use `IPluginContext.Notifications` (`IPluginNotificationService`).
 | Sample | What it shows |
 |---|---|
 | [SampleNotification](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleNotification) | A plugin without a window that has two items, which notify of map changes and new battles. Five setting types, and keeping intervals and limits in the plugin |
-| [SampleAll](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleAll) | Notifications sent from buttons in a window and a widget |
+| [SampleCombined](https://github.com/kokoukohiro/StarResonanceDps/tree/main/StarResonanceDps.Plugins.Samples/SampleCombined) | Notifications sent from buttons in a window and a widget |

@@ -19,7 +19,7 @@ public interface IPluginPacketService
     /// When canceled, the enumeration ends with <see cref="OperationCanceledException"/> after the messages already received.
     /// </param>
     /// <remarks>
-    /// Messages that have not been read yet are kept for the plugin. When they exceed 64 MB for one plugin,
+    /// Messages that have not been read yet are kept for the plugin. When they and the unread combat events (<see cref="IPluginCombatEventService"/>) exceed 64 MB for one plugin,
     /// the host stops the plugin. Keep up with the messages or read only the types the plugin needs.
     /// <see cref="IStarResonancePlugin.Initialize"/> runs on the UI thread; start the loop with <c>ConfigureAwait(false)</c>
     /// so that its body does not run on the UI thread.
