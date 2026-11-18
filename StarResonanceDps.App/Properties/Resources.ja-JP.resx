@@ -995,6 +995,9 @@ VOICEVOXを起動し直してください。</value>
   <data name="Settings_Theme_WindowOpacity" xml:space="preserve">
     <value>ウィンドウの不透明度</value>
   </data>
+  <data name="Settings_Theme_WindowScale" xml:space="preserve">
+    <value>ウィンドウの拡大率</value>
+  </data>
   <data name="ColorPicker_SelectedColor" xml:space="preserve">
     <value>選択中の色</value>
   </data>

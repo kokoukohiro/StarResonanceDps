@@ -994,6 +994,9 @@
   <data name="Settings_Theme_WindowOpacity" xml:space="preserve">
     <value>窗口不透明度</value>
   </data>
+  <data name="Settings_Theme_WindowScale" xml:space="preserve">
+    <value>窗口缩放比例</value>
+  </data>
   <data name="ColorPicker_SelectedColor" xml:space="preserve">
     <value>当前颜色</value>
   </data>

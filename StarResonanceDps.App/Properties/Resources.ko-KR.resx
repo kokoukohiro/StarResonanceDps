@@ -994,6 +994,9 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="Settings_Theme_WindowOpacity" xml:space="preserve">
     <value>창 불투명도</value>
   </data>
+  <data name="Settings_Theme_WindowScale" xml:space="preserve">
+    <value>창 확대율</value>
+  </data>
   <data name="ColorPicker_SelectedColor" xml:space="preserve">
     <value>선택한 색상</value>
   </data>

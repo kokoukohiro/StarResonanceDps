@@ -994,6 +994,9 @@ Download the zip from {0} and overwrite the app folder.</value>
   <data name="Settings_Theme_WindowOpacity" xml:space="preserve">
     <value>Window Opacity</value>
   </data>
+  <data name="Settings_Theme_WindowScale" xml:space="preserve">
+    <value>Window Scale</value>
+  </data>
   <data name="ColorPicker_SelectedColor" xml:space="preserve">
     <value>Selected color</value>
   </data>

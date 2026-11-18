@@ -118,6 +118,19 @@ public partial class WidgetWindow : Window
     /// <summary>この窓を開くときに渡された位置と大きさ。まだ測れていない間の保存に使う。</summary>
     private readonly WidgetWindowConfig _restoredBounds;
 
+    /// <summary>XAML に書いた最小の大きさ(拡大率100%のとき)。</summary>
+    private readonly double _baseMinWidth;
+    private readonly double _baseMinHeight;
+
+    /// <summary>
+    /// 今当てているウィンドウの拡大率の倍率(<see cref="WidgetListItemViewModel.WindowScaleFactor"/>)。
+    /// 窓の大きさ(<c>Width</c>・<c>Height</c>・最小の大きさ)はこの倍率を掛けた値で、保存する大きさはこの倍率で割った100%のときの大きさ。
+    /// </summary>
+    private double _windowScale = 1d;
+
+    /// <summary>拡大率が100%以外の間、影の付いた文字を画面の画素へそろえる(<see cref="ScaledTextPixelSnapping"/>)。</summary>
+    private readonly ScaledTextPixelSnapping _textSnapping;
+
     /// <param name="dataStatusSource">タイトルの左の円に映す状態の印の持ち主(窓の中身)。</param>
     public WidgetWindow(
         WidgetListItemViewModel widget,
@@ -189,6 +202,12 @@ public partial class WidgetWindow : Window
         // (対象ごとに開く窓は Show() の前に SaveOpenTargets が走る)ので、
         // そこで 0 を書かせないために復元に使った値を控えておく。
         _restoredBounds = savedBounds.Clone();
+
+        _baseMinWidth = MinWidth;
+        _baseMinHeight = MinHeight;
+        _textSnapping = new ScaledTextPixelSnapping(this);
+        _windowScale = NormalizeWindowScaleFactor(widget.WindowScaleFactor);
+        ApplyWindowScaleTransform();
 
         ApplySavedBounds(savedBounds, owner);
         ApplyPinState(widget.IsPinned);
@@ -655,6 +674,7 @@ public partial class WidgetWindow : Window
         SaveBounds(isMoveOrResize: _saveBoundsTimer.IsEnabled, isClosing: true);
         _saveBoundsTimer.Stop();
         _saveBoundsTimer.Tick -= SaveBoundsTimer_Tick;
+        _textSnapping.Deactivate();
         _widget.PropertyChanged -= Widget_PropertyChanged;
         ConfigManager.Instance.SettingsPreviewChanged -= ConfigManager_SettingsPreviewChanged;
         GameForegroundWatcher.Instance.HidesWidgetsChanged -= GameForegroundWatcher_HidesWidgetsChanged;
@@ -830,6 +850,66 @@ public partial class WidgetWindow : Window
         {
             ApplyClickThroughState();
         }
+
+        if (e.PropertyName == nameof(WidgetListItemViewModel.WindowScaleFactor))
+        {
+            ApplyWindowScaleChange();
+        }
+    }
+
+    private static double NormalizeWindowScaleFactor(double factor)
+    {
+        return double.IsFinite(factor) && factor > 0d ? factor : 1d;
+    }
+
+    /// <summary>
+    /// 拡大率の倍率を、ヘッダーからフッターまで入った一番外の <c>WindowRoot</c> の変形と、最小の大きさに当てる。
+    /// 中は100%の配置のまま拡大する(部品どうしの関係は100%と同じ比になる)。影の付いた文字だけは、画素の途中に来るとにじむので、
+    /// 100%以外の間は画素へそろえる(<see cref="ScaledTextPixelSnapping"/>)。
+    /// 100%のときは変形を置かず、文字も動かさない(拡大率を足す前と同じ窓)。
+    /// </summary>
+    private void ApplyWindowScaleTransform()
+    {
+        if (_windowScale == 1d)
+        {
+            WindowRoot.ClearValue(LayoutTransformProperty);
+            _textSnapping.Deactivate();
+        }
+        else
+        {
+            var transform = new ScaleTransform(_windowScale, _windowScale);
+            transform.Freeze();
+            WindowRoot.LayoutTransform = transform;
+            _textSnapping.Activate();
+        }
+
+        MinWidth = _baseMinWidth * _windowScale;
+        MinHeight = _baseMinHeight * _windowScale;
+    }
+
+    /// <summary>
+    /// 拡大率が変わった(設定の保存前のプレビューも)。窓の大きさを同じ比で変え(左上は動かさない)、変形を当て直す。
+    /// 保存する大きさ(100%のときの大きさ)は変わらない。
+    /// </summary>
+    private void ApplyWindowScaleChange()
+    {
+        var scale = NormalizeWindowScaleFactor(_widget.WindowScaleFactor);
+        if (scale == _windowScale)
+        {
+            return;
+        }
+
+        var ratio = scale / _windowScale;
+        var width = IsFinitePositive(ActualWidth) ? ActualWidth : Width;
+        var height = IsFinitePositive(ActualHeight) ? ActualHeight : Height;
+
+        _windowScale = scale;
+        ApplyWindowScaleTransform();
+        if (WindowState == WindowState.Normal && IsFinitePositive(width) && IsFinitePositive(height))
+        {
+            Width = Math.Max(width * ratio, MinWidth);
+            Height = Math.Max(height * ratio, MinHeight);
+        }
     }
 
     protected override void OnActivated(EventArgs e)
@@ -904,7 +984,8 @@ public partial class WidgetWindow : Window
 
         _isFitHeightPending = false;
 
-        var shortfall = AutoFitHeightBehavior.GetHeightShortfall(_autoFitHeightSource);
+        // 中身の足りない高さは拡大する前の大きさなので、窓の大きさへは拡大率を掛ける。
+        var shortfall = AutoFitHeightBehavior.GetHeightShortfall(_autoFitHeightSource) * _windowScale;
         if (!double.IsFinite(shortfall) || Math.Abs(shortfall) < 0.5d)
         {
             return;
@@ -1244,14 +1325,14 @@ public partial class WidgetWindow : Window
             }
         }
 
-        // 大きさを保存しない辺(WidgetConfigDefaults.GetFixedWindowSize)は書かない。
+        // 大きさを保存しない辺(WidgetConfigDefaults.GetFixedWindowSize)は書かない。大きさは拡大率で割った100%のときの大きさ。
         var fixedSize = WidgetConfigDefaults.GetFixedWindowSize(_widget.Kind);
         WidgetStateManager.Instance.SaveWidgetWindowBounds(
             _widget.Key,
             Left,
             Top,
-            fixedSize.Width is null ? ActualWidth : null,
-            fixedSize.Height is null ? ActualHeight : null);
+            fixedSize.Width is null ? ActualWidth / _windowScale : null,
+            fixedSize.Height is null ? ActualHeight / _windowScale : null);
     }
 
     /// <summary>
@@ -1271,6 +1352,7 @@ public partial class WidgetWindow : Window
     ///
     /// <para>
     /// 大きさを保存しない辺(<see cref="WidgetConfigDefaults.GetFixedWindowSize"/>)は null。
+    /// 大きさは拡大率で割った100%のときの大きさ。
     /// </para>
     /// </summary>
     public WidgetWindowConfig GetCurrentBounds()
@@ -1285,10 +1367,10 @@ public partial class WidgetWindow : Window
             Y = hasPosition ? Top : _restoredBounds.Y,
             Width = fixedSize.Width is not null
                 ? null
-                : hasMeasuredSize ? ActualWidth : _restoredBounds.Width,
+                : hasMeasuredSize ? ActualWidth / _windowScale : _restoredBounds.Width,
             Height = fixedSize.Height is not null
                 ? null
-                : hasMeasuredSize ? ActualHeight : _restoredBounds.Height
+                : hasMeasuredSize ? ActualHeight / _windowScale : _restoredBounds.Height
         };
     }
 
@@ -1343,13 +1425,19 @@ public partial class WidgetWindow : Window
     private void ApplySavedBounds(WidgetWindowConfig savedBounds, Window? owner)
     {
         // 大きさを保存しない辺は、保存先に値が残っていてもいつも既定の大きさで開く。
+        // 保存と既定の大きさは100%のときの大きさなので、拡大率を掛ける(保存が無ければ XAML の既定の大きさに掛ける)。
         var fixedSize = WidgetConfigDefaults.GetFixedWindowSize(_widget.Kind);
         var width = fixedSize.Width ?? savedBounds.Width;
         var height = fixedSize.Height ?? savedBounds.Height;
         if (IsFinitePositive(width) && IsFinitePositive(height))
         {
-            Width = Math.Max(width!.Value, MinWidth);
-            Height = Math.Max(height!.Value, MinHeight);
+            Width = Math.Max(width!.Value * _windowScale, MinWidth);
+            Height = Math.Max(height!.Value * _windowScale, MinHeight);
+        }
+        else if (_windowScale != 1d)
+        {
+            Width *= _windowScale;
+            Height *= _windowScale;
         }
 
         if (double.IsFinite(savedBounds.X ?? double.NaN) && double.IsFinite(savedBounds.Y ?? double.NaN))

@@ -26,6 +26,17 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private double _windowOpacity = 50;
 
+    /// <summary>ウィンドウの拡大率(百分率)。スライダーは刻み(1%)で止まり、つまみを手放したときに値が入る(ReleaseCommitSliderBehavior)。</summary>
+    [ObservableProperty]
+    private double _windowScale = WidgetConfigDefaults.DefaultWindowScale;
+
+    /// <summary>ウィンドウの拡大率のスライダーの最小・最大・刻み。値の束縛より先に決まるよう、画面からは <c>x:Static</c> で読む。</summary>
+    public const double WindowScaleSliderMinimum = WidgetConfigDefaults.MinWindowScale;
+
+    public const double WindowScaleSliderMaximum = WidgetConfigDefaults.MaxWindowScale;
+
+    public const double WindowScaleSliderStep = WidgetConfigDefaults.WindowScaleStep;
+
     [ObservableProperty]
     private string? _backgroundImagePath;
 
@@ -1002,6 +1013,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
                 (int)Math.Round(WindowOpacity, MidpointRounding.AwayFromZero),
                 WidgetConfigDefaults.MinWindowOpacity,
                 WidgetConfigDefaults.MaxWindowOpacity),
+            WindowScale = WidgetConfigDefaults.NormalizeWindowScale(WindowScale),
             WindowColors = [.. WindowColors.GetHexColors()],
             BackgroundImagePath = string.IsNullOrWhiteSpace(BackgroundImagePath)
                 ? null
@@ -1025,6 +1037,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         {
             WindowColors.Load(normalized.WindowColors, normalized.WindowColorIndex);
             WindowOpacity = normalized.WindowOpacity;
+            WindowScale = normalized.WindowScale;
             BackgroundImagePath = normalized.BackgroundImagePath;
             BackgroundImageAverageColor = normalized.BackgroundImageAverageColor;
             BackgroundImageAverageColorSourcePath = normalized.BackgroundImageAverageColorSourcePath;
@@ -1054,6 +1067,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
         return left.WindowColorIndex == right.WindowColorIndex
             && left.WindowOpacity == right.WindowOpacity
+            && left.WindowScale == right.WindowScale
             && string.Equals(left.BackgroundImagePath, right.BackgroundImagePath, StringComparison.OrdinalIgnoreCase)
             && string.Equals(left.BackgroundImageAverageColor, right.BackgroundImageAverageColor, StringComparison.OrdinalIgnoreCase)
             && string.Equals(left.BackgroundImageAverageColorSourcePath, right.BackgroundImageAverageColorSourcePath, StringComparison.OrdinalIgnoreCase)
@@ -1086,6 +1100,16 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     }
 
     partial void OnWindowOpacityChanged(double value)
+    {
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+
+        if (!_isLoadingTheme)
+        {
+            RaiseThemePreviewChanged();
+        }
+    }
+
+    partial void OnWindowScaleChanged(double value)
     {
         OnPropertyChanged(nameof(HasUnsavedChanges));
 

@@ -121,6 +121,10 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     [ObservableProperty]
     private bool _hideFooterWhenInactive;
 
+    /// <summary>ウィンドウの拡大率の倍率(1.0 が100%)。ウィンドウ側が読む。</summary>
+    [ObservableProperty]
+    private double _windowScaleFactor = 1d;
+
     [ObservableProperty]
     private WidgetWindowThemePalette _widgetWindowPalette = WidgetWindowThemePalette.Create(Color.FromRgb(0x0B, 0x16, 0x24), 50);
 
@@ -1433,6 +1437,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
         HideHeaderWhenInactive = normalized.HideHeaderWhenInactive;
         HideFooterWhenInactive = normalized.HideFooterWhenInactive;
+        WindowScaleFactor = normalized.WindowScale / 100d;
     }
 
     public void UpdatePlayerRoster(

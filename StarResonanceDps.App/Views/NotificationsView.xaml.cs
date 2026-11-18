@@ -27,8 +27,6 @@ public partial class NotificationsView : UserControl
     /// <summary>空だった VOICEVOX のリストを、選択肢ができたので開き直している(開き直しでは問い合わせない)。</summary>
     private bool _isReopeningVoicevoxDropDown;
 
-    private bool _isDraggingSlider;
-
     private NotificationsViewModel? _subscribedViewModel;
 
     public NotificationsView()
@@ -187,35 +185,6 @@ public partial class NotificationsView : UserControl
     private void NotificationTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         FormatFieldInsertion.MoveCaretToEndWhenUnfocused((TextBox)sender);
-    }
-
-    // --- 通知音量とプラグインの設定のスライドバー ---
-    // 値を項目へ渡す(保存と通知に効く)のは、つまみを手放したときと、
-    // ドラッグ以外の操作(クリック・キー・ホイール)で値が変わったときだけ。ドラッグ中は打つ前の値のまま。
-    // 作っている途中(範囲と値を入れているあいだ)の値の変化は渡さない。
-
-    private void ReleaseCommitSlider_DragStarted(object sender, DragStartedEventArgs e)
-    {
-        _isDraggingSlider = true;
-    }
-
-    private void ReleaseCommitSlider_DragCompleted(object sender, DragCompletedEventArgs e)
-    {
-        _isDraggingSlider = false;
-        CommitSlider((Slider)sender);
-    }
-
-    private void ReleaseCommitSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-        if (!_isDraggingSlider && ((Slider)sender).IsLoaded)
-        {
-            CommitSlider((Slider)sender);
-        }
-    }
-
-    private static void CommitSlider(Slider slider)
-    {
-        slider.GetBindingExpression(RangeBase.ValueProperty)?.UpdateSource();
     }
 
     // --- プラグインの設定の数の欄 ---

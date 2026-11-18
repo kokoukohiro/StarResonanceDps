@@ -203,63 +203,65 @@
                     </ToolTip>
                 </Grid.ToolTip>
 
+                <!--
+                    枠の箱(枠の絵の大きさ 31 × 34)。箱と中の部品は丸めず、枠の絵は箱いっぱいに描き、絵とはてなは箱の中の決まった座標に置く。
+                    Windows の表示の拡大(125%・150% など)で、枠と中身の関係がずれないようにするため(位置を画素へ丸める格子が変わっても、箱の中は同じ比で描かれる)。
+                    箱の左上は組の左上で、組は丸める。座標は推移グラフの 01・02 の枠と同じ値。
+                -->
                 <Grid Width="32"
                       HorizontalAlignment="Left">
-                    <Image Width="31"
-                           Style="{StaticResource Icon.PlayerListSkillFrame}"
-                           Stretch="Uniform"
-                           RenderOptions.BitmapScalingMode="HighQuality" />
-                    <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
-                           Stretch="Uniform"
-                           RenderOptions.BitmapScalingMode="HighQuality">
-                        <Image.Style>
-                            <Style TargetType="Image">
-                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                                <Setter Property="Width" Value="27" />
-                                <Setter Property="RenderTransform">
-                                    <Setter.Value>
-                                        <TranslateTransform X="-0.2" Y="1.3" />
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding UsesImagineAsset}" Value="True">
-                                        <Setter Property="Width" Value="25" />
-                                        <Setter Property="RenderTransform">
-                                            <Setter.Value>
-                                                <TranslateTransform X="-1.2" Y="2.1" />
-                                            </Setter.Value>
-                                        </Setter>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Image.Style>
-                    </Image>
-                    <!-- 絵のファイルが無い技ははてな。大きさと位置は推移グラフの 01・02 の枠のはてなと同じ値。 -->
-                    <Rectangle Width="20"
-                               Height="20"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               Fill="White"
-                               Effect="{StaticResource Effect.ProfessionIconShadow}">
-                        <Rectangle.RenderTransform>
-                            <TranslateTransform X="-0.6" Y="1.7" />
-                        </Rectangle.RenderTransform>
-                        <Rectangle.OpacityMask>
-                            <ImageBrush ImageSource="{StaticResource Icon.Profession.Unknown}" Stretch="Uniform" />
-                        </Rectangle.OpacityMask>
-                        <Rectangle.Style>
-                            <Style TargetType="Rectangle">
-                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                                <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
-                                <Setter Property="Visibility" Value="Collapsed" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ShowsUnknownIcon}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Rectangle.Style>
-                    </Rectangle>
+                    <Grid Width="31"
+                          Height="34"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Top"
+                          UseLayoutRounding="False">
+                        <Image Style="{StaticResource Icon.PlayerListSkillFrame}" />
+                        <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Top"
+                               Stretch="Uniform"
+                               RenderOptions.BitmapScalingMode="HighQuality">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Width" Value="27" />
+                                    <Setter Property="Height" Value="27" />
+                                    <Setter Property="Margin" Value="1.8,5.3,0,0" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding UsesImagineAsset}" Value="True">
+                                            <Setter Property="Width" Value="25" />
+                                            <Setter Property="Height" Value="25" />
+                                            <Setter Property="Margin" Value="2.8,6.1,0,0" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                        <!-- 絵のファイルが無い技ははてな。 -->
+                        <Rectangle Width="20"
+                                   Height="20"
+                                   Margin="5.4,8.7,0,0"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Top"
+                                   Fill="White"
+                                   Effect="{StaticResource Effect.ProfessionIconShadow}">
+                            <Rectangle.OpacityMask>
+                                <ImageBrush ImageSource="{StaticResource Icon.Profession.Unknown}" Stretch="Uniform" />
+                            </Rectangle.OpacityMask>
+                            <Rectangle.Style>
+                                <Style TargetType="Rectangle">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ShowsUnknownIcon}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Rectangle.Style>
+                        </Rectangle>
+                    </Grid>
                 </Grid>
 
                 <ContentPresenter Content="{Binding DebuffEntry}"

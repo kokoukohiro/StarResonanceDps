@@ -115,6 +115,10 @@ public sealed class WidgetThemeConfig
 {
     public int WindowColorIndex { get; set; }
     public int WindowOpacity { get; set; } = 50;
+
+    /// <summary>ウィンドウの拡大率(百分率)。ヘッダーからフッターまでの全体をこの倍率で描く。保存する窓の大きさは100%のときの大きさ。</summary>
+    public int WindowScale { get; set; } = WidgetConfigDefaults.DefaultWindowScale;
+
     public List<string> WindowColors { get; set; } = WidgetConfigDefaults.CreateDefaultWindowColors();
     public string? BackgroundImagePath { get; set; }
     public string? BackgroundImageAverageColor { get; set; }
@@ -135,6 +139,7 @@ public sealed class WidgetThemeConfig
         {
             WindowColorIndex = WindowColorIndex,
             WindowOpacity = WindowOpacity,
+            WindowScale = WindowScale,
             WindowColors = WindowColors is null ? WidgetConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors],
             BackgroundImagePath = BackgroundImagePath,
             BackgroundImageAverageColor = BackgroundImageAverageColor,
@@ -1188,6 +1193,10 @@ public static class WidgetConfigDefaults
     public const int MinColorIndex = 0;
     public const int MinWindowOpacity = 0;
     public const int MaxWindowOpacity = 100;
+    public const int MinWindowScale = 100;
+    public const int MaxWindowScale = 200;
+    public const int WindowScaleStep = 1;
+    public const int DefaultWindowScale = 100;
     public const int MinClassColorIndex = 0;
     public const int MinClassColorOpacity = 0;
     public const int MaxClassColorOpacity = 100;
@@ -3041,6 +3050,7 @@ public static class WidgetConfigDefaults
         {
             WindowColorIndex = 0,
             WindowOpacity = 50,
+            WindowScale = DefaultWindowScale,
             WindowColors = CreateDefaultWindowColors(),
             HideHeaderWhenInactive = true
         };
@@ -3902,11 +3912,24 @@ public static class WidgetConfigDefaults
         }
     }
 
+    /// <summary>ウィンドウの拡大率を範囲(100〜200%)に収め、刻み(1%)にそろえる。</summary>
+    public static int NormalizeWindowScale(double scale)
+    {
+        if (!double.IsFinite(scale))
+        {
+            return DefaultWindowScale;
+        }
+
+        var stepped = Math.Round(scale / WindowScaleStep, MidpointRounding.AwayFromZero) * WindowScaleStep;
+        return (int)Math.Clamp(stepped, MinWindowScale, MaxWindowScale);
+    }
+
     public static void NormalizeTheme(WidgetThemeConfig theme)
     {
         theme.WindowColors = NormalizeColorList(theme.WindowColors, DefaultWindowColorHexes, MaxPaletteColorCount);
         theme.WindowColorIndex = Math.Clamp(theme.WindowColorIndex, MinColorIndex, theme.WindowColors.Count - 1);
         theme.WindowOpacity = Math.Clamp(theme.WindowOpacity, MinWindowOpacity, MaxWindowOpacity);
+        theme.WindowScale = NormalizeWindowScale(theme.WindowScale);
         theme.BackgroundImagePath = string.IsNullOrWhiteSpace(theme.BackgroundImagePath)
             ? null
             : theme.BackgroundImagePath.Trim();

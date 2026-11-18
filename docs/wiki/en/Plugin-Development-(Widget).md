@@ -95,6 +95,7 @@ public sealed class Plugin : IStarResonancePlugin, IPluginWidgetProvider
 - The `DataContext` of the body and the footer is `null`. If you use bindings, set it yourself.
 - The window does not set a text color. To show the white text and shadow of widgets, apply the `Text.WidgetWindow` style.
 - "Window Opacity" in the settings applies to the window background and frame; the body and footer do not become lighter.
+- "Window Scale" in the settings enlarges the whole window, including the body and footer. Text with a shadow that you make yourself can look blurry when enlarged, so use the `Text.WidgetWindow` style.
 - Changing `Text` of a header button changes its text, and clicking it raises `Click` on the UI thread. The buttons stay as in the list given when the content was created; none are added or removed. While the header is hidden by "Hide Header While Pinned" in the settings, the buttons are hidden too.
 - If the body or footer is `IDisposable`, `Dispose` is called after the window is closed. Unsubscribe from events and stop timers there.
 

@@ -1,6 +1,7 @@
 ﻿<!-- This file is part of StarResonanceDps. See LICENSING.md for the license, additional permissions and additional terms. -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors">
     <!--
         ウィジェットの基底フォント。数字を等幅で出すために要る。
 
@@ -37,6 +38,8 @@
         <Setter Property="Effect" Value="{StaticResource Effect.WidgetWindowTextShadow}" />
         <Setter Property="FontFamily" Value="{StaticResource Font.ProjectDefault}" />
         <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+        <!-- ウィンドウの拡大率が100%以外のとき、影がにじまないよう画面の画素へそろえる。 -->
+        <Setter Property="behaviors:ScaledTextPixelSnapping.IsTarget" Value="True" />
     </Style>
 
     <Style x:Key="Text.WidgetWindowSubtitle"

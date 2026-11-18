@@ -761,9 +761,7 @@
                                                     IsSnapToTickEnabled="True"
                                                     Style="{StaticResource Input.ValueSlider}"
                                                     Value="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
-                                                    Thumb.DragStarted="ReleaseCommitSlider_DragStarted"
-                                                    Thumb.DragCompleted="ReleaseCommitSlider_DragCompleted"
-                                                    ValueChanged="ReleaseCommitSlider_ValueChanged" />
+                                                    behaviors:ReleaseCommitSliderBehavior.IsEnabled="True" />
 
                                             <TextBlock Grid.Column="2"
                                                        VerticalAlignment="Center"
@@ -834,7 +832,7 @@
 
                             <!--
                                 範囲は AppConfigDefaults.NotificationVolumeMin / Max と同じ(スタイルの既定は 0〜100)。
-                                値を渡すのは、つまみを手放したときと、ドラッグ以外の操作(クリック・キー・ホイール)のときだけ(NotificationsView.xaml.cs)。
+                                値を渡すのは、つまみを手放したときと、ドラッグ以外の操作(クリック・キー・ホイール)のときだけ(ReleaseCommitSliderBehavior)。
                                 右の数字はスライドバーの値を出すので、ドラッグ中もつまみに合わせて動く。
                             -->
                             <Slider x:Name="NotificationVolumeSlider"
@@ -844,9 +842,7 @@
                                     TickFrequency="1"
                                     Style="{StaticResource Input.ValueSlider}"
                                     Value="{Binding Volume, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
-                                    Thumb.DragStarted="ReleaseCommitSlider_DragStarted"
-                                    Thumb.DragCompleted="ReleaseCommitSlider_DragCompleted"
-                                    ValueChanged="ReleaseCommitSlider_ValueChanged" />
+                                    behaviors:ReleaseCommitSliderBehavior.IsEnabled="True" />
 
                             <TextBlock Grid.Column="2"
                                        VerticalAlignment="Center"

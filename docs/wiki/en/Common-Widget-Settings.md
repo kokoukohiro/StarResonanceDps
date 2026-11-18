@@ -60,6 +60,7 @@ Open it with the settings button (gear) on the card in "Widgets".
 - Hide Header While Pinned: While the window is pinned, hides the header and passes clicks in that area to the screen below (default: on).
 - Hide Footer While Pinned: Only for widgets that have a footer. While the window is pinned, hides the footer in the same way (default: off).
 - Window Opacity: How dark the window background is. Text, numbers, bars, and icons do not become lighter. While you click the window to make it active, it is shown at 50% even if the setting is lower than 50% (default: 50%).
+- Window Scale: Changes the size of the window contents, from the header to the footer, in steps of 1%, from 100% to 200%. The window size changes by the same ratio. Tooltips and right-click menus do not become larger (default: 100%).
 
 ![Theme](images/en/WidgetSettings2.png)
 
