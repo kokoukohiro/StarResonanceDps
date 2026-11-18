@@ -246,6 +246,7 @@ string title = texts["WindowTitle"];
 - If a dependency DLL that has XAML resources might also be used by other plugins in a different version, write `AssemblyVersion` in the dependency's csproj. The version then goes into the WPF resource references, so the dependency is not mixed up with a different version of the same component. When you refer to the dependency's resources yourself, also use the form that includes the version (`/<component name>;v<AssemblyVersion>;component/…`).
 - Plugins can use only the SDK types and the appearance keys in `PluginResourceKeys`. The app's internal types and other resource keys can change without notice.
 - Plugins run inside the app and can do anything the app can do.
+- Avoid adding features by modifying the app's existing widgets or notification items. Build a new feature as a new widget or notification item.
 
 ## Samples
 
