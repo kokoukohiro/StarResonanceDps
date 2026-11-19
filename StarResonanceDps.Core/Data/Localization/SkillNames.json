@@ -1611,7 +1611,7 @@
     "zh-CN": "碎星冲",
     "en-US": "Star Shatter",
     "ja-JP": "砕星衝",
-    "ko-KR": "별 쪼개기"
+    "ko-KR": "쇄성 돌진"
   },
   "1925": {
     "zh-CN": "怒爆",
@@ -1713,7 +1713,7 @@
     "zh-CN": "碎星崩裂",
     "en-US": "Starfall",
     "ja-JP": "砕星の鉄槌",
-    "ko-KR": "별 부수기"
+    "ko-KR": "쇄성 붕괴"
   },
   "1942": {
     "zh-CN": "崩裂",
@@ -3543,7 +3543,7 @@
     "zh-CN": "绝技！绝对零度",
     "en-US": "Stunt! Absolute Zero",
     "ja-JP": "絶技！絶対零度",
-    "ko-KR": "비기! 절대 영도"
+    "ko-KR": "비기! 절대영도"
   },
   "3979": {
     "zh-CN": "绝技！深渊吐息",
@@ -3735,7 +3735,7 @@
     "zh-CN": "虚蚀传递",
     "en-US": "Pass on",
     "ja-JP": "虚蝕伝播",
-    "ko-KR": "허무의 침식 전달"
+    "ko-KR": "허식 전달"
   },
   "4011": {
     "zh-CN": "雷电汇聚",
@@ -4187,6 +4187,12 @@
     "ja-JP": "暁の跳躍",
     "ko-KR": "여명의 도약"
   },
+  "4548": {
+    "zh-CN": "入暮之跃",
+    "en-US": "",
+    "ja-JP": "明日への跳躍",
+    "ko-KR": "황혼의 도약"
+  },
   "4551": {
     "zh-CN": "认真一掷",
     "en-US": "Serious Throw",
@@ -4630,6 +4636,30 @@
     "en-US": "Cruise Flight",
     "ja-JP": "巡航飛行",
     "ko-KR": "순항 비행"
+  },
+  "4801": {
+    "zh-CN": "冥火奔流",
+    "en-US": "Netherflame Torrent",
+    "ja-JP": "冥炎奔流",
+    "ko-KR": "명계의 질주"
+  },
+  "4802": {
+    "zh-CN": "次元梭行",
+    "en-US": "Dimensional Transit",
+    "ja-JP": "次元疾駆",
+    "ko-KR": "차원 이동"
+  },
+  "4803": {
+    "zh-CN": "冥火奔流",
+    "en-US": "Netherflame Torrent",
+    "ja-JP": "冥炎奔流",
+    "ko-KR": "명계의 질주"
+  },
+  "4804": {
+    "zh-CN": "次元梭行",
+    "en-US": "Dimensional Transit",
+    "ja-JP": "次元疾駆",
+    "ko-KR": "차원 이동"
   },
   "4901": {
     "zh-CN": "丢雪球",
@@ -11253,19 +11283,19 @@
     "zh-CN": "虚蚀の咆哮！",
     "en-US": "Void Corruption: Roar!",
     "ja-JP": "虚蝕の咆哮！",
-    "ko-KR": "허무의 침식 포효!"
+    "ko-KR": "허식 포효!"
   },
   "170108": {
     "zh-CN": "虚蚀烙印",
     "en-US": "Void Corruption Mark",
     "ja-JP": "虚蝕の烙印",
-    "ko-KR": "허무의 침식 낙인"
+    "ko-KR": "허식 낙인"
   },
   "170109": {
     "zh-CN": "虚蚀劫刃断！",
     "en-US": "Void Corruption: Cleave!",
     "ja-JP": "虚蝕劫剣！",
-    "ko-KR": "허무의 침식 격참단!"
+    "ko-KR": "허식 격참단!"
   },
   "170110": {
     "zh-CN": "斩！",
@@ -11343,31 +11373,31 @@
     "zh-CN": "虚蚀碎裂贯穿！",
     "en-US": "Void Corruption: Fracture!",
     "ja-JP": "虚蝕ペネトレイト！",
-    "ko-KR": "허무의 침식 파쇄 관통!"
+    "ko-KR": "허식 파쇄 관통!"
   },
   "170208": {
     "zh-CN": "虚蚀の终焉",
     "en-US": "Void Corruption's End",
     "ja-JP": "虚蝕の終焉",
-    "ko-KR": "허무의 침식 종언"
+    "ko-KR": "허식의 종언"
   },
   "170209": {
     "zh-CN": "虚蚀残留",
     "en-US": "Void Residue",
     "ja-JP": "虚蝕残留",
-    "ko-KR": "침식의 잔해"
+    "ko-KR": "허식의 잔해"
   },
   "170210": {
     "zh-CN": "虚蚀半灭死域！",
     "en-US": "Void Corruption: Decimation!",
     "ja-JP": "半死の虚蝕フィールド！",
-    "ko-KR": "허무의 침식 반멸 사역!"
+    "ko-KR": "허식 반멸 사역!"
   },
   "170211": {
     "zh-CN": "虚蚀の圆舞",
     "en-US": "Void Corruption: Waltz!",
     "ja-JP": "虚蝕のワルツ",
-    "ko-KR": "허무의 침식 댄스"
+    "ko-KR": "허식의 왈츠"
   },
   "170212": {
     "zh-CN": "",
@@ -11823,7 +11853,7 @@
     "zh-CN": "虚蚀回收",
     "en-US": "Void Corruption Recycle",
     "ja-JP": "虚蝕回収",
-    "ko-KR": "허무의 침식 회수"
+    "ko-KR": "허식 회수"
   },
   "300012": {
     "zh-CN": "",
@@ -12003,7 +12033,7 @@
     "zh-CN": "虚蚀转换",
     "en-US": "Void Corruption Conversion",
     "ja-JP": "虚蝕コンバート",
-    "ko-KR": "허무의 침식 전환"
+    "ko-KR": "허식 전환"
   },
   "300061": {
     "zh-CN": "",
@@ -12033,7 +12063,7 @@
     "zh-CN": "虚蚀转换",
     "en-US": "Void Corruption Conversion",
     "ja-JP": "虚蝕コンバート",
-    "ko-KR": "허무의 침식 전환"
+    "ko-KR": "허식 전환"
   },
   "300066": {
     "zh-CN": "",
@@ -12081,7 +12111,7 @@
     "zh-CN": "虚蚀残留",
     "en-US": "Void Residue",
     "ja-JP": "虚蝕残留",
-    "ko-KR": "침식의 잔해"
+    "ko-KR": "허식의 잔해"
   },
   "300078": {
     "zh-CN": "",
@@ -14067,7 +14097,7 @@
     "zh-CN": "虚蚀践踏",
     "en-US": "Void Corruption Stomp",
     "ja-JP": "虚蝕踏撃",
-    "ko-KR": "허무의 침식 짓밟기"
+    "ko-KR": "허식 짓밟기"
   },
   "420131": {
     "zh-CN": "狂暴黑暗",
@@ -16713,7 +16743,7 @@
     "zh-CN": "虚蚀冲撞",
     "en-US": "Void Corruption Charge",
     "ja-JP": "虚蝕タックル",
-    "ko-KR": "허무의 침식 돌진"
+    "ko-KR": "허식 돌진"
   },
   "1005810": {
     "zh-CN": "",
@@ -22173,7 +22203,7 @@
     "zh-CN": "虚蚀·蚀影追袭",
     "en-US": "Void Corruption: Shadow Pursuit",
     "ja-JP": "虚蝕・影蝕の追撃",
-    "ko-KR": "허무의 침식・그림자 추격"
+    "ko-KR": "허식・그림자 추격"
   },
   "2001728": {
     "zh-CN": "",
@@ -23529,7 +23559,7 @@
     "zh-CN": "碎星冲",
     "en-US": "Star Shatter",
     "ja-JP": "砕星衝",
-    "ko-KR": "별 쪼개기"
+    "ko-KR": "쇄성 돌진"
   },
   "2900105": {
     "zh-CN": "砂石斗篷",
@@ -23906,8 +23936,8 @@
   "2900720": {
     "zh-CN": "摆个耍酷的姿势……？",
     "en-US": "Strike a cool pose...?",
-    "ja-JP": "クールなポーズを決める……？",
-    "ko-KR": "멋있는 포즈를 취한다…?"
+    "ja-JP": "カッコいいポーズをとる……？",
+    "ko-KR": "멋있는 포즈를 취한다...?"
   },
   "2900740": {
     "zh-CN": "奥义！万象升华",
@@ -27093,7 +27123,7 @@
     "zh-CN": "虚蚀践踏",
     "en-US": "Void Corruption Stomp",
     "ja-JP": "虚蝕踏撃",
-    "ko-KR": "허무의 침식 짓밟기"
+    "ko-KR": "허식 짓밟기"
   },
   "3390116": {
     "zh-CN": "",

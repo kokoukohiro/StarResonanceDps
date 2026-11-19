@@ -3,19 +3,19 @@
     "zh-CN": "烈火糖浆·等级1",
     "en-US": "Fire Serum Lv.1",
     "ja-JP": "烈火のシロップG1",
-    "ko-KR": "불꽃 시럽・Lv.1"
+    "ko-KR": "열화의 시럽・Lv.1"
   },
   "2033012": {
     "zh-CN": "烈火糖浆·等级2",
     "en-US": "Fire Serum Lv.2",
     "ja-JP": "烈火のシロップG2",
-    "ko-KR": "불꽃 시럽・Lv.2"
+    "ko-KR": "열화의 시럽・Lv.2"
   },
   "2033013": {
     "zh-CN": "烈火糖浆·等级3",
     "en-US": "Fire Serum Lv.3",
     "ja-JP": "烈火のシロップG3",
-    "ko-KR": "불꽃 시럽・Lv.3"
+    "ko-KR": "열화의 시럽・Lv.3"
   },
   "2033014": {
     "zh-CN": "烈焰蜥脊试剂·等级1",
@@ -57,19 +57,19 @@
     "zh-CN": "冰冻糖浆·等级1",
     "en-US": "Ice Serum Lv.1",
     "ja-JP": "氷結のシロップG1",
-    "ko-KR": "서리 시럽・Lv.1"
+    "ko-KR": "빙결의 시럽・Lv.1"
   },
   "2033022": {
     "zh-CN": "冰冻糖浆·等级2",
     "en-US": "Ice Serum Lv.2",
     "ja-JP": "氷結のシロップG2",
-    "ko-KR": "서리 시럽・Lv.2"
+    "ko-KR": "빙결의 시럽・Lv.2"
   },
   "2033023": {
     "zh-CN": "冰冻糖浆·等级3",
     "en-US": "Ice Serum Lv.3",
     "ja-JP": "氷結のシロップG3",
-    "ko-KR": "서리 시럽・Lv.3"
+    "ko-KR": "빙결의 시럽・Lv.3"
   },
   "2033024": {
     "zh-CN": "极寒蜥脊试剂·等级1",
@@ -111,19 +111,19 @@
     "zh-CN": "青蔓糖浆·等级1",
     "en-US": "Forest Serum Lv.1",
     "ja-JP": "青ツタのシロップG1",
-    "ko-KR": "덩굴 시럽・Lv.1"
+    "ko-KR": "푸른 덩굴의 시럽・Lv.1"
   },
   "2033032": {
     "zh-CN": "青蔓糖浆·等级2",
     "en-US": "Forest Serum Lv.2",
     "ja-JP": "青ツタのシロップG2",
-    "ko-KR": "덩굴 시럽・Lv.2"
+    "ko-KR": "푸른 덩굴의 시럽・Lv.2"
   },
   "2033033": {
     "zh-CN": "青蔓糖浆·等级3",
     "en-US": "Forest Serum Lv.3",
     "ja-JP": "青ツタのシロップG3",
-    "ko-KR": "덩굴 시럽・Lv.3"
+    "ko-KR": "푸른 덩굴의 시럽・Lv.3"
   },
   "2033034": {
     "zh-CN": "叶脉蜥脊试剂·等级1",
@@ -165,19 +165,19 @@
     "zh-CN": "震土糖浆·等级1",
     "en-US": "Rock Serum Lv.1",
     "ja-JP": "震土のシロップG1",
-    "ko-KR": "토양 시럽・Lv.1"
+    "ko-KR": "흔들리는 땅의 시럽・Lv.1"
   },
   "2033042": {
     "zh-CN": "震土糖浆·等级2",
     "en-US": "Rock Serum Lv.2",
     "ja-JP": "震土のシロップG2",
-    "ko-KR": "토양 시럽・Lv.2"
+    "ko-KR": "흔들리는 땅의 시럽・Lv.2"
   },
   "2033043": {
     "zh-CN": "震土糖浆·等级3",
     "en-US": "Rock Serum Lv.3",
     "ja-JP": "震土のシロップG3",
-    "ko-KR": "토양 시럽・Lv.3"
+    "ko-KR": "흔들리는 땅의 시럽・Lv.3"
   },
   "2033044": {
     "zh-CN": "砂岩蜥脊试剂·等级1",
@@ -219,19 +219,19 @@
     "zh-CN": "旋风糖浆·等级1",
     "en-US": "Wind Serum Lv.1",
     "ja-JP": "旋風のシロップG1",
-    "ko-KR": "회오리 시럽・Lv.1"
+    "ko-KR": "선풍의 시럽・Lv.1"
   },
   "2033052": {
     "zh-CN": "旋风糖浆·等级2",
     "en-US": "Wind Serum Lv.2",
     "ja-JP": "旋風のシロップG2",
-    "ko-KR": "회오리 시럽・Lv.2"
+    "ko-KR": "선풍의 시럽・Lv.2"
   },
   "2033053": {
     "zh-CN": "旋风糖浆·等级3",
     "en-US": "Wind Serum Lv.3",
     "ja-JP": "旋風のシロップG3",
-    "ko-KR": "회오리 시럽・Lv.3"
+    "ko-KR": "선풍의 시럽・Lv.3"
   },
   "2033054": {
     "zh-CN": "风鸣蜥脊试剂·等级1",
@@ -273,19 +273,19 @@
     "zh-CN": "雷鸣糖浆·等级1",
     "en-US": "Thunder Serum Lv.1",
     "ja-JP": "雷鳴のシロップG1",
-    "ko-KR": "천둥 시럽・Lv.1"
+    "ko-KR": "뇌명의 시럽・Lv.1"
   },
   "2033062": {
     "zh-CN": "雷鸣糖浆·等级2",
     "en-US": "Thunder Serum Lv.2",
     "ja-JP": "雷鳴のシロップG2",
-    "ko-KR": "천둥 시럽・Lv.2"
+    "ko-KR": "뇌명의 시럽・Lv.2"
   },
   "2033063": {
     "zh-CN": "雷鸣糖浆·等级3",
     "en-US": "Thunder Serum Lv.3",
     "ja-JP": "雷鳴のシロップG3",
-    "ko-KR": "천둥 시럽・Lv.3"
+    "ko-KR": "뇌명의 시럽・Lv.3"
   },
   "2033064": {
     "zh-CN": "电解蜥脊试剂·等级1",
@@ -327,19 +327,19 @@
     "zh-CN": "光彩糖浆·等级1",
     "en-US": "Light Serum Lv.1",
     "ja-JP": "光彩のシロップG1",
-    "ko-KR": "광채 시럽・Lv.1"
+    "ko-KR": "광채의 시럽・Lv.1"
   },
   "2033072": {
     "zh-CN": "光彩糖浆·等级2",
     "en-US": "Light Serum Lv.2",
     "ja-JP": "光彩のシロップG2",
-    "ko-KR": "광채 시럽・Lv.2"
+    "ko-KR": "광채의 시럽・Lv.2"
   },
   "2033073": {
     "zh-CN": "光彩糖浆·等级3",
     "en-US": "Light Serum Lv.3",
     "ja-JP": "光彩のシロップG3",
-    "ko-KR": "광채 시럽・Lv.3"
+    "ko-KR": "광채의 시럽・Lv.3"
   },
   "2033074": {
     "zh-CN": "辉白蜥脊试剂·等级1",
@@ -381,19 +381,19 @@
     "zh-CN": "暗夜糖浆·等级1",
     "en-US": "Dark Serum Lv.1",
     "ja-JP": "常闇のシロップG1",
-    "ko-KR": "어둠 시럽・Lv.1"
+    "ko-KR": "암야의 시럽・Lv.1"
   },
   "2033082": {
     "zh-CN": "暗夜糖浆·等级2",
     "en-US": "Dark Serum Lv.2",
     "ja-JP": "常闇のシロップG2",
-    "ko-KR": "어둠 시럽・Lv.2"
+    "ko-KR": "암야의 시럽・Lv.2"
   },
   "2033083": {
     "zh-CN": "暗夜糖浆·等级3",
     "en-US": "Dark Serum Lv.3",
     "ja-JP": "常闇のシロップG3",
-    "ko-KR": "어둠 시럽・Lv.3"
+    "ko-KR": "암야의 시럽・Lv.3"
   },
   "2033084": {
     "zh-CN": "黯淡蜥脊试剂·等级1",
@@ -939,145 +939,145 @@
     "zh-CN": "烈焰之烛·等级1",
     "en-US": "Flame Candle Lv.1",
     "ja-JP": "烈炎のキャンドルG1",
-    "ko-KR": "열화의 촛불・Lv.1"
+    "ko-KR": "열화의 양초・Lv.1"
   },
   "2033212": {
     "zh-CN": "烈焰之烛·等级2",
     "en-US": "Flame Candle Lv.2",
     "ja-JP": "烈炎のキャンドルG2",
-    "ko-KR": "열화의 촛불・Lv.2"
+    "ko-KR": "열화의 양초・Lv.2"
   },
   "2033213": {
     "zh-CN": "烈焰之烛·等级3",
     "en-US": "Flame Candle Lv.3",
     "ja-JP": "烈炎のキャンドルG3",
-    "ko-KR": "열화의 촛불・Lv.3"
+    "ko-KR": "열화의 양초・Lv.3"
   },
   "2033221": {
     "zh-CN": "极寒之烛·等级1",
     "en-US": "Frost Candle Lv.1",
     "ja-JP": "極寒のキャンドルG1",
-    "ko-KR": "극한의 촛불・Lv.1"
+    "ko-KR": "극한의 양초・Lv.1"
   },
   "2033222": {
     "zh-CN": "极寒之烛·等级2",
     "en-US": "Frost Candle Lv.2",
     "ja-JP": "極寒のキャンドルG2",
-    "ko-KR": "극한의 촛불・Lv.2"
+    "ko-KR": "극한의 양초・Lv.2"
   },
   "2033223": {
     "zh-CN": "极寒之烛·等级3",
     "en-US": "Frost Candle Lv.3",
     "ja-JP": "極寒のキャンドルG3",
-    "ko-KR": "극한의 촛불・Lv.3"
+    "ko-KR": "극한의 양초・Lv.3"
   },
   "2033231": {
     "zh-CN": "叶脉之烛·等级1",
     "en-US": "Leafvein Candle Lv.1",
     "ja-JP": "葉脈のキャンドルG1",
-    "ko-KR": "잎맥의 촛불・Lv.1"
+    "ko-KR": "잎맥의 양초・Lv.1"
   },
   "2033232": {
     "zh-CN": "叶脉之烛·等级2",
     "en-US": "Leafvein Candle Lv.2",
     "ja-JP": "葉脈のキャンドルG2",
-    "ko-KR": "잎맥의 촛불・Lv.2"
+    "ko-KR": "잎맥의 양초・Lv.2"
   },
   "2033233": {
     "zh-CN": "叶脉之烛·等级3",
     "en-US": "Leafvein Candle Lv.3",
     "ja-JP": "葉脈のキャンドルG3",
-    "ko-KR": "잎맥의 촛불・Lv.3"
+    "ko-KR": "잎맥의 양초・Lv.3"
   },
   "2033241": {
     "zh-CN": "砂岩之烛·等级1",
     "en-US": "Sandstone Candle Lv.1",
     "ja-JP": "砂岩のキャンドルG1",
-    "ko-KR": "사암의 촛불・Lv.1"
+    "ko-KR": "사암의 양초・Lv.1"
   },
   "2033242": {
     "zh-CN": "砂岩之烛·等级2",
     "en-US": "Sandstone Candle Lv.2",
     "ja-JP": "砂岩のキャンドルG2",
-    "ko-KR": "사암의 촛불・Lv.2"
+    "ko-KR": "사암의 양초・Lv.2"
   },
   "2033243": {
     "zh-CN": "砂岩之烛·等级3",
     "en-US": "Sandstone Candle Lv.3",
     "ja-JP": "砂岩のキャンドルG3",
-    "ko-KR": "사암의 촛불・Lv.3"
+    "ko-KR": "사암의 양초・Lv.3"
   },
   "2033251": {
     "zh-CN": "风鸣之烛·等级1",
     "en-US": "Windwhisper Candle Lv.1",
     "ja-JP": "風鳴のキャンドルG1",
-    "ko-KR": "풍명의 촛불・Lv.1"
+    "ko-KR": "풍명의 양초・Lv.1"
   },
   "2033252": {
     "zh-CN": "风鸣之烛·等级2",
     "en-US": "Windwhisper Candle Lv.2",
     "ja-JP": "風鳴のキャンドルG2",
-    "ko-KR": "풍명의 촛불・Lv.2"
+    "ko-KR": "풍명의 양초・Lv.2"
   },
   "2033253": {
     "zh-CN": "风鸣之烛·等级3",
     "en-US": "Windwhisper Candle Lv.3",
     "ja-JP": "風鳴のキャンドルG3",
-    "ko-KR": "풍명의 촛불・Lv.3"
+    "ko-KR": "풍명의 양초・Lv.3"
   },
   "2033261": {
     "zh-CN": "电解之烛·等级1",
     "en-US": "Electrolytic Candle Lv.1",
     "ja-JP": "電解のキャンドルG1",
-    "ko-KR": "전해의 촛불・Lv.1"
+    "ko-KR": "전해의 양초・Lv.1"
   },
   "2033262": {
     "zh-CN": "电解之烛·等级2",
     "en-US": "Electrolytic Candle Lv.2",
     "ja-JP": "電解のキャンドルG2",
-    "ko-KR": "전해의 촛불・Lv.2"
+    "ko-KR": "전해의 양초・Lv.2"
   },
   "2033263": {
     "zh-CN": "电解之烛·等级3",
     "en-US": "Electrolytic Candle Lv.3",
     "ja-JP": "電解のキャンドルG3",
-    "ko-KR": "전해의 촛불・Lv.3"
+    "ko-KR": "전해의 양초・Lv.3"
   },
   "2033271": {
     "zh-CN": "辉白之烛·等级1",
     "en-US": "Radiant White Candle Lv.1",
     "ja-JP": "輝白のキャンドルG1",
-    "ko-KR": "광휘의 촛불・Lv.1"
+    "ko-KR": "광휘의 양초・Lv.1"
   },
   "2033272": {
     "zh-CN": "辉白之烛·等级2",
     "en-US": "Radiant White Candle Lv.2",
     "ja-JP": "輝白のキャンドルG2",
-    "ko-KR": "광휘의 촛불・Lv.2"
+    "ko-KR": "광휘의 양초・Lv.2"
   },
   "2033273": {
     "zh-CN": "辉白之烛·等级3",
     "en-US": "Radiant White Candle Lv.3",
     "ja-JP": "輝白のキャンドルG3",
-    "ko-KR": "광휘의 촛불・Lv.3"
+    "ko-KR": "광휘의 양초・Lv.3"
   },
   "2033281": {
     "zh-CN": "黯淡之烛·等级1",
     "en-US": "Dim Candle Lv.1",
     "ja-JP": "暗淡のキャンドルG1",
-    "ko-KR": "암담의 촛불・Lv.1"
+    "ko-KR": "암담의 양초・Lv.1"
   },
   "2033282": {
     "zh-CN": "黯淡之烛·等级2",
     "en-US": "Dim Candle Lv.2",
     "ja-JP": "暗淡のキャンドルG2",
-    "ko-KR": "암담의 촛불・Lv.2"
+    "ko-KR": "암담의 양초・Lv.2"
   },
   "2033283": {
     "zh-CN": "黯淡之烛·等级3",
     "en-US": "Dim Candle Lv.3",
     "ja-JP": "暗淡のキャンドルG3",
-    "ko-KR": "암담의 촛불・Lv.3"
+    "ko-KR": "암담의 양초・Lv.3"
   },
   "2033291": {
     "zh-CN": "避火之凝脂·等级1",

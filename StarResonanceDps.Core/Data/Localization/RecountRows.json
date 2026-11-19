@@ -134,8 +134,8 @@
     "RecountName": {
       "zh-CN": "刹那连击",
       "en-US": "Instant Edge Combo",
-      "ja-JP": "刹那",
-      "ko-KR": "찰나"
+      "ja-JP": "刹那連撃",
+      "ko-KR": "찰나 연격"
     },
     "SourceId": [
       "149904:1"
@@ -207,7 +207,7 @@
     "RecountName": {
       "zh-CN": "风螺旋",
       "en-US": "Wind Spiral",
-      "ja-JP": "スパイラルウィンド",
+      "ja-JP": "風螺旋",
       "ko-KR": "나선 선풍"
     },
     "SourceId": [
@@ -276,7 +276,7 @@
     "RecountName": {
       "zh-CN": "撕裂",
       "en-US": "Rend",
-      "ja-JP": "ティア",
+      "ja-JP": "烈破",
       "ko-KR": "파열"
     },
     "SourceId": [
@@ -287,7 +287,7 @@
     "RecountName": {
       "zh-CN": "长矛贯穿",
       "en-US": "Spear Thrust",
-      "ja-JP": "ペネトレイトスピア",
+      "ja-JP": "長槍貫穿",
       "ko-KR": "스피어 피어싱"
     },
     "SourceId": [
@@ -459,7 +459,7 @@
     "RecountName": {
       "zh-CN": "冰箭",
       "en-US": "Ice Arrow",
-      "ja-JP": "アイスボルト",
+      "ja-JP": "氷矢",
       "ko-KR": "아이스 애로우"
     },
     "SourceId": [
@@ -471,7 +471,7 @@
     "RecountName": {
       "zh-CN": "贯穿冰矛",
       "en-US": "Piercing Ice Lance",
-      "ja-JP": "貫通アイススピア",
+      "ja-JP": "貫通氷槍",
       "ko-KR": "피어싱 아이스 스피어"
     },
     "SourceId": [
@@ -482,7 +482,7 @@
     "RecountName": {
       "zh-CN": "冰霜彗星",
       "en-US": "Frost Comet",
-      "ja-JP": "氷の彗星",
+      "ja-JP": "氷慧",
       "ko-KR": "프로스트 코멧"
     },
     "SourceId": [
@@ -504,7 +504,7 @@
     "RecountName": {
       "zh-CN": "冰冷脉冲",
       "en-US": "Cold Pulse",
-      "ja-JP": "コールドパルス",
+      "ja-JP": "氷冷波動",
       "ko-KR": "콜드 펄스"
     },
     "SourceId": [
@@ -526,7 +526,7 @@
     "RecountName": {
       "zh-CN": "冰霜冲击",
       "en-US": "Frost Shock",
-      "ja-JP": "アイスブラスト",
+      "ja-JP": "氷霜衝撃",
       "ko-KR": "프로스트 쇼크"
     },
     "SourceId": [
@@ -1103,8 +1103,8 @@
     "RecountName": {
       "zh-CN": "野狼普通攻击·横扫",
       "en-US": "Wild Wolf - Basic Attack - Sweep",
-      "ja-JP": "臣狼の通常攻撃",
-      "ko-KR": "늑대 일반 공격"
+      "ja-JP": "臣狼の通常攻撃・なぎ払い",
+      "ko-KR": "늑대 일반 공격・휩쓸기"
     },
     "SourceId": [
       "1700827:1"
@@ -1114,8 +1114,8 @@
     "RecountName": {
       "zh-CN": "野狼协同攻击·撕咬",
       "en-US": "Wild Wolf - Coordinated Attack - Bite",
-      "ja-JP": "臣狼の協力攻撃",
-      "ko-KR": "늑대 협동 공격"
+      "ja-JP": "臣狼の協力攻撃・噛みつき",
+      "ko-KR": "늑대 협동 공격・물어뜯기"
     },
     "SourceId": [
       "1700820:2"
@@ -1242,7 +1242,7 @@
     "RecountName": {
       "zh-CN": "光棱",
       "en-US": "Light Prism",
-      "ja-JP": "光のプリズム",
+      "ja-JP": "閃稜",
       "ko-KR": "라이트 프리즘"
     },
     "SourceId": [
@@ -1380,7 +1380,7 @@
       "zh-CN": "碎星冲",
       "en-US": "Star Shatter",
       "ja-JP": "砕星衝",
-      "ko-KR": "별 쪼개기"
+      "ko-KR": "쇄성 돌진"
     },
     "SourceId": [
       "1924:2"
@@ -1461,7 +1461,7 @@
       "zh-CN": "怒击",
       "en-US": "Rageblow",
       "ja-JP": "怒撃",
-      "ko-KR": "노격"
+      "ko-KR": "분노의 일격"
     },
     "SourceId": [
       "1935:1"
@@ -1472,7 +1472,7 @@
       "zh-CN": "碎星崩裂",
       "en-US": "Starfall",
       "ja-JP": "砕星の鉄槌",
-      "ko-KR": "별 부수기"
+      "ko-KR": "쇄성 붕괴"
     },
     "SourceId": [
       "1941:2"
@@ -2743,7 +2743,7 @@
       "zh-CN": "炽热挥击",
       "en-US": "Blazing Swing",
       "ja-JP": "ブレイズスイング",
-      "ko-KR": "화염의 휘두르기"
+      "ko-KR": "불꽃 휘두르기"
     },
     "SourceId": [
       "1601:1",
@@ -2923,8 +2923,8 @@
     "RecountName": {
       "zh-CN": "迷狂炎舞·最后一斩",
       "en-US": "Wildfire Dance - Final Slash",
-      "ja-JP": "バーニングラッシュ・終式",
-      "ko-KR": "광염난무・종식"
+      "ja-JP": "燃焼ラッシュ・最後の一撃",
+      "ko-KR": "광염난무・최후의 일격"
     },
     "SourceId": [
       "1622:1"
@@ -3820,7 +3820,7 @@
       "zh-CN": "虚蚀爆裂",
       "en-US": "Void Corruption Arcane",
       "ja-JP": "虚蝕の爆発",
-      "ko-KR": "허무의 침식 파열"
+      "ko-KR": "허식 폭발"
     },
     "SourceId": [
       "701001:1"
@@ -3831,7 +3831,7 @@
       "zh-CN": "虚蚀脉冲（原虚蚀凝神）",
       "en-US": "Void Corruption Frenzy Pulse (formerly Void Corruption Frenzy Focus)",
       "ja-JP": "虚蝕パルス（もと虚蝕フォーカス）",
-      "ko-KR": "허무의 침식 파동(이전: 침식의 집중)"
+      "ko-KR": "허식 파동(이전: 허식의 집중)"
     },
     "SourceId": [
       "391401:0"
@@ -3842,7 +3842,7 @@
       "zh-CN": "虚蚀波动",
       "en-US": "Void Corruption Fluctuation",
       "ja-JP": "虚蝕の波動",
-      "ko-KR": "침식의 파동"
+      "ko-KR": "허식의 파동"
     },
     "SourceId": [
       "701002:1",
@@ -3854,7 +3854,7 @@
       "zh-CN": "虚蚀光环",
       "en-US": "Void Aura",
       "ja-JP": "虚蝕オーラ",
-      "ko-KR": "허무의 침식 오라"
+      "ko-KR": "허식 오라"
     },
     "SourceId": [
       "3001031:3",
@@ -3955,8 +3955,8 @@
     "RecountName": {
       "zh-CN": "幻灭冲击",
       "en-US": "Disillusion Impact",
-      "ja-JP": "イマジンインパクト",
-      "ko-KR": "환상 충격"
+      "ja-JP": "幻滅の衝撃",
+      "ko-KR": "환멸의 충격"
     },
     "SourceId": [
       "7998:1"
@@ -3998,7 +3998,7 @@
     "RecountName": {
       "zh-CN": "普通攻击-奥义！星灵魔导士",
       "en-US": "Normal attack - Arcane! Celestial Spirit Mage",
-      "ja-JP": "通常攻撃・奥義！星霊魔導士",
+      "ja-JP": "通常攻撃-奥義！星霊魔導士",
       "ko-KR": "일반 공격 - 오의! 성령 마도사"
     },
     "SourceId": [
@@ -4011,7 +4011,7 @@
     "RecountName": {
       "zh-CN": "星之大河-奥义！星灵魔导士",
       "en-US": "Fleuve d'étoiles - Arcane! Celestial Spirit Mage",
-      "ja-JP": "星の大河・奥義！星霊魔導士",
+      "ja-JP": "星の大河-奥義！星霊魔導士",
       "ko-KR": "에투알 플루브 - 오의! 성령 마도사"
     },
     "SourceId": [
@@ -4024,7 +4024,7 @@
     "RecountName": {
       "zh-CN": "水文史话-奥义！星灵魔导士",
       "en-US": "Aqua Metria - Arcane! Celestial Spirit Mage",
-      "ja-JP": "アクアメトリア・奥義！星霊魔導士",
+      "ja-JP": "アクアメトリア-奥義！星霊魔導士",
       "ko-KR": "아쿠아 메트리아 - 오의! 성령 마도사"
     },
     "SourceId": [
@@ -4035,7 +4035,7 @@
     "RecountName": {
       "zh-CN": "普通攻击-奥义！灭龙魔导士",
       "en-US": "Normal Attack - Arcane! Dragon Slayer",
-      "ja-JP": "通常攻撃・奥義！滅竜魔導士",
+      "ja-JP": "通常攻撃-奥義！滅竜魔導士",
       "ko-KR": "일반 공격 - 오의! 멸룡 마도사"
     },
     "SourceId": [
@@ -4048,7 +4048,7 @@
     "RecountName": {
       "zh-CN": "火龙的铁拳-奥义！灭龙魔导士",
       "en-US": "Fire Dragon's Iron Fist - Arcane! Dragon Slayer",
-      "ja-JP": "火竜の鉄拳・奥義！滅竜魔導士",
+      "ja-JP": "火竜の鉄拳-奥義！滅竜魔導士",
       "ko-KR": "화룡의 철권 - 오의! 멸룡 마도사"
     },
     "SourceId": [
@@ -4059,7 +4059,7 @@
     "RecountName": {
       "zh-CN": "火龙的翼击-奥义！灭龙魔导士",
       "en-US": "Fire Dragon's Wing Attack - Arcane! Dragon Slayer",
-      "ja-JP": "火竜の翼撃・奥義！滅竜魔導士",
+      "ja-JP": "火竜の翼撃-奥義！滅竜魔導士",
       "ko-KR": "화룡의 익격 - 오의! 멸룡 마도사"
     },
     "SourceId": [
@@ -4070,7 +4070,7 @@
     "RecountName": {
       "zh-CN": "火龙的咆哮-奥义！灭龙魔导士",
       "en-US": "Fire Dragon's Roar - Arcane! Dragon Slayer",
-      "ja-JP": "火竜の咆哮・奥義！滅竜魔導士",
+      "ja-JP": "火竜の咆哮-奥義！滅竜魔導士",
       "ko-KR": "화룡의 포효 - 오의! 멸룡 마도사"
     },
     "SourceId": [

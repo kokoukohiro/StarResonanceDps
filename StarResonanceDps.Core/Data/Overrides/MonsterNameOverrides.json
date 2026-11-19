@@ -71,6 +71,14 @@
       "ko-KR": "몽둥이 고블린"
     }
   },
+  "112": {
+    "Name": {
+      "zh-CN": "首领·哥布林王",
+      "en-US": "Boss: Goblin King",
+      "ja-JP": "ボス・キングゴブリン",
+      "ko-KR": "보스・고블린 왕"
+    }
+  },
   "113": {
     "Name": {
       "zh-CN": "塔塔",
@@ -85,6 +93,38 @@
       "en-US": "Transformation Exclusive - Void Tina",
       "ja-JP": "変身専用-虚蝕ティナ",
       "ko-KR": "변신 전용 - 침식된 티나"
+    }
+  },
+  "201": {
+    "Name": {
+      "zh-CN": "变身专用-巨斧哥布林",
+      "en-US": "Transformation Exclusive - Goblin Axe",
+      "ja-JP": "変身専用-大斧ゴブリン",
+      "ko-KR": "변신 전용 - 거대 도끼 고블린"
+    }
+  },
+  "202": {
+    "Name": {
+      "zh-CN": "变身专用-艾露娜",
+      "en-US": "Transformation Exclusive - Airona",
+      "ja-JP": "変身専用-アルーナ",
+      "ko-KR": "변신 전용 - 아이로나"
+    }
+  },
+  "203": {
+    "Name": {
+      "zh-CN": "哥布林王-剑盾变身",
+      "en-US": "Goblin King - AegisTransformation",
+      "ja-JP": "キングゴブリン-ソード＆バリア変身",
+      "ko-KR": "고블린 왕 - 검방패 변신"
+    }
+  },
+  "204": {
+    "Name": {
+      "zh-CN": "哥布林王-法杖变身",
+      "en-US": "Goblin King - Staff Transformation",
+      "ja-JP": "キングゴブリン-法杖変身",
+      "ko-KR": "고블린 왕 - 지팡이 변신"
     }
   },
   "1108": {
@@ -3607,6 +3647,14 @@
       "ko-KR": "은신 몬스터(필드 중심 지점)"
     }
   },
+  "103203": {
+    "Name": {
+      "zh-CN": "对龙机像幻象（二阶段）",
+      "en-US": "Dragonbane Golem Illusion (Phase 2)",
+      "ja-JP": "対ドラゴンゴーレムの幻影（フェイズ2）",
+      "ko-KR": "드래곤 대항 골렘 환영(2단계)"
+    }
+  },
   "103204": {
     "Name": {
       "zh-CN": "隐身怪（闪现的目标点 宽边）",
@@ -3615,12 +3663,60 @@
       "ko-KR": "은신 몬스터(순간이동 목표 지점・짧은 쪽)"
     }
   },
+  "103205": {
+    "Name": {
+      "zh-CN": "机械守卫",
+      "en-US": "Mech Sentinel",
+      "ja-JP": "機械の衛兵",
+      "ko-KR": "기계 경비병"
+    }
+  },
+  "103206": {
+    "Name": {
+      "zh-CN": "机械眼舱",
+      "en-US": "Mechanical Oculopod",
+      "ja-JP": "機械眼球ポッド",
+      "ko-KR": "기계 안구 포드"
+    }
+  },
   "103209": {
     "Name": {
       "zh-CN": "隐身怪（结局表演冲锋用）",
       "en-US": "Invisible Monster (End-Cinematic Charge)",
       "ja-JP": "ハイドモンスター（エンディング演出の突進用）",
       "ko-KR": "은신 몬스터(엔딩 연출 돌격용)"
+    }
+  },
+  "103210": {
+    "Name": {
+      "zh-CN": "自巡航守卫",
+      "en-US": "Patrol Sentinel",
+      "ja-JP": "自動巡回ガード",
+      "ko-KR": "자율 순찰 경비병"
+    }
+  },
+  "103211": {
+    "Name": {
+      "zh-CN": "自巡航眼舱",
+      "en-US": "Patrol Oculopod",
+      "ja-JP": "自動巡回アイポッド",
+      "ko-KR": "자율 순찰 아이포드"
+    }
+  },
+  "103212": {
+    "Name": {
+      "zh-CN": "自巡航眼舱",
+      "en-US": "Patrol Oculopod",
+      "ja-JP": "自動巡回アイポッド",
+      "ko-KR": "자율 순찰 아이포드"
+    }
+  },
+  "103213": {
+    "Name": {
+      "zh-CN": "自巡航眼舱",
+      "en-US": "Patrol Oculopod",
+      "ja-JP": "自動巡回アイポッド",
+      "ko-KR": "자율 순찰 아이포드"
     }
   },
   "103303": {
@@ -3653,6 +3749,214 @@
       "en-US": "Zone A Marker",
       "ja-JP": "ブロックAマーク",
       "ko-KR": "구역 A 표식"
+    }
+  },
+  "110001": {
+    "Name": {
+      "zh-CN": "班哈尔特剑士虚影",
+      "en-US": "Byrnhald Swordsman Phantom",
+      "ja-JP": "バーンハルト剣士の幻影",
+      "ko-KR": "번하르트 검사 허상"
+    }
+  },
+  "110002": {
+    "Name": {
+      "zh-CN": "班哈尔特长矛兵虚影",
+      "en-US": "Byrnhald Spearman Phantom",
+      "ja-JP": "バーンハルト槍兵の幻影",
+      "ko-KR": "번하르트 창병 허상"
+    }
+  },
+  "110003": {
+    "Name": {
+      "zh-CN": "班哈尔特盾兵虚影",
+      "en-US": "Byrnhald Shield Bearer Phantom",
+      "ja-JP": "バーンハルト盾兵の幻影",
+      "ko-KR": "번하르트 방패병 허상"
+    }
+  },
+  "130101": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "130102": {
+    "Name": {
+      "zh-CN": "塔塔",
+      "en-US": "Tatta",
+      "ja-JP": "タータ",
+      "ko-KR": "타타"
+    }
+  },
+  "130103": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "130110": {
+    "Name": {
+      "zh-CN": "丹佛",
+      "en-US": "Denvel",
+      "ja-JP": "デンヴェル",
+      "ko-KR": "덴벨"
+    }
+  },
+  "130111": {
+    "Name": {
+      "zh-CN": "狂化·黯影军士",
+      "en-US": "Berserk - Dark Mist Sergeant",
+      "ja-JP": "狂暴化・暗霧分隊軍士",
+      "ko-KR": "광화・검은 안개 군단 부사관"
+    }
+  },
+  "130112": {
+    "Name": {
+      "zh-CN": "精英·激进黯影剑士",
+      "en-US": "Elite: Shadow Blade",
+      "ja-JP": "精鋭・昂る暗霧剣士",
+      "ko-KR": "엘리트・급진파 검은 안개 검병"
+    }
+  },
+  "130113": {
+    "Name": {
+      "zh-CN": "巡查的黯影军士",
+      "en-US": "Patrolling Dark Mist Sergeant",
+      "ja-JP": "見回りの暗霧分隊軍士",
+      "ko-KR": "순찰하는 검은 안개 군단 부사관"
+    }
+  },
+  "130114": {
+    "Name": {
+      "zh-CN": "逃跑的黯影军士",
+      "en-US": "Fleeing Dark Mist Sergeant",
+      "ja-JP": "逃亡した暗霧分隊軍士",
+      "ko-KR": "도망치는 검은 안개 군단 부사관"
+    }
+  },
+  "130115": {
+    "Name": {
+      "zh-CN": "黯影军团·剑士",
+      "en-US": "Dark Mist Swordsman",
+      "ja-JP": "暗霧分隊・剣士",
+      "ko-KR": "검은 안개 군단・검병"
+    }
+  },
+  "130116": {
+    "Name": {
+      "zh-CN": "腐蚀·黯影士兵",
+      "en-US": "Corrupted Dark Mist Soldier",
+      "ja-JP": "腐食・暗霧兵",
+      "ko-KR": "침식・검은 안개 병사"
+    }
+  },
+  "130117": {
+    "Name": {
+      "zh-CN": "黯影军团·剑士",
+      "en-US": "Dark Mist Swordsman",
+      "ja-JP": "暗霧分隊・剣士",
+      "ko-KR": "검은 안개 군단・검병"
+    }
+  },
+  "130118": {
+    "Name": {
+      "zh-CN": "黯影军团·步枪兵",
+      "en-US": "Dark Mist Legion Rifleman",
+      "ja-JP": "暗霧分隊・銃兵",
+      "ko-KR": "검은 안개 군단・소총병"
+    }
+  },
+  "130119": {
+    "Name": {
+      "zh-CN": "黯影军团·剑士",
+      "en-US": "Dark Mist Swordsman",
+      "ja-JP": "暗霧分隊・剣士",
+      "ko-KR": "검은 안개 군단・검병"
+    }
+  },
+  "130120": {
+    "Name": {
+      "zh-CN": "黯影军团·步枪兵",
+      "en-US": "Dark Mist Legion Rifleman",
+      "ja-JP": "暗霧分隊・銃兵",
+      "ko-KR": "검은 안개 군단・소총병"
+    }
+  },
+  "130121": {
+    "Name": {
+      "zh-CN": "黯影军团·剑士",
+      "en-US": "Dark Mist Swordsman",
+      "ja-JP": "暗霧分隊・剣士",
+      "ko-KR": "검은 안개 군단・검병"
+    }
+  },
+  "130122": {
+    "Name": {
+      "zh-CN": "腐蚀·黯影士兵",
+      "en-US": "Corrupted Dark Mist Soldier",
+      "ja-JP": "腐食・暗霧兵",
+      "ko-KR": "침식・검은 안개 병사"
+    }
+  },
+  "130123": {
+    "Name": {
+      "zh-CN": "狂化·黯影军士",
+      "en-US": "Berserk - Dark Mist Sergeant",
+      "ja-JP": "狂暴化・暗霧分隊軍士",
+      "ko-KR": "광화・검은 안개 군단 부사관"
+    }
+  },
+  "130124": {
+    "Name": {
+      "zh-CN": "狂化·黯影军士",
+      "en-US": "Berserk - Dark Mist Sergeant",
+      "ja-JP": "狂暴化・暗霧分隊軍士",
+      "ko-KR": "광화・검은 안개 군단 부사관"
+    }
+  },
+  "130190": {
+    "Name": {
+      "zh-CN": "黯影军团·剑士",
+      "en-US": "Dark Mist Swordsman",
+      "ja-JP": "暗霧分隊・剣士",
+      "ko-KR": "검은 안개 군단・검병"
+    }
+  },
+  "130191": {
+    "Name": {
+      "zh-CN": "黯影军团·步枪兵",
+      "en-US": "Dark Mist Legion Rifleman",
+      "ja-JP": "暗霧分隊・銃兵",
+      "ko-KR": "검은 안개 군단・소총병"
+    }
+  },
+  "130192": {
+    "Name": {
+      "zh-CN": "黯影军团·盾兵",
+      "en-US": "Dark Mist Legion Shield Bearer",
+      "ja-JP": "暗霧分隊・盾兵",
+      "ko-KR": "검은 안개 군단・방패병"
+    }
+  },
+  "130193": {
+    "Name": {
+      "zh-CN": "黯影军团·军官剑士",
+      "en-US": "Dark Mist Legion Officer Swordsman",
+      "ja-JP": "暗霧分隊・士官剣士",
+      "ko-KR": "검은 안개 군단・검병 장교"
+    }
+  },
+  "170081": {
+    "Name": {
+      "zh-CN": "伴生地狐",
+      "en-US": "Bonded Foxen",
+      "ja-JP": "エコーランドフォックス",
+      "ko-KR": "공생 땅여우"
     }
   },
   "210101": {
@@ -3695,6 +3999,158 @@
       "ko-KR": "기본 음향"
     }
   },
+  "501901": {
+    "Name": {
+      "zh-CN": "虚蚀结晶",
+      "en-US": "Void Prism",
+      "ja-JP": "虚蝕結晶",
+      "ko-KR": "침식의 결정"
+    }
+  },
+  "501902": {
+    "Name": {
+      "zh-CN": "虚蚀结晶",
+      "en-US": "Void Prism",
+      "ja-JP": "虚蝕結晶",
+      "ko-KR": "침식의 결정"
+    }
+  },
+  "501903": {
+    "Name": {
+      "zh-CN": "虚蚀结晶",
+      "en-US": "Void Prism",
+      "ja-JP": "虚蝕結晶",
+      "ko-KR": "침식의 결정"
+    }
+  },
+  "511031": {
+    "Name": {
+      "zh-CN": "幻祸精英哥布林",
+      "en-US": "Elite Illusory Plague Goblin",
+      "ja-JP": "幻花晶災精鋭ゴブリン",
+      "ko-KR": "환상 재해 엘리트 고블린"
+    }
+  },
+  "512011": {
+    "Name": {
+      "zh-CN": "哥布林战士",
+      "en-US": "Goblin Warrior",
+      "ja-JP": "ゴブリンウォーリアー",
+      "ko-KR": "고블린 전사"
+    }
+  },
+  "512012": {
+    "Name": {
+      "zh-CN": "哥布林祭祀",
+      "en-US": "Goblin Priest",
+      "ja-JP": "マスターゴブリン",
+      "ko-KR": "고블린 사제"
+    }
+  },
+  "512013": {
+    "Name": {
+      "zh-CN": "哥布林巫医",
+      "en-US": "Goblin Shaman",
+      "ja-JP": "悪しき癒し手",
+      "ko-KR": "고블린 의술사"
+    }
+  },
+  "512014": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "512015": {
+    "Name": {
+      "zh-CN": "法法菈",
+      "en-US": "Fafala",
+      "ja-JP": "ファルファラ",
+      "ko-KR": "파파라"
+    }
+  },
+  "512021": {
+    "Name": {
+      "zh-CN": "暴烈野猪",
+      "en-US": "Boarrier Tyrant",
+      "ja-JP": "タイラントボア",
+      "ko-KR": "폭군 멧돼지"
+    }
+  },
+  "512022": {
+    "Name": {
+      "zh-CN": "烈风野猪",
+      "en-US": "Boarrier Storm",
+      "ja-JP": "ゲイルボア",
+      "ko-KR": "질풍 멧돼지"
+    }
+  },
+  "512023": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "512031": {
+    "Name": {
+      "zh-CN": "地狐",
+      "en-US": "Foxen",
+      "ja-JP": "ランドフォックス",
+      "ko-KR": "땅여우"
+    }
+  },
+  "512032": {
+    "Name": {
+      "zh-CN": "荒地狐",
+      "en-US": "Wasteland Foxen",
+      "ja-JP": "ワイルドランドフォックス",
+      "ko-KR": "황야 땅여우"
+    }
+  },
+  "512033": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "530101": {
+    "Name": {
+      "zh-CN": "黯影军团·剑士",
+      "en-US": "Dark Mist Swordsman",
+      "ja-JP": "暗霧分隊・剣士",
+      "ko-KR": "검은 안개 군단・검병"
+    }
+  },
+  "530102": {
+    "Name": {
+      "zh-CN": "黯影军团·步枪兵",
+      "en-US": "Dark Mist Legion Rifleman",
+      "ja-JP": "暗霧分隊・銃兵",
+      "ko-KR": "검은 안개 군단・소총병"
+    }
+  },
+  "530103": {
+    "Name": {
+      "zh-CN": "黯影军团·盾兵",
+      "en-US": "Dark Mist Legion Shield Bearer",
+      "ja-JP": "暗霧分隊・盾兵",
+      "ko-KR": "검은 안개 군단・방패병"
+    }
+  },
+  "530104": {
+    "Name": {
+      "zh-CN": "神官·斯坦利",
+      "en-US": "Priest Stanley",
+      "ja-JP": "神官・スタンリー",
+      "ko-KR": "신관・스탠리"
+    }
+  },
   "530105": {
     "Name": {
       "zh-CN": "艾露娜",
@@ -3709,6 +4165,134 @@
       "en-US": "Asterleeds Trooper",
       "ja-JP": "アステルリーズの兵士",
       "ko-KR": "아스텔리즈 병사"
+    }
+  },
+  "530301": {
+    "Name": {
+      "zh-CN": "纳鲁鲁",
+      "en-US": "Narulu",
+      "ja-JP": "ナルル",
+      "ko-KR": "나루루"
+    }
+  },
+  "530302": {
+    "Name": {
+      "zh-CN": "奥尔维拉",
+      "en-US": "Olvera",
+      "ja-JP": "オルヴェラ",
+      "ko-KR": "올베라"
+    }
+  },
+  "530303": {
+    "Name": {
+      "zh-CN": "杰拉德",
+      "en-US": "Jerrad",
+      "ja-JP": "ジェラード",
+      "ko-KR": "제라드"
+    }
+  },
+  "530304": {
+    "Name": {
+      "zh-CN": "虚弱的黯影军士",
+      "en-US": "Weak Dark Mist Sergeant",
+      "ja-JP": "軟弱な暗霧分隊軍士",
+      "ko-KR": "허약한 검은 안개 군단 부사관"
+    }
+  },
+  "530305": {
+    "Name": {
+      "zh-CN": "奥尔维拉",
+      "en-US": "Olvera",
+      "ja-JP": "オルヴェラ",
+      "ko-KR": "올베라"
+    }
+  },
+  "530321": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的棒槌哥布林",
+      "en-US": "Void Goblin Cudgel",
+      "ja-JP": "雷虚蝕されたゴブリングロウ",
+      "ko-KR": "번개 침식된 몽둥이 고블린"
+    }
+  },
+  "530322": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的小刀哥布林",
+      "en-US": "Void Goblin Dagger",
+      "ja-JP": "雷虚蝕されたナイフゴブリン",
+      "ko-KR": "번개 침식된 나이프 고블린"
+    }
+  },
+  "530331": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的棒槌哥布林",
+      "en-US": "Void Goblin Cudgel",
+      "ja-JP": "雷虚蝕されたゴブリングロウ",
+      "ko-KR": "번개 침식된 몽둥이 고블린"
+    }
+  },
+  "530332": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的小刀哥布林",
+      "en-US": "Void Goblin Dagger",
+      "ja-JP": "雷虚蝕されたナイフゴブリン",
+      "ko-KR": "번개 침식된 나이프 고블린"
+    }
+  },
+  "530334": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的风巫师哥布林",
+      "en-US": "Void Goblin Wind Mage",
+      "ja-JP": "雷虚蝕された風のエルダーゴブリン",
+      "ko-KR": "번개 침식된 바람 샤먼 고블린"
+    }
+  },
+  "530341": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的弩箭哥布林",
+      "en-US": "Void Goblin Crossbow",
+      "ja-JP": "雷虚蝕されたボウガンゴブリン",
+      "ko-KR": "번개 침식된 석궁 고블린"
+    }
+  },
+  "530343": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的火巫师哥布林",
+      "en-US": "Void Goblin Fire Mage",
+      "ja-JP": "雷虚蝕された炎のエルダーゴブリン",
+      "ko-KR": "번개 침식된 불 샤먼 고블린"
+    }
+  },
+  "530351": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的巨斧哥布林",
+      "en-US": "Void Goblin Axe",
+      "ja-JP": "雷虚蝕された大斧ゴブリン",
+      "ko-KR": "번개 침식된 거대 도끼 고블린"
+    }
+  },
+  "530352": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的小刀哥布林",
+      "en-US": "Void Goblin Dagger",
+      "ja-JP": "雷虚蝕されたナイフゴブリン",
+      "ko-KR": "번개 침식된 나이프 고블린"
+    }
+  },
+  "530353": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的弩箭哥布林",
+      "en-US": "Void Goblin Crossbow",
+      "ja-JP": "雷虚蝕されたボウガンゴブリン",
+      "ko-KR": "번개 침식된 석궁 고블린"
+    }
+  },
+  "530354": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的雷电食人魔",
+      "en-US": "Void Tempest Ogre",
+      "ja-JP": "雷虚蝕されたサンダーオーガ",
+      "ko-KR": "번개 침식된 번개 오우거"
     }
   },
   "530391": {
@@ -4151,6 +4735,54 @@
       "ko-KR": "허무의 침식・검은 안개 군단 병사"
     }
   },
+  "553501": {
+    "Name": {
+      "zh-CN": "虚蚀·巫师哥布林",
+      "en-US": "Void - Goblin Mage",
+      "ja-JP": "虚蝕・エルダーゴブリン",
+      "ko-KR": "허무의 침식・샤먼 고블린"
+    }
+  },
+  "553502": {
+    "Name": {
+      "zh-CN": "虚蚀·小刀哥布林",
+      "en-US": "Void - Goblin Dagger",
+      "ja-JP": "虚蝕・ナイフゴブリン",
+      "ko-KR": "허무의 침식・나이프 고블린"
+    }
+  },
+  "553503": {
+    "Name": {
+      "zh-CN": "虚蚀·棒槌哥布林",
+      "en-US": "Void - Goblin Cudgel",
+      "ja-JP": "虚蝕・ゴブリングロウ",
+      "ko-KR": "허무의 침식・몽둥이 고블린"
+    }
+  },
+  "553504": {
+    "Name": {
+      "zh-CN": "虚蚀·小刀哥布林",
+      "en-US": "Void - Goblin Dagger",
+      "ja-JP": "虚蝕・ナイフゴブリン",
+      "ko-KR": "허무의 침식・나이프 고블린"
+    }
+  },
+  "560301": {
+    "Name": {
+      "zh-CN": "谜之少女",
+      "en-US": "Mysterious Girl",
+      "ja-JP": "謎の少女",
+      "ko-KR": "수수께끼 소녀"
+    }
+  },
+  "560302": {
+    "Name": {
+      "zh-CN": "谜之少女",
+      "en-US": "Mysterious Girl",
+      "ja-JP": "謎の少女",
+      "ko-KR": "수수께끼 소녀"
+    }
+  },
   "560303": {
     "Name": {
       "zh-CN": "艾露娜",
@@ -4167,12 +4799,108 @@
       "ko-KR": "검은 돌 군단 병사"
     }
   },
+  "570306": {
+    "Name": {
+      "zh-CN": "黑石军团士兵",
+      "en-US": "Blackstone Legion Soldier",
+      "ja-JP": "黒磊兵団の兵士",
+      "ko-KR": "검은 돌 군단 병사"
+    }
+  },
+  "570401": {
+    "Name": {
+      "zh-CN": "格里格",
+      "en-US": "Grieg",
+      "ja-JP": "グリーグ",
+      "ko-KR": "그리그"
+    }
+  },
+  "570402": {
+    "Name": {
+      "zh-CN": "岩石蜥蜴",
+      "en-US": "Rock Lizard",
+      "ja-JP": "ロックリザード",
+      "ko-KR": "암석 리자드"
+    }
+  },
+  "570403": {
+    "Name": {
+      "zh-CN": "纳尔迪",
+      "en-US": "Naldi",
+      "ja-JP": "ナルディ",
+      "ko-KR": "나르디"
+    }
+  },
   "570404": {
     "Name": {
       "zh-CN": "矿工-死亡",
       "en-US": "Miner - Dead",
       "ja-JP": "鉱員-死亡",
       "ko-KR": "광부 - 사망"
+    }
+  },
+  "570501": {
+    "Name": {
+      "zh-CN": "角羊",
+      "en-US": "Caprahorn",
+      "ja-JP": "ホーンゴート",
+      "ko-KR": "뿔염소"
+    }
+  },
+  "570601": {
+    "Name": {
+      "zh-CN": "黑石军团士兵",
+      "en-US": "Blackstone Legion Soldier",
+      "ja-JP": "黒磊兵団の兵士",
+      "ko-KR": "검은 돌 군단 병사"
+    }
+  },
+  "570602": {
+    "Name": {
+      "zh-CN": "黑石军团士兵",
+      "en-US": "Blackstone Legion Soldier",
+      "ja-JP": "黒磊兵団の兵士",
+      "ko-KR": "검은 돌 군단 병사"
+    }
+  },
+  "580401": {
+    "Name": {
+      "zh-CN": "星元监测器",
+      "en-US": "Engram Monitor",
+      "ja-JP": "エングラム観測器",
+      "ko-KR": "엔그램 관측 장치"
+    }
+  },
+  "580402": {
+    "Name": {
+      "zh-CN": "星元监测器",
+      "en-US": "Engram Monitor",
+      "ja-JP": "エングラム観測器",
+      "ko-KR": "엔그램 관측 장치"
+    }
+  },
+  "580403": {
+    "Name": {
+      "zh-CN": "星元监测器",
+      "en-US": "Engram Monitor",
+      "ja-JP": "エングラム観測器",
+      "ko-KR": "엔그램 관측 장치"
+    }
+  },
+  "580405": {
+    "Name": {
+      "zh-CN": "娜宝",
+      "en-US": "Nappo",
+      "ja-JP": "ナッポ",
+      "ko-KR": "나뽀"
+    }
+  },
+  "580406": {
+    "Name": {
+      "zh-CN": "娜宝",
+      "en-US": "Nappo",
+      "ja-JP": "ナッポ",
+      "ko-KR": "나뽀"
     }
   },
   "581101": {
@@ -4213,6 +4941,94 @@
       "en-US": "Swift Arachnocrab",
       "ja-JP": "爆速カニクモ",
       "ko-KR": "초고속 거미게"
+    }
+  },
+  "590001": {
+    "Name": {
+      "zh-CN": "蜥蜴人士兵",
+      "en-US": "Lizardman Soldier",
+      "ja-JP": "ギルミー兵士",
+      "ko-KR": "리자드맨 병사"
+    }
+  },
+  "590002": {
+    "Name": {
+      "zh-CN": "深海凝视者",
+      "en-US": "Abyssal Gazer",
+      "ja-JP": "深海の凝視者",
+      "ko-KR": "심해 주시자"
+    }
+  },
+  "590101": {
+    "Name": {
+      "zh-CN": "凶猛金牙",
+      "en-US": "Golden Juggernaut",
+      "ja-JP": "猛る金色",
+      "ko-KR": "사나운 황금 이빨"
+    }
+  },
+  "590102": {
+    "Name": {
+      "zh-CN": "幻妖蟹蛛",
+      "en-US": "Phantom Arachnocrab",
+      "ja-JP": "ゴーストカニクモ",
+      "ko-KR": "환영 거미게"
+    }
+  },
+  "590103": {
+    "Name": {
+      "zh-CN": "破雾之牙",
+      "en-US": "Mist-Piercing Fang",
+      "ja-JP": "破霧の牙",
+      "ko-KR": "안개 송곳니"
+    }
+  },
+  "590104": {
+    "Name": {
+      "zh-CN": "克劳泽",
+      "en-US": "Klausze",
+      "ja-JP": "クローゼ",
+      "ko-KR": "클라우저"
+    }
+  },
+  "590105": {
+    "Name": {
+      "zh-CN": "雅戈尔将军",
+      "en-US": "General Yageer",
+      "ja-JP": "ヤゴール将軍",
+      "ko-KR": "야고르 장군"
+    }
+  },
+  "604001": {
+    "Name": {
+      "zh-CN": "卷心菜战士",
+      "en-US": "Cabbage Warrior",
+      "ja-JP": "甘藍戦士",
+      "ko-KR": "양배추 전사"
+    }
+  },
+  "604002": {
+    "Name": {
+      "zh-CN": "卷心菜逃跑测试",
+      "en-US": "Cabbage Flee Test",
+      "ja-JP": "甘藍逃走テスト",
+      "ko-KR": "양배추 도망 테스트"
+    }
+  },
+  "604003": {
+    "Name": {
+      "zh-CN": "胆小菇",
+      "en-US": "Timid Mushroom",
+      "ja-JP": "臆病キノコ",
+      "ko-KR": "소심버섯"
+    }
+  },
+  "604004": {
+    "Name": {
+      "zh-CN": "胆小菇-死亡",
+      "en-US": "Timid Mushroom - Dead",
+      "ja-JP": "臆病キノコ-死亡",
+      "ko-KR": "소심버섯 - 사망"
     }
   },
   "604005": {

@@ -4187,6 +4187,12 @@
     "ja-JP": "",
     "ko-KR": ""
   },
+  "4548": {
+    "zh-CN": "",
+    "en-US": "",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
   "4551": {
     "zh-CN": "",
     "en-US": "",
@@ -4626,6 +4632,30 @@
     "ko-KR": ""
   },
   "4772": {
+    "zh-CN": "",
+    "en-US": "",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "4801": {
+    "zh-CN": "",
+    "en-US": "",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "4802": {
+    "zh-CN": "",
+    "en-US": "",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "4803": {
+    "zh-CN": "",
+    "en-US": "",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "4804": {
     "zh-CN": "",
     "en-US": "",
     "ja-JP": "",
@@ -13797,31 +13827,31 @@
     "zh-CN": "虚蚀·狂化术",
     "en-US": "Void Corruption: Frenzy Spell",
     "ja-JP": "虚蝕・凶暴化術",
-    "ko-KR": "허무의 침식・광폭술"
+    "ko-KR": "허식・광폭술"
   },
   "400414": {
     "zh-CN": "虚蚀·嗜血术",
     "en-US": "Void Corruption: Bloodlust Spell",
     "ja-JP": "虚蝕・吸血術",
-    "ko-KR": "허무의 침식・흡혈술"
+    "ko-KR": "허식・흡혈술"
   },
   "400415": {
     "zh-CN": "虚蚀·涡流",
     "en-US": "Void Corruption: Vortex",
     "ja-JP": "虚蝕・渦巻き",
-    "ko-KR": "허무의 침식・볼텍스"
+    "ko-KR": "허식・볼텍스"
   },
   "400416": {
     "zh-CN": "虚蚀·狂化术",
     "en-US": "Void Corruption: Frenzy Spell",
     "ja-JP": "虚蝕・凶暴化術",
-    "ko-KR": "허무의 침식・광폭술"
+    "ko-KR": "허식・광폭술"
   },
   "400417": {
     "zh-CN": "虚蚀·复生术",
     "en-US": "Void Corruption: Resurrection Spell",
     "ja-JP": "虚蝕・復活術",
-    "ko-KR": "허무의 침식・소생술"
+    "ko-KR": "허식・소생술"
   },
   "400418": {
     "zh-CN": "",
@@ -16869,7 +16899,7 @@
     "zh-CN": "虚蚀·强化震荡",
     "en-US": "Void Corruption: Empowered Shock",
     "ja-JP": "虚蝕・強化ショック",
-    "ko-KR": "허무의 침식・진동 강화"
+    "ko-KR": "허식・진동 강화"
   },
   "1006502": {
     "zh-CN": "",
@@ -16881,7 +16911,7 @@
     "zh-CN": "虚蚀·处决",
     "en-US": "Void Corruption: Execution",
     "ja-JP": "虚蝕・エグゼキューション",
-    "ko-KR": "허무의 침식・처형"
+    "ko-KR": "허식・처형"
   },
   "1006504": {
     "zh-CN": "",
@@ -16929,19 +16959,19 @@
     "zh-CN": "虚蚀震荡",
     "en-US": "Void Corruption Tremor",
     "ja-JP": "虚蝕ショック",
-    "ko-KR": "허무의 침식 진동"
+    "ko-KR": "허식 진동"
   },
   "1006512": {
     "zh-CN": "虚蚀·剑气",
     "en-US": "Void Corruption: Sword Energy",
     "ja-JP": "虚蝕・ソードエネルギー",
-    "ko-KR": "허무의 침식・검기"
+    "ko-KR": "허식・검기"
   },
   "1006513": {
     "zh-CN": "虚蚀·震荡",
     "en-US": "Void Corruption: Tremor",
     "ja-JP": "虚蝕・ショック",
-    "ko-KR": "허무의 침식・진동"
+    "ko-KR": "허식・진동"
   },
   "1006514": {
     "zh-CN": "重坠",
@@ -16953,7 +16983,7 @@
     "zh-CN": "虚蚀·迸发",
     "en-US": "Void Corruption: Burst",
     "ja-JP": "虚蝕・ブースト",
-    "ko-KR": "허무의 침식・분출"
+    "ko-KR": "허식・분출"
   },
   "1006551": {
     "zh-CN": "",
@@ -22173,7 +22203,7 @@
     "zh-CN": "虚蚀·蚀影追袭",
     "en-US": "Void Corruption: Shadow Pursuit",
     "ja-JP": "虚蝕・蝕影追撃",
-    "ko-KR": "허무의 침식・그림자 추격"
+    "ko-KR": "허식・그림자 추격"
   },
   "2001728": {
     "zh-CN": "破甲刺杀",
@@ -24279,7 +24309,7 @@
     "zh-CN": "虚蚀·嗜血术",
     "en-US": "Void Corruption: Bloodlust Spell",
     "ja-JP": "虚蝕・吸血術",
-    "ko-KR": "허무의 침식・흡혈술"
+    "ko-KR": "허식・흡혈술"
   },
   "3030911": {
     "zh-CN": "",

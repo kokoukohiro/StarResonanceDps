@@ -131,7 +131,7 @@ public sealed record PlayerInfoEntry
             ? unknownText
             : CombatDataCatalog.GetSeasonRankName(seasonId, player.SeasonRankLevel.Value);
         var classKey = PlayerProfession.GetKey(player.ProfessionId, player.ClassSpec);
-        var seasonTalent = ResolveSeasonTalentIcon(player.SeasonTalentBuffId, player.IsSeasonTalentInactive);
+        var seasonTalent = ResolveSeasonTalentIcon(player.SeasonTalentBuffId, seasonId, player.IsSeasonTalentInactive);
 
         return new PlayerInfoEntry
         {
@@ -158,7 +158,7 @@ public sealed record PlayerInfoEntry
             // 無効はプレイヤー情報だけ「心相晶無効」と出す(書式の {Psych} とプレイヤーリストは「無効」)。
             SeasonTalentText = player.SeasonTalentBuffId <= 0 && player.IsSeasonTalentInactive
                 ? localization.GetString("PlayerInfo_SeasonTalentInactive")
-                : PlayerInfoFormatFormatter.GetSeasonTalentText(player.SeasonTalentBuffId, player.IsSeasonTalentInactive),
+                : PlayerInfoFormatFormatter.GetSeasonTalentText(player.SeasonTalentBuffId, seasonId, player.IsSeasonTalentInactive),
             SeasonIconMask = season.Mask,
             SeasonIconBrush = season.Brush,
             IsSeasonUnknown = season.IsUnknown,
@@ -183,15 +183,15 @@ public sealed record PlayerInfoEntry
 
     /// <summary>
     /// 潜在心相晶の絵と色の鍵。型が分かれば型の絵と型の色、無効なら無効の絵と無効の色、どちらでもなければはてなと不明の色。
-    /// 表に無い型(絵が無い型)も、はてなと不明の色。
+    /// 表に無い型(絵が無い型)も、はてなと不明の色。型は根のバフと回のシーズン(<paramref name="seasonId"/>)で決める。
     /// </summary>
-    private static (Brush? Mask, string ColorKey) ResolveSeasonTalentIcon(int rootBuffId, bool isInactive)
+    private static (Brush? Mask, string ColorKey) ResolveSeasonTalentIcon(int rootBuffId, int seasonId, bool isInactive)
     {
         if (rootBuffId > 0)
         {
-            var typeColorKey = SeasonTalentIcons.GetColorKey(rootBuffId);
+            var typeColorKey = SeasonTalentIcons.GetColorKey(rootBuffId, seasonId);
             return (
-                SeasonTalentIcons.GetIconMask(rootBuffId, isInactive: false),
+                SeasonTalentIcons.GetIconMask(rootBuffId, seasonId, isInactive: false),
                 string.Equals(typeColorKey, SeasonTalentIcons.UnknownColorKey, StringComparison.OrdinalIgnoreCase)
                     ? UnknownColorKey
                     : typeColorKey);
@@ -199,7 +199,7 @@ public sealed record PlayerInfoEntry
 
         return isInactive
             ? (SeasonTalentIcons.GetInactiveIconMask(), SeasonTalentIcons.InactiveColorKey)
-            : (SeasonTalentIcons.GetIconMask(0, isInactive: false), UnknownColorKey);
+            : (SeasonTalentIcons.GetIconMask(0, seasonId, isInactive: false), UnknownColorKey);
     }
 
     /// <summary>

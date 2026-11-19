@@ -26,26 +26,26 @@
   "5": {
     "zh-CN": "荒芜之庭",
     "en-US": "Barren Courtyard",
-    "ja-JP": "呪われし煌墓",
-    "ko-KR": "저주받은 무덤"
+    "ja-JP": "荒廃の庭",
+    "ko-KR": "황폐한 정원"
   },
   "6": {
     "zh-CN": "弥妄·巨龙爪痕",
     "en-US": "Illusion-Shroud - Dragon Claw Valley",
-    "ja-JP": "機械化工場",
-    "ko-KR": "기계화 처리소"
+    "ja-JP": "迷妄・巨竜の爪痕",
+    "ko-KR": "미망・거룡의 발톱"
   },
   "7": {
     "zh-CN": "镜中的审判",
     "en-US": "Mirror Judgment",
-    "ja-JP": "蝕・ティナの精神領域",
-    "ko-KR": "침식・티나의 정신 세계"
+    "ja-JP": "鏡中の審判",
+    "ko-KR": "거울 속의 심판"
   },
   "8": {
     "zh-CN": "弥妄·流月之野",
     "en-US": "Illusion-Shroud - Moonveil Wilds",
-    "ja-JP": "霧海の猟場",
-    "ko-KR": "안개 속 사냥터"
+    "ja-JP": "迷妄・流月の野",
+    "ko-KR": "미망・빛이 흐르는 들판"
   },
   "9": {
     "zh-CN": "日活跃目标",
@@ -80,26 +80,26 @@
   "14": {
     "zh-CN": "荒芜之庭",
     "en-US": "Barren Courtyard",
-    "ja-JP": "呪われし煌墓",
-    "ko-KR": "저주받은 무덤"
+    "ja-JP": "荒廃の庭",
+    "ko-KR": "황폐한 정원"
   },
   "15": {
     "zh-CN": "弥妄·巨龙爪痕",
     "en-US": "Illusion-Shroud - Dragon Claw Valley",
-    "ja-JP": "機械化工場",
-    "ko-KR": "기계화 처리소"
+    "ja-JP": "迷妄・巨竜の爪痕",
+    "ko-KR": "미망・거룡의 발톱"
   },
   "16": {
     "zh-CN": "镜中的审判",
     "en-US": "Mirror Judgment",
-    "ja-JP": "蝕・ティナの精神領域",
-    "ko-KR": "침식・티나의 정신 세계"
+    "ja-JP": "鏡中の審判",
+    "ko-KR": "거울 속의 심판"
   },
   "17": {
     "zh-CN": "弥妄·流月之野",
     "en-US": "Illusion-Shroud - Moonveil Wilds",
-    "ja-JP": "霧海の猟場",
-    "ko-KR": "안개 속 사냥터"
+    "ja-JP": "迷妄・流月の野",
+    "ko-KR": "미망・빛이 흐르는 들판"
   },
   "18": {
     "zh-CN": "讨伐领主",
@@ -272,14 +272,14 @@
   "101": {
     "zh-CN": "弥妄·黯影堡垒",
     "en-US": "Illusion-Shroud - Dark Mist Fortress",
-    "ja-JP": "蝕・巨塔の遺跡",
-    "ko-KR": "침식・거탑 유적"
+    "ja-JP": "迷妄・暗霧要塞",
+    "ko-KR": "미망・검은 안개 요새"
   },
   "102": {
     "zh-CN": "弥妄·黯影堡垒",
     "en-US": "Illusion-Shroud - Dark Mist Fortress",
-    "ja-JP": "蝕・巨塔の遺跡",
-    "ko-KR": "침식・거탑 유적"
+    "ja-JP": "迷妄・暗霧要塞",
+    "ko-KR": "미망・검은 안개 요새"
   },
   "103": {
     "zh-CN": "巨龙爪痕",
@@ -290,8 +290,8 @@
   "104": {
     "zh-CN": "远天的神槛",
     "en-US": "Cavern Zero",
-    "ja-JP": "珊瑚岩の谷",
-    "ko-KR": "환해 암초 지대"
+    "ja-JP": "遠天の神檻",
+    "ko-KR": "먼 하늘의 신단"
   },
   "105": {
     "zh-CN": "黯影堡垒",
@@ -308,8 +308,8 @@
   "107": {
     "zh-CN": "远天的神槛",
     "en-US": "Cavern Zero",
-    "ja-JP": "珊瑚岩の谷",
-    "ko-KR": "환해 암초 지대"
+    "ja-JP": "遠天の神檻",
+    "ko-KR": "먼 하늘의 신단"
   },
   "200": {
     "zh-CN": "主题活动",
@@ -345,13 +345,13 @@
     "zh-CN": "山贼营地巡逻",
     "en-US": "Brigand Camp Patrol",
     "ja-JP": "山賊野営地の巡回",
-    "ko-KR": "산적 영지 순찰"
+    "ko-KR": "산적 캠프 순찰"
   },
   "206": {
     "zh-CN": "姆克营地巡逻",
     "en-US": "Muku Camp Patrol",
     "ja-JP": "ムークキャンプの巡回",
-    "ko-KR": "무크 영지 순찰"
+    "ko-KR": "무크 캠프 순찰"
   },
   "207": {
     "zh-CN": "舞蹈练习生",
@@ -644,7 +644,7 @@
   "345": {
     "zh-CN": "传说鱼影追踪战",
     "en-US": "Legendary Fish Chase",
-    "ja-JP": "伝説の魚影を追え！",
+    "ja-JP": "伝説の魚影・追跡戦",
     "ko-KR": "전설의 물고기 그림자 추격전"
   },
   "346": {
@@ -680,14 +680,14 @@
   "358": {
     "zh-CN": "烬夜映迹",
     "en-US": "Ember Night Echoes",
-    "ja-JP": "余燼の残影",
+    "ja-JP": "燼夜の跡",
     "ko-KR": "밤의 잔불의 잔상"
   },
   "359": {
     "zh-CN": "朝夕祈愿",
     "en-US": "Dawn to Dusk Wishes",
-    "ja-JP": "朝夕の祈り",
-    "ko-KR": "낮밤의 기원"
+    "ja-JP": "朝夕の願い",
+    "ko-KR": "아침 저녁의 기도"
   },
   "360": {
     "zh-CN": "海风节庆典<br>～星之行迹～",
@@ -1022,7 +1022,7 @@
   "908": {
     "zh-CN": "恶疫之鳞剿灭·挑战",
     "en-US": "Malice Scales Subjugation - Challenge",
-    "ja-JP": "毒竜殲滅戦・チャレンジ",
+    "ja-JP": "毒竜・プレイグ殲滅・挑戦",
     "ko-KR": "역병 비늘 토벌전・도전"
   },
   "909": {
@@ -1256,7 +1256,7 @@
   "3267": {
     "zh-CN": "祖息孢培育计划预告",
     "en-US": "Ancestral Spore Cultivation Plan Preview",
-    "ja-JP": "盟約の胞子育成計画予告",
+    "ja-JP": "盟約の胞子育成計画の予告",
     "ko-KR": "선조의 숨결 포자 배양 계획 예고"
   },
   "3268": {
@@ -1304,25 +1304,25 @@
   "10006": {
     "zh-CN": "传说鱼影追踪战·一",
     "en-US": "Legendary Fish Chase I",
-    "ja-JP": "伝説の魚影を追え！・一",
+    "ja-JP": "伝説の魚影・追跡戦・一",
     "ko-KR": "전설의 물고기 그림자 추격전・1"
   },
   "10007": {
     "zh-CN": "传说鱼影追踪战·二",
     "en-US": "Legendary Fish Chase II",
-    "ja-JP": "伝説の魚影を追え！・二",
+    "ja-JP": "伝説の魚影・追跡戦・二",
     "ko-KR": "전설의 물고기 그림자 추격전・2"
   },
   "10008": {
     "zh-CN": "传说鱼影追踪战·三",
     "en-US": "Legendary Fish Chase III",
-    "ja-JP": "伝説の魚影を追え！・三",
+    "ja-JP": "伝説の魚影・追跡戦・三",
     "ko-KR": "전설의 물고기 그림자 추격전・3"
   },
   "10009": {
     "zh-CN": "传说鱼影追踪战·四",
     "en-US": "Legendary Fish Chase IV",
-    "ja-JP": "伝説の魚影を追え！・四",
+    "ja-JP": "伝説の魚影・追跡戦・四",
     "ko-KR": "전설의 물고기 그림자 추격전・4"
   },
   "11000": {
@@ -1435,9 +1435,9 @@
   },
   "11027": {
     "zh-CN": "大师分目标",
-    "en-US": "",
-    "ja-JP": "",
-    "ko-KR": ""
+    "en-US": "Master Score Goal",
+    "ja-JP": "マスタースコア目標",
+    "ko-KR": "마스터 점수 목표"
   },
   "20001": {
     "zh-CN": "香格里拉边境",
@@ -1496,7 +1496,7 @@
   "20010": {
     "zh-CN": "传说鱼影追踪战",
     "en-US": "Legendary Fish Chase",
-    "ja-JP": "伝説の魚影を追え！",
+    "ja-JP": "伝説の魚影・追跡戦",
     "ko-KR": "전설의 물고기 그림자 추격전"
   },
   "20011": {

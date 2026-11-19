@@ -3,9 +3,12 @@
 シーズンタレントの型のルートノードの名前テーブルを生成する。
 
   Data/Localization/SeasonTalentNames.json
+  Data/Localization/SeasonTalentTypeNames.json
 
 シーズンタレントは型ごとに木があり、型を付けるとそのルートノードの効果のバフが付く。
-そのバフから、その人が付けている型のルートノードを引くための「ルートノードのバフID → ルートノードの名前」。
+`SeasonTalentNames.json`は、そのバフから、その人が付けている型のルートノードを引くための「ルートノードのバフID → ルートノードの名前」。
+`SeasonTalentTypeNames.json`は「型ID(`SeasonTalentTemplateTable.Id`) → ルートノードの名前」。シーズンをまたいで同じバフをルートバフに使う型も、型ごとに名前が引ける。
+型ごとの名前もベースのデータソースの決まりは同じで、型IDの単位で決める。
 
 ルートノードは`SeasonTalentTemplateTable.NoteRootId`。`SeasonTalentEffectOrdinaryTable`のうち`GroupId`がそれに一致する行が
 ルートノードの効果で、`Effect`の`[3, バフID, 1]`がそのバフ、`Name`がルートノードの名前。ルート以外のノードは入れない。
@@ -72,6 +75,7 @@ def roots_of(label, templates, ordinary, problems):
 
 def main():
     values = {lang: {} for lang in LANGS}
+    type_values = {lang: {} for lang in LANGS}
     problems = []
     conflicts = []
     resolved = []
@@ -85,6 +89,11 @@ def main():
                 problems.append("%sに%sが無い" % (label, TEMPLATE_TABLE))
                 continue
             found = roots_of(label, templates, ordinary, problems)
+            for candidates in found.values():
+                # 先のデータソース(ベース)で名前が決まった型IDには、後のデータソースを混ぜない。
+                for _, template_id, name in candidates:
+                    if name and not type_values[lang].get(str(template_id)):
+                        type_values[lang][str(template_id)] = name
             for key, candidates in found.items():
                 # 先のデータソース(ベース)で名前が決まったバフIDには、後のデータソースを混ぜない。
                 if values[lang].get(key):
@@ -103,7 +112,8 @@ def main():
                 if len({name for _, _, name in named}) > 1:
                     resolved.append("%s %s %s(%s)→ シーズン%dを採る" % (lang, key, source_name, listing, newest))
             counts.append("%s %d" % (source_name, len(found)))
-        print("%-6sルートノードのバフID %3d(%s)" % (lang, len(values[lang]), " / ".join(counts)))
+        print("%-6sルートノードのバフID %3d / 型ID %3d(%s)"
+              % (lang, len(values[lang]), len(type_values[lang]), " / ".join(counts)))
 
     if problems or conflicts:
         for text in problems:
@@ -124,6 +134,11 @@ def main():
     print()
 
     write_localized("SeasonTalentNames", values, keys)
+
+    type_keys = set()
+    for lang in LANGS:
+        type_keys |= set(type_values[lang])
+    write_localized("SeasonTalentTypeNames", type_values, type_keys)
 
 
 if __name__ == "__main__":

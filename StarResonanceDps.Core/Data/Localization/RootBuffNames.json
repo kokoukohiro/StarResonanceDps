@@ -98,8 +98,8 @@
   "3002420": {
     "zh-CN": "箭雨·急袭箭雨",
     "en-US": "Arrow Rain: Arrow Barrage",
-    "ja-JP": "デュアルタイム",
-    "ko-KR": "이중 시공간"
+    "ja-JP": "アローレイン・急襲",
+    "ko-KR": "화살비・화살비 급습"
   },
   "3002430": {
     "zh-CN": "梦矢封暴",
@@ -116,8 +116,8 @@
   "3002450": {
     "zh-CN": "箭雨·追魂箭矢",
     "en-US": "Arrow Rain: Soulseeker Arrows",
-    "ja-JP": "天流八重",
-    "ko-KR": "천류 팔중"
+    "ja-JP": "アローレイン・追魂の矢",
+    "ko-KR": "화살비・영혼 추적 화살"
   },
   "3002460": {
     "zh-CN": "精炼异华",
@@ -128,8 +128,8 @@
   "3002470": {
     "zh-CN": "箭雨·锋锐箭矢",
     "en-US": "Arrow Rain: Sharp Arrows",
-    "ja-JP": "幻影貫通",
-    "ko-KR": "환상 관통 공격"
+    "ja-JP": "アローレイン・鋭利の矢",
+    "ko-KR": "화살비・예리한 화살"
   },
   "3002480": {
     "zh-CN": "专精妙技",
@@ -146,7 +146,7 @@
   "3002500": {
     "zh-CN": "箭雨·暴击箭矢",
     "en-US": "Arrow Rain: Crit Arrows",
-    "ja-JP": "アローレイン・幸運の矢",
+    "ja-JP": "アローレイン・会心の矢",
     "ko-KR": "화살비・치명타 화살"
   },
   "3002510": {
@@ -260,8 +260,8 @@
   "3003030": {
     "zh-CN": "激励·绝唱护魂",
     "en-US": "Inspire: Soulguard Finale",
-    "ja-JP": "幻夢の執念",
-    "ko-KR": "환상꿈 집념"
+    "ja-JP": "激励・護魂絶唱",
+    "ko-KR": "격려・영혼 수호의 선율"
   },
   "3003040": {
     "zh-CN": "止境延界",
@@ -839,132 +839,6 @@
     "ja-JP": "交響・四重絶奏",
     "ko-KR": "하모니・사중주"
   },
-  "3050010": {
-    "zh-CN": "雷影X1",
-    "en-US": "Stormblade X1",
-    "ja-JP": "ストームブレイドX1",
-    "ko-KR": "스톰 블레이드X1"
-  },
-  "3050020": {
-    "zh-CN": "雷影X2",
-    "en-US": "Stormblade X2",
-    "ja-JP": "ストームブレイドX2",
-    "ko-KR": "스톰 블레이드X2"
-  },
-  "3050030": {
-    "zh-CN": "雷影X3",
-    "en-US": "Stormblade X3",
-    "ja-JP": "ストームブレイドX3",
-    "ko-KR": "스톰 블레이드X3"
-  },
-  "3050040": {
-    "zh-CN": "雷影X4",
-    "en-US": "Stormblade X4",
-    "ja-JP": "ストームブレイドX4",
-    "ko-KR": "스톰 블레이드X4"
-  },
-  "3050050": {
-    "zh-CN": "雷影X5",
-    "en-US": "Stormblade X5",
-    "ja-JP": "ストームブレイドX5",
-    "ko-KR": "스톰 블레이드X5"
-  },
-  "3050060": {
-    "zh-CN": "雷影X6",
-    "en-US": "Stormblade X6",
-    "ja-JP": "ストームブレイドX6",
-    "ko-KR": "스톰 블레이드X6"
-  },
-  "3050070": {
-    "zh-CN": "雷影X7",
-    "en-US": "Stormblade X7",
-    "ja-JP": "ストームブレイドX7",
-    "ko-KR": "스톰 블레이드X7"
-  },
-  "3050080": {
-    "zh-CN": "雷影X8",
-    "en-US": "Stormblade X8",
-    "ja-JP": "ストームブレイドX8",
-    "ko-KR": "스톰 블레이드X8"
-  },
-  "3050090": {
-    "zh-CN": "雷影X9",
-    "en-US": "Stormblade X9",
-    "ja-JP": "ストームブレイドX9",
-    "ko-KR": "스톰 블레이드X9"
-  },
-  "3050100": {
-    "zh-CN": "雷影X10",
-    "en-US": "Stormblade X10",
-    "ja-JP": "ストームブレイドX10",
-    "ko-KR": "스톰 블레이드X10"
-  },
-  "3050110": {
-    "zh-CN": "雷影X11",
-    "en-US": "Stormblade X11",
-    "ja-JP": "ストームブレイドX11",
-    "ko-KR": "스톰 블레이드X11"
-  },
-  "3050120": {
-    "zh-CN": "雷影狂想X1",
-    "en-US": "Stormblade Rhapsody X1",
-    "ja-JP": "ストームブレイド・狂想X1",
-    "ko-KR": "스톰 블레이드 광상X1"
-  },
-  "3050130": {
-    "zh-CN": "雷影狂想X2",
-    "en-US": "Stormblade Rhapsody X2",
-    "ja-JP": "ストームブレイド・狂想X2",
-    "ko-KR": "스톰 블레이드 광상X2"
-  },
-  "3050140": {
-    "zh-CN": "雷影狂想X3",
-    "en-US": "Stormblade Rhapsody X3",
-    "ja-JP": "ストームブレイド・狂想X3",
-    "ko-KR": "스톰 블레이드 광상X3"
-  },
-  "3050150": {
-    "zh-CN": "雷影狂想X4",
-    "en-US": "Stormblade Rhapsody X4",
-    "ja-JP": "ストームブレイド・狂想X4",
-    "ko-KR": "스톰 블레이드 광상X4"
-  },
-  "3050400": {
-    "zh-CN": "雷影真实因子X1",
-    "en-US": "Stormblade Reality Factor X1",
-    "ja-JP": "ストームブレイド・実像因子X1",
-    "ko-KR": "스톰 블레이드 진실 인자X1"
-  },
-  "3050410": {
-    "zh-CN": "雷影真实因子X2",
-    "en-US": "Stormblade Reality Factor X2",
-    "ja-JP": "ストームブレイド・実像因子X2",
-    "ko-KR": "스톰 블레이드 진실 인자X2"
-  },
-  "3050420": {
-    "zh-CN": "雷影真实因子X3",
-    "en-US": "Stormblade Reality Factor X3",
-    "ja-JP": "ストームブレイド・実像因子X3",
-    "ko-KR": "스톰 블레이드 진실 인자X3"
-  },
-  "3050430": {
-    "zh-CN": "雷影真实因子X4",
-    "en-US": "Stormblade Reality Factor X4",
-    "ja-JP": "ストームブレイド・実像因子X4",
-    "ko-KR": "스톰 블레이드 진실 인자X4"
-  },
-  "3050440": {
-    "zh-CN": "雷影真实因子X5",
-    "en-US": "Stormblade Reality Factor X5",
-    "ja-JP": "ストームブレイド・実像因子X5",
-    "ko-KR": "스톰 블레이드 진실 인자X5"
-  },
-  "3050450": {
-    "zh-CN": "雷影真实因子X6",
-    "en-US": "Stormblade Reality Factor X6",
-    "ja-JP": "ストームブレイド・実像因子X6",
-    "ko-KR": "스톰 블레이드 진실 인자X6"
-  },
   "3050460": {
     "zh-CN": "雷影灵感因子X1",
     "en-US": "Stormblade Inspiration Factor X1",
@@ -1049,341 +923,89 @@
     "ja-JP": "ストームブレイド・恒常性因子X2",
     "ko-KR": "스톰 블레이드 안정 인자 X2"
   },
-  "3051010": {
-    "zh-CN": "青岚X1",
-    "en-US": "Wind Knight X1",
-    "ja-JP": "ゲイルランサーX1",
-    "ko-KR": "윈드 나이트X1"
-  },
-  "3051020": {
-    "zh-CN": "青岚X2",
-    "en-US": "Wind Knight X2",
-    "ja-JP": "ゲイルランサーX2",
-    "ko-KR": "윈드 나이트X2"
-  },
-  "3051030": {
-    "zh-CN": "青岚X3",
-    "en-US": "Wind Knight X3",
-    "ja-JP": "ゲイルランサーX3",
-    "ko-KR": "윈드 나이트X3"
-  },
-  "3051040": {
-    "zh-CN": "青岚X4",
-    "en-US": "Wind Knight X4",
-    "ja-JP": "ゲイルランサーX4",
-    "ko-KR": "윈드 나이트X4"
-  },
-  "3051050": {
-    "zh-CN": "青岚X5",
-    "en-US": "Wind Knight X5",
-    "ja-JP": "ゲイルランサーX5",
-    "ko-KR": "윈드 나이트X5"
-  },
-  "3051060": {
-    "zh-CN": "青岚X6",
-    "en-US": "Wind Knight X6",
-    "ja-JP": "ゲイルランサーX6",
-    "ko-KR": "윈드 나이트X6"
-  },
-  "3051070": {
-    "zh-CN": "青岚X7",
-    "en-US": "Wind Knight X7",
-    "ja-JP": "ゲイルランサーX7",
-    "ko-KR": "윈드 나이트X7"
-  },
-  "3051080": {
-    "zh-CN": "青岚X8",
-    "en-US": "Wind Knight X8",
-    "ja-JP": "ゲイルランサーX8",
-    "ko-KR": "윈드 나이트X8"
-  },
-  "3051090": {
-    "zh-CN": "青岚X9",
-    "en-US": "Wind Knight X9",
-    "ja-JP": "ゲイルランサーX9",
-    "ko-KR": "윈드 나이트X9"
-  },
-  "3051100": {
-    "zh-CN": "青岚X10",
-    "en-US": "Wind Knight X10",
-    "ja-JP": "ゲイルランサーX10",
-    "ko-KR": "윈드 나이트X10"
-  },
-  "3051110": {
-    "zh-CN": "青岚X11",
-    "en-US": "Wind Knight X11",
-    "ja-JP": "ゲイルランサーX11",
-    "ko-KR": "윈드 나이트X11"
-  },
-  "3051120": {
-    "zh-CN": "青岚狂想X1",
-    "en-US": "Wind Knight Rhapsody X1",
-    "ja-JP": "ゲイルランサー・狂想X1",
-    "ko-KR": "윈드 나이트 광상X1"
-  },
-  "3051130": {
-    "zh-CN": "青岚狂想X2",
-    "en-US": "Wind Knight Rhapsody X2",
-    "ja-JP": "ゲイルランサー・狂想X2",
-    "ko-KR": "윈드 나이트 광상X2"
-  },
-  "3051140": {
-    "zh-CN": "青岚狂想X3",
-    "en-US": "Wind Knight Rhapsody X3",
-    "ja-JP": "ゲイルランサー・狂想X3",
-    "ko-KR": "윈드 나이트 광상X3"
-  },
-  "3051150": {
-    "zh-CN": "青岚狂想X4",
-    "en-US": "Wind Knight Rhapsody X4",
-    "ja-JP": "ゲイルランサー・狂想X4",
-    "ko-KR": "윈드 나이트 광상X4"
-  },
-  "3051400": {
-    "zh-CN": "青岚真实因子X1",
-    "en-US": "Wind Knight Reality Factor X1",
-    "ja-JP": "ゲイルランサー・実像因子X1",
-    "ko-KR": "윈드 나이트 진실 인자X1"
-  },
-  "3051410": {
-    "zh-CN": "青岚真实因子X2",
-    "en-US": "Wind Knight Reality Factor X2",
-    "ja-JP": "ゲイルランサー・実像因子X2",
-    "ko-KR": "윈드 나이트 진실 인자X2"
-  },
-  "3051420": {
-    "zh-CN": "青岚真实因子X3",
-    "en-US": "Wind Knight Reality Factor X3",
-    "ja-JP": "ゲイルランサー・実像因子X3",
-    "ko-KR": "윈드 나이트 진실 인자X3"
-  },
-  "3051430": {
-    "zh-CN": "青岚真实因子X4",
-    "en-US": "Wind Knight Reality Factor X4",
-    "ja-JP": "ゲイルランサー・実像因子X4",
-    "ko-KR": "윈드 나이트 진실 인자X4"
-  },
-  "3051440": {
-    "zh-CN": "青岚真实因子X5",
-    "en-US": "Wind Knight Reality Factor X5",
-    "ja-JP": "ゲイルランサー・実像因子X5",
-    "ko-KR": "윈드 나이트 진실 인자X5"
-  },
-  "3051450": {
-    "zh-CN": "青岚真实因子X6",
-    "en-US": "Wind Knight Reality Factor X6",
-    "ja-JP": "ゲイルランサー・実像因子X6",
-    "ko-KR": "윈드 나이트 진실 인자X6"
-  },
   "3051460": {
     "zh-CN": "青岚灵感因子X1",
     "en-US": "Wind Knight Inspiration Factor X1",
     "ja-JP": "ゲイルランサー・想像因子X1",
-    "ko-KR": "윈드 영감 인자 X1"
+    "ko-KR": "윈드 나이트 영감 인자 X1"
   },
   "3051470": {
     "zh-CN": "青岚灵感因子X2",
     "en-US": "Wind Knight Inspiration Factor X2",
     "ja-JP": "ゲイルランサー・想像因子X2",
-    "ko-KR": "윈드 영감 인자 X2"
+    "ko-KR": "윈드 나이트 영감 인자 X2"
   },
   "3051480": {
     "zh-CN": "青岚灵感因子X3",
     "en-US": "Wind Knight Inspiration Factor X3",
     "ja-JP": "ゲイルランサー・想像因子X3",
-    "ko-KR": "윈드 영감 인자 X3"
+    "ko-KR": "윈드 나이트 영감 인자 X3"
   },
   "3051490": {
     "zh-CN": "青岚灵感因子X4",
     "en-US": "Wind Knight Inspiration Factor X4",
     "ja-JP": "ゲイルランサー・想像因子X4",
-    "ko-KR": "윈드 영감 인자 X4"
+    "ko-KR": "윈드 나이트 영감 인자 X4"
   },
   "3051500": {
     "zh-CN": "青岚奇点因子X3",
     "en-US": "Wind Knight Singularity Factor X3",
     "ja-JP": "ゲイルランサー・特異因子X3",
-    "ko-KR": "윈드 특이점 인자 X3"
+    "ko-KR": "윈드 나이트 특이점 인자 X3"
   },
   "3051510": {
     "zh-CN": "青岚灵感因子X6",
     "en-US": "Wind Knight Inspiration Factor X6",
     "ja-JP": "ゲイルランサー・想像因子X6",
-    "ko-KR": "윈드 영감 인자 X6"
+    "ko-KR": "윈드 나이트 영감 인자 X6"
   },
   "3051520": {
     "zh-CN": "青岚灵感因子X7",
     "en-US": "Wind Knight Inspiration Factor X7",
     "ja-JP": "ゲイルランサー・想像因子X7",
-    "ko-KR": "윈드 영감 인자 X7"
+    "ko-KR": "윈드 나이트 영감 인자 X7"
   },
   "3051530": {
     "zh-CN": "青岚灵感因子X8",
     "en-US": "Wind Knight Inspiration Factor X8",
     "ja-JP": "ゲイルランサー・想像因子X8",
-    "ko-KR": "윈드 영감 인자 X8"
+    "ko-KR": "윈드 나이트 영감 인자 X8"
   },
   "3051540": {
     "zh-CN": "青岚奇点因子X1",
     "en-US": "Wind Knight Singularity Factor X1",
     "ja-JP": "ゲイルランサー・特異因子X1",
-    "ko-KR": "윈드 특이점 인자 X1"
+    "ko-KR": "윈드 나이트 특이점 인자 X1"
   },
   "3051550": {
     "zh-CN": "青岚奇点因子X2",
     "en-US": "Wind Knight Singularity Factor X2",
     "ja-JP": "ゲイルランサー・特異因子X2",
-    "ko-KR": "윈드 특이점 인자 X2"
+    "ko-KR": "윈드 나이트 특이점 인자 X2"
   },
   "3051560": {
     "zh-CN": "青岚灵感因子X5",
     "en-US": "Wind Knight Inspiration Factor X5",
     "ja-JP": "ゲイルランサー・想像因子X5",
-    "ko-KR": "윈드 영감 인자 X5"
+    "ko-KR": "윈드 나이트 영감 인자 X5"
   },
   "3051570": {
     "zh-CN": "青岚奇点因子X4",
     "en-US": "Wind Knight Singularity Factor X4",
     "ja-JP": "ゲイルランサー・特異因子X4",
-    "ko-KR": "윈드 특이점 인자 X4"
+    "ko-KR": "윈드 나이트 특이점 인자 X4"
   },
   "3051580": {
     "zh-CN": "青岚稳态因子X1",
     "en-US": "Wind Knight Stasis Factor X1",
     "ja-JP": "ゲイルランサー・恒常性因子X1",
-    "ko-KR": "윈드 안정 인자 X1"
+    "ko-KR": "윈드 나이트 안정 인자 X1"
   },
   "3051590": {
     "zh-CN": "青岚稳态因子X2",
     "en-US": "Wind Knight Stasis Factor X2",
     "ja-JP": "ゲイルランサー・恒常性因子X2",
-    "ko-KR": "윈드 안정 인자 X2"
-  },
-  "3052010": {
-    "zh-CN": "冰魔X1",
-    "en-US": "Frost Mage X1",
-    "ja-JP": "フロストメイジX1",
-    "ko-KR": "프로스트 메이지X1"
-  },
-  "3052020": {
-    "zh-CN": "冰魔X2",
-    "en-US": "Frost Mage X2",
-    "ja-JP": "フロストメイジX2",
-    "ko-KR": "프로스트 메이지X2"
-  },
-  "3052030": {
-    "zh-CN": "冰魔X3",
-    "en-US": "Frost Mage X3",
-    "ja-JP": "フロストメイジX3",
-    "ko-KR": "프로스트 메이지X3"
-  },
-  "3052040": {
-    "zh-CN": "冰魔X4",
-    "en-US": "Frost Mage X4",
-    "ja-JP": "フロストメイジX4",
-    "ko-KR": "프로스트 메이지X4"
-  },
-  "3052050": {
-    "zh-CN": "冰魔X5",
-    "en-US": "Frost Mage X5",
-    "ja-JP": "フロストメイジX5",
-    "ko-KR": "프로스트 메이지X5"
-  },
-  "3052060": {
-    "zh-CN": "冰魔X6",
-    "en-US": "Frost Mage X6",
-    "ja-JP": "フロストメイジX6",
-    "ko-KR": "프로스트 메이지X6"
-  },
-  "3052070": {
-    "zh-CN": "冰魔X7",
-    "en-US": "Frost Mage X7",
-    "ja-JP": "フロストメイジX7",
-    "ko-KR": "프로스트 메이지X7"
-  },
-  "3052080": {
-    "zh-CN": "冰魔X8",
-    "en-US": "Frost Mage X8",
-    "ja-JP": "フロストメイジX8",
-    "ko-KR": "프로스트 메이지X8"
-  },
-  "3052090": {
-    "zh-CN": "冰魔X9",
-    "en-US": "Frost Mage X9",
-    "ja-JP": "フロストメイジX9",
-    "ko-KR": "프로스트 메이지X9"
-  },
-  "3052100": {
-    "zh-CN": "冰魔X10",
-    "en-US": "Frost Mage X10",
-    "ja-JP": "フロストメイジX10",
-    "ko-KR": "프로스트 메이지X10"
-  },
-  "3052110": {
-    "zh-CN": "冰魔X11",
-    "en-US": "Frost Mage X11",
-    "ja-JP": "フロストメイジX11",
-    "ko-KR": "프로스트 메이지X11"
-  },
-  "3052120": {
-    "zh-CN": "冰魔狂想X1",
-    "en-US": "Frost Mage Rhapsody X1",
-    "ja-JP": "フロストメイジ・狂想X1",
-    "ko-KR": "프로스트 메이지 광상X1"
-  },
-  "3052130": {
-    "zh-CN": "冰魔狂想X2",
-    "en-US": "Frost Mage Rhapsody X2",
-    "ja-JP": "フロストメイジ・狂想X2",
-    "ko-KR": "프로스트 메이지 광상X2"
-  },
-  "3052140": {
-    "zh-CN": "冰魔狂想X3",
-    "en-US": "Frost Mage Rhapsody X3",
-    "ja-JP": "フロストメイジ・狂想X3",
-    "ko-KR": "프로스트 메이지 광상X3"
-  },
-  "3052150": {
-    "zh-CN": "冰魔狂想X4",
-    "en-US": "Frost Mage Rhapsody X4",
-    "ja-JP": "フロストメイジ・狂想X4",
-    "ko-KR": "프로스트 메이지 광상X4"
-  },
-  "3052400": {
-    "zh-CN": "冰魔真实因子X1",
-    "en-US": "Frost Mage Reality Factor X1",
-    "ja-JP": "フロストメイジ・実像因子X1",
-    "ko-KR": "프로스트 메이지 진실 인자X1"
-  },
-  "3052410": {
-    "zh-CN": "冰魔真实因子X2",
-    "en-US": "Frost Mage Reality Factor X2",
-    "ja-JP": "フロストメイジ・実像因子X2",
-    "ko-KR": "프로스트 메이지 진실 인자X2"
-  },
-  "3052420": {
-    "zh-CN": "冰魔真实因子X3",
-    "en-US": "Frost Mage Reality Factor X3",
-    "ja-JP": "フロストメイジ・実像因子X3",
-    "ko-KR": "프로스트 메이지 진실 인자X3"
-  },
-  "3052430": {
-    "zh-CN": "冰魔真实因子X4",
-    "en-US": "Frost Mage Reality Factor X4",
-    "ja-JP": "フロストメイジ・実像因子X4",
-    "ko-KR": "프로스트 메이지 진실 인자X4"
-  },
-  "3052440": {
-    "zh-CN": "冰魔真实因子X5",
-    "en-US": "Frost Mage Reality Factor X5",
-    "ja-JP": "フロストメイジ・実像因子X5",
-    "ko-KR": "프로스트 메이지 진실 인자X5"
-  },
-  "3052450": {
-    "zh-CN": "冰魔真实因子X6",
-    "en-US": "Frost Mage Reality Factor X6",
-    "ja-JP": "フロストメイジ・実像因子X6",
-    "ko-KR": "프로스트 메이지 진실 인자X6"
+    "ko-KR": "윈드 나이트 안정 인자 X2"
   },
   "3052460": {
     "zh-CN": "冰魔灵感因子X1",
@@ -1469,132 +1091,6 @@
     "ja-JP": "フロストメイジ・恒常性因子X2",
     "ko-KR": "프로스트 메이지 안정 인자 X2"
   },
-  "3053010": {
-    "zh-CN": "神射X1",
-    "en-US": "Marksman X1",
-    "ja-JP": "ディバインアーチャーX1",
-    "ko-KR": "디바인 아처X1"
-  },
-  "3053020": {
-    "zh-CN": "神射X2",
-    "en-US": "Marksman X2",
-    "ja-JP": "ディバインアーチャーX2",
-    "ko-KR": "디바인 아처X2"
-  },
-  "3053030": {
-    "zh-CN": "神射X3",
-    "en-US": "Marksman X3",
-    "ja-JP": "ディバインアーチャーX3",
-    "ko-KR": "디바인 아처X3"
-  },
-  "3053040": {
-    "zh-CN": "神射X4",
-    "en-US": "Marksman X4",
-    "ja-JP": "ディバインアーチャーX4",
-    "ko-KR": "디바인 아처X4"
-  },
-  "3053050": {
-    "zh-CN": "神射X5",
-    "en-US": "Marksman X5",
-    "ja-JP": "ディバインアーチャーX5",
-    "ko-KR": "디바인 아처X5"
-  },
-  "3053060": {
-    "zh-CN": "神射X6",
-    "en-US": "Marksman X6",
-    "ja-JP": "ディバインアーチャーX6",
-    "ko-KR": "디바인 아처X6"
-  },
-  "3053070": {
-    "zh-CN": "神射X7",
-    "en-US": "Marksman X7",
-    "ja-JP": "ディバインアーチャーX7",
-    "ko-KR": "디바인 아처X7"
-  },
-  "3053080": {
-    "zh-CN": "神射X8",
-    "en-US": "Marksman X8",
-    "ja-JP": "ディバインアーチャーX8",
-    "ko-KR": "디바인 아처X8"
-  },
-  "3053090": {
-    "zh-CN": "神射X9",
-    "en-US": "Marksman X9",
-    "ja-JP": "ディバインアーチャーX9",
-    "ko-KR": "디바인 아처X9"
-  },
-  "3053100": {
-    "zh-CN": "神射X10",
-    "en-US": "Marksman X10",
-    "ja-JP": "ディバインアーチャーX10",
-    "ko-KR": "디바인 아처X10"
-  },
-  "3053110": {
-    "zh-CN": "神射X11",
-    "en-US": "Marksman X11",
-    "ja-JP": "ディバインアーチャーX11",
-    "ko-KR": "디바인 아처X11"
-  },
-  "3053120": {
-    "zh-CN": "神射狂想X1",
-    "en-US": "Marksman Rhapsody X1",
-    "ja-JP": "ディバインアーチャー・狂想X1",
-    "ko-KR": "디바인 아처 광상X1"
-  },
-  "3053130": {
-    "zh-CN": "神射狂想X2",
-    "en-US": "Marksman Rhapsody X2",
-    "ja-JP": "ディバインアーチャー・狂想X2",
-    "ko-KR": "디바인 아처 광상X2"
-  },
-  "3053140": {
-    "zh-CN": "神射狂想X3",
-    "en-US": "Marksman Rhapsody X3",
-    "ja-JP": "ディバインアーチャー・狂想X3",
-    "ko-KR": "디바인 아처 광상X3"
-  },
-  "3053150": {
-    "zh-CN": "神射狂想X4",
-    "en-US": "Marksman Rhapsody X4",
-    "ja-JP": "ディバインアーチャー・狂想X4",
-    "ko-KR": "디바인 아처 광상X4"
-  },
-  "3053400": {
-    "zh-CN": "神射真实因子X1",
-    "en-US": "Marksman Reality Factor X1",
-    "ja-JP": "ディバインアーチャー・実像因子X1",
-    "ko-KR": "디바인 아처 진실 인자X1"
-  },
-  "3053410": {
-    "zh-CN": "神射真实因子X2",
-    "en-US": "Marksman Reality Factor X2",
-    "ja-JP": "ディバインアーチャー・実像因子X2",
-    "ko-KR": "디바인 아처 진실 인자X2"
-  },
-  "3053420": {
-    "zh-CN": "神射真实因子X3",
-    "en-US": "Marksman Reality Factor X3",
-    "ja-JP": "ディバインアーチャー・実像因子X3",
-    "ko-KR": "디바인 아처 진실 인자X3"
-  },
-  "3053430": {
-    "zh-CN": "神射真实因子X4",
-    "en-US": "Marksman Reality Factor X4",
-    "ja-JP": "ディバインアーチャー・実像因子X4",
-    "ko-KR": "디바인 아처 진실 인자X4"
-  },
-  "3053440": {
-    "zh-CN": "神射真实因子X5",
-    "en-US": "Marksman Reality Factor X5",
-    "ja-JP": "ディバインアーチャー・実像因子X5",
-    "ko-KR": "디바인 아처 진실 인자X5"
-  },
-  "3053450": {
-    "zh-CN": "神射真实因子X6",
-    "en-US": "Marksman Reality Factor X6",
-    "ja-JP": "ディバインアーチャー・実像因子X6",
-    "ko-KR": "디바인 아처 진실 인자X6"
-  },
   "3053460": {
     "zh-CN": "神射灵感因子X1",
     "en-US": "Marksman Inspiration Factor X1",
@@ -1678,132 +1174,6 @@
     "en-US": "Marksman Stasis Factor X2",
     "ja-JP": "ディバインアーチャー・恒常性因子X2",
     "ko-KR": "디바인 아처 안정 인자 X2"
-  },
-  "3054010": {
-    "zh-CN": "神盾X1",
-    "en-US": "Shield Knight X1",
-    "ja-JP": "シールドファイターX1",
-    "ko-KR": "실드 나이트X1"
-  },
-  "3054020": {
-    "zh-CN": "神盾X2",
-    "en-US": "Shield Knight X2",
-    "ja-JP": "シールドファイターX2",
-    "ko-KR": "실드 나이트X2"
-  },
-  "3054030": {
-    "zh-CN": "神盾X3",
-    "en-US": "Shield Knight X3",
-    "ja-JP": "シールドファイターX3",
-    "ko-KR": "실드 나이트X3"
-  },
-  "3054040": {
-    "zh-CN": "神盾X4",
-    "en-US": "Shield Knight X4",
-    "ja-JP": "シールドファイターX4",
-    "ko-KR": "실드 나이트X4"
-  },
-  "3054050": {
-    "zh-CN": "神盾X5",
-    "en-US": "Shield Knight X5",
-    "ja-JP": "シールドファイターX5",
-    "ko-KR": "실드 나이트X5"
-  },
-  "3054060": {
-    "zh-CN": "神盾X6",
-    "en-US": "Shield Knight X6",
-    "ja-JP": "シールドファイターX6",
-    "ko-KR": "실드 나이트X6"
-  },
-  "3054070": {
-    "zh-CN": "神盾X7",
-    "en-US": "Shield Knight X7",
-    "ja-JP": "シールドファイターX7",
-    "ko-KR": "실드 나이트X7"
-  },
-  "3054080": {
-    "zh-CN": "神盾X8",
-    "en-US": "Shield Knight X8",
-    "ja-JP": "シールドファイターX8",
-    "ko-KR": "실드 나이트X8"
-  },
-  "3054090": {
-    "zh-CN": "神盾X9",
-    "en-US": "Shield Knight X9",
-    "ja-JP": "シールドファイターX9",
-    "ko-KR": "실드 나이트X9"
-  },
-  "3054100": {
-    "zh-CN": "神盾X10",
-    "en-US": "Shield Knight X10",
-    "ja-JP": "シールドファイターX10",
-    "ko-KR": "실드 나이트X10"
-  },
-  "3054110": {
-    "zh-CN": "神盾X11",
-    "en-US": "Shield Knight X11",
-    "ja-JP": "シールドファイターX11",
-    "ko-KR": "실드 나이트X11"
-  },
-  "3054120": {
-    "zh-CN": "神盾狂想X1",
-    "en-US": "Shield Knight Rhapsody X1",
-    "ja-JP": "シールドファイター・狂想X1",
-    "ko-KR": "실드 나이트 광상X1"
-  },
-  "3054130": {
-    "zh-CN": "神盾狂想X2",
-    "en-US": "Shield Knight Rhapsody X2",
-    "ja-JP": "シールドファイター・狂想X2",
-    "ko-KR": "실드 나이트 광상X2"
-  },
-  "3054140": {
-    "zh-CN": "神盾狂想X3",
-    "en-US": "Shield Knight Rhapsody X3",
-    "ja-JP": "シールドファイター・狂想X3",
-    "ko-KR": "실드 나이트 광상X3"
-  },
-  "3054150": {
-    "zh-CN": "神盾狂想X4",
-    "en-US": "Shield Knight Rhapsody X4",
-    "ja-JP": "シールドファイター・狂想X4",
-    "ko-KR": "실드 나이트 광상X4"
-  },
-  "3054400": {
-    "zh-CN": "神盾真实因子X1",
-    "en-US": "Shield Knight Reality Factor X1",
-    "ja-JP": "シールドファイター・実像因子X1",
-    "ko-KR": "실드 나이트 진실 인자X1"
-  },
-  "3054410": {
-    "zh-CN": "神盾真实因子X2",
-    "en-US": "Shield Knight Reality Factor X2",
-    "ja-JP": "シールドファイター・実像因子X2",
-    "ko-KR": "실드 나이트 진실 인자X2"
-  },
-  "3054420": {
-    "zh-CN": "神盾真实因子X3",
-    "en-US": "Shield Knight Reality Factor X3",
-    "ja-JP": "シールドファイター・実像因子X3",
-    "ko-KR": "실드 나이트 진실 인자X3"
-  },
-  "3054430": {
-    "zh-CN": "神盾真实因子X4",
-    "en-US": "Shield Knight Reality Factor X4",
-    "ja-JP": "シールドファイター・実像因子X4",
-    "ko-KR": "실드 나이트 진실 인자X4"
-  },
-  "3054440": {
-    "zh-CN": "神盾真实因子X5",
-    "en-US": "Shield Knight Reality Factor X5",
-    "ja-JP": "シールドファイター・実像因子X5",
-    "ko-KR": "실드 나이트 진실 인자X5"
-  },
-  "3054450": {
-    "zh-CN": "神盾真实因子X6",
-    "en-US": "Shield Knight Reality Factor X6",
-    "ja-JP": "シールドファイター・実像因子X6",
-    "ko-KR": "실드 나이트 진실 인자X6"
   },
   "3054460": {
     "zh-CN": "神盾灵感因子X1",
@@ -1889,132 +1259,6 @@
     "ja-JP": "シールドファイター・恒常性因子X2",
     "ko-KR": "실드 나이트 안정 인자 X2"
   },
-  "3055010": {
-    "zh-CN": "巨刃X1",
-    "en-US": "Heavy Guardian X1",
-    "ja-JP": "ヘヴィガーディアンX1",
-    "ko-KR": "헤비 가디언X1"
-  },
-  "3055020": {
-    "zh-CN": "巨刃X2",
-    "en-US": "Heavy Guardian X2",
-    "ja-JP": "ヘヴィガーディアンX2",
-    "ko-KR": "헤비 가디언X2"
-  },
-  "3055030": {
-    "zh-CN": "巨刃X3",
-    "en-US": "Heavy Guardian X3",
-    "ja-JP": "ヘヴィガーディアンX3",
-    "ko-KR": "헤비 가디언X3"
-  },
-  "3055040": {
-    "zh-CN": "巨刃X4",
-    "en-US": "Heavy Guardian X4",
-    "ja-JP": "ヘヴィガーディアンX4",
-    "ko-KR": "헤비 가디언X4"
-  },
-  "3055050": {
-    "zh-CN": "巨刃X5",
-    "en-US": "Heavy Guardian X5",
-    "ja-JP": "ヘヴィガーディアンX5",
-    "ko-KR": "헤비 가디언X5"
-  },
-  "3055060": {
-    "zh-CN": "巨刃X6",
-    "en-US": "Heavy Guardian X6",
-    "ja-JP": "ヘヴィガーディアンX6",
-    "ko-KR": "헤비 가디언X6"
-  },
-  "3055070": {
-    "zh-CN": "巨刃X7",
-    "en-US": "Heavy Guardian X7",
-    "ja-JP": "ヘヴィガーディアンX7",
-    "ko-KR": "헤비 가디언X7"
-  },
-  "3055080": {
-    "zh-CN": "巨刃X8",
-    "en-US": "Heavy Guardian X8",
-    "ja-JP": "ヘヴィガーディアンX8",
-    "ko-KR": "헤비 가디언X8"
-  },
-  "3055090": {
-    "zh-CN": "巨刃X9",
-    "en-US": "Heavy Guardian X9",
-    "ja-JP": "ヘヴィガーディアンX9",
-    "ko-KR": "헤비 가디언X9"
-  },
-  "3055100": {
-    "zh-CN": "巨刃X10",
-    "en-US": "Heavy Guardian X10",
-    "ja-JP": "ヘヴィガーディアンX10",
-    "ko-KR": "헤비 가디언X10"
-  },
-  "3055110": {
-    "zh-CN": "巨刃X11",
-    "en-US": "Heavy Guardian X11",
-    "ja-JP": "ヘヴィガーディアンX11",
-    "ko-KR": "헤비 가디언X11"
-  },
-  "3055120": {
-    "zh-CN": "巨刃狂想X1",
-    "en-US": "Heavy Guardian Rhapsody X1",
-    "ja-JP": "ヘヴィガーディアン・狂想X1",
-    "ko-KR": "헤비 가디언 광상X1"
-  },
-  "3055130": {
-    "zh-CN": "巨刃狂想X2",
-    "en-US": "Heavy Guardian Rhapsody X2",
-    "ja-JP": "ヘヴィガーディアン・狂想X2",
-    "ko-KR": "헤비 가디언 광상X2"
-  },
-  "3055140": {
-    "zh-CN": "巨刃狂想X3",
-    "en-US": "Heavy Guardian Rhapsody X3",
-    "ja-JP": "ヘヴィガーディアン・狂想X3",
-    "ko-KR": "헤비 가디언 광상X3"
-  },
-  "3055150": {
-    "zh-CN": "巨刃狂想X4",
-    "en-US": "Heavy Guardian Rhapsody X4",
-    "ja-JP": "ヘヴィガーディアン・狂想X4",
-    "ko-KR": "헤비 가디언 광상X4"
-  },
-  "3055360": {
-    "zh-CN": "巨刃真实因子X1",
-    "en-US": "Heavy Guardian Reality Factor X1",
-    "ja-JP": "ヘヴィガーディアン・実像因子X1",
-    "ko-KR": "헤비 가디언 진실 인자X1"
-  },
-  "3055370": {
-    "zh-CN": "巨刃真实因子X2",
-    "en-US": "Heavy Guardian Reality Factor X2",
-    "ja-JP": "ヘヴィガーディアン・実像因子X2",
-    "ko-KR": "헤비 가디언 진실 인자X2"
-  },
-  "3055380": {
-    "zh-CN": "巨刃真实因子X3",
-    "en-US": "Heavy Guardian Reality Factor X3",
-    "ja-JP": "ヘヴィガーディアン・実像因子X3",
-    "ko-KR": "헤비 가디언 진실 인자X3"
-  },
-  "3055390": {
-    "zh-CN": "巨刃真实因子X4",
-    "en-US": "Heavy Guardian Reality Factor X4",
-    "ja-JP": "ヘヴィガーディアン・実像因子X4",
-    "ko-KR": "헤비 가디언 진실 인자X4"
-  },
-  "3055400": {
-    "zh-CN": "巨刃真实因子X5",
-    "en-US": "Heavy Guardian Reality Factor X5",
-    "ja-JP": "ヘヴィガーディアン・実像因子X5",
-    "ko-KR": "헤비 가디언 진실 인자X5"
-  },
-  "3055410": {
-    "zh-CN": "巨刃真实因子X6",
-    "en-US": "Heavy Guardian Reality Factor X6",
-    "ja-JP": "ヘヴィガーディアン・実像因子X6",
-    "ko-KR": "헤비 가디언 진실 인자X6"
-  },
   "3055460": {
     "zh-CN": "巨刃灵感因子X1",
     "en-US": "Heavy Guardian Inspiration Factor X1",
@@ -2099,131 +1343,11 @@
     "ja-JP": "ヘヴィガーディアン・恒常性因子X2",
     "ko-KR": "헤비 가디언 안정 인자 X2"
   },
-  "3056010": {
-    "zh-CN": "森语X1",
-    "en-US": "Verdant Oracle X1",
-    "ja-JP": "ヴァーダントオラクルX1",
-    "ko-KR": "실반 오라클X1"
-  },
-  "3056020": {
-    "zh-CN": "森语X2",
-    "en-US": "Verdant Oracle X2",
-    "ja-JP": "ヴァーダントオラクルX2",
-    "ko-KR": "실반 오라클X2"
-  },
   "3056030": {
     "zh-CN": "森语灵感因子X1",
     "en-US": "Verdant Oracle Inspiration Factor X1",
-    "ja-JP": "ヴァーダントオラクルX3",
-    "ko-KR": "실반 오라클X3"
-  },
-  "3056040": {
-    "zh-CN": "森语X4",
-    "en-US": "Verdant Oracle X4",
-    "ja-JP": "ヴァーダントオラクルX4",
-    "ko-KR": "실반 오라클X4"
-  },
-  "3056050": {
-    "zh-CN": "森语X5",
-    "en-US": "Verdant Oracle X5",
-    "ja-JP": "ヴァーダントオラクルX5",
-    "ko-KR": "실반 오라클X5"
-  },
-  "3056060": {
-    "zh-CN": "森语X6",
-    "en-US": "Verdant Oracle X6",
-    "ja-JP": "ヴァーダントオラクルX6",
-    "ko-KR": "실반 오라클X6"
-  },
-  "3056070": {
-    "zh-CN": "森语X7",
-    "en-US": "Verdant Oracle X7",
-    "ja-JP": "ヴァーダントオラクルX7",
-    "ko-KR": "실반 오라클X7"
-  },
-  "3056080": {
-    "zh-CN": "森语X8",
-    "en-US": "Verdant Oracle X8",
-    "ja-JP": "ヴァーダントオラクルX8",
-    "ko-KR": "실반 오라클X8"
-  },
-  "3056090": {
-    "zh-CN": "森语X9",
-    "en-US": "Verdant Oracle X9",
-    "ja-JP": "ヴァーダントオラクルX9",
-    "ko-KR": "실반 오라클X9"
-  },
-  "3056100": {
-    "zh-CN": "森语X10",
-    "en-US": "Verdant Oracle X10",
-    "ja-JP": "ヴァーダントオラクルX10",
-    "ko-KR": "실반 오라클X10"
-  },
-  "3056110": {
-    "zh-CN": "森语X11",
-    "en-US": "Verdant Oracle X11",
-    "ja-JP": "ヴァーダントオラクルX11",
-    "ko-KR": "실반 오라클X11"
-  },
-  "3056120": {
-    "zh-CN": "森语狂想X1",
-    "en-US": "Verdant Oracle Rhapsody X1",
-    "ja-JP": "ヴァーダントオラクル・狂想X1",
-    "ko-KR": "실반 오라클 광상X1"
-  },
-  "3056130": {
-    "zh-CN": "森语狂想X2",
-    "en-US": "Verdant Oracle Rhapsody X2",
-    "ja-JP": "ヴァーダントオラクル・狂想X2",
-    "ko-KR": "실반 오라클 광상X2"
-  },
-  "3056140": {
-    "zh-CN": "森语狂想X3",
-    "en-US": "Verdant Oracle Rhapsody X3",
-    "ja-JP": "ヴァーダントオラクル・狂想X3",
-    "ko-KR": "실반 오라클 광상X3"
-  },
-  "3056150": {
-    "zh-CN": "森语狂想X4",
-    "en-US": "Verdant Oracle Rhapsody X4",
-    "ja-JP": "ヴァーダントオラクル・狂想X4",
-    "ko-KR": "실반 오라클 광상X4"
-  },
-  "3056380": {
-    "zh-CN": "森语真实因子X1",
-    "en-US": "Verdant Oracle Reality Factor X1",
-    "ja-JP": "ヴァーダントオラクル・実像因子X1",
-    "ko-KR": "실반 오라클 진실 인자X1"
-  },
-  "3056390": {
-    "zh-CN": "森语真实因子X2",
-    "en-US": "Verdant Oracle Reality Factor X2",
-    "ja-JP": "ヴァーダントオラクル・実像因子X2",
-    "ko-KR": "실반 오라클 진실 인자X2"
-  },
-  "3056400": {
-    "zh-CN": "森语真实因子X3",
-    "en-US": "Verdant Oracle Reality Factor X3",
-    "ja-JP": "ヴァーダントオラクル・実像因子X3",
-    "ko-KR": "실반 오라클 진실 인자X3"
-  },
-  "3056410": {
-    "zh-CN": "森语真实因子X4",
-    "en-US": "Verdant Oracle Reality Factor X4",
-    "ja-JP": "ヴァーダントオラクル・実像因子X4",
-    "ko-KR": "실반 오라클 진실 인자X4"
-  },
-  "3056420": {
-    "zh-CN": "森语真实因子X5",
-    "en-US": "Verdant Oracle Reality Factor X5",
-    "ja-JP": "ヴァーダントオラクル・実像因子X5",
-    "ko-KR": "실반 오라클 진실 인자X5"
-  },
-  "3056430": {
-    "zh-CN": "森语真实因子X6",
-    "en-US": "Verdant Oracle Reality Factor X6",
-    "ja-JP": "ヴァーダントオラクル・実像因子X6",
-    "ko-KR": "실반 오라클 진실 인자X6"
+    "ja-JP": "ヴァーダントオラクル・想像因子X1",
+    "ko-KR": "실반 오라클 영감 인자 X1"
   },
   "3056470": {
     "zh-CN": "森语灵感因子X2",
@@ -2302,132 +1426,6 @@
     "en-US": "Verdant Oracle Stasis Factor X2",
     "ja-JP": "ヴァーダントオラクル・恒常性因子X2",
     "ko-KR": "실반 오라클 안정 인자 X2"
-  },
-  "3057010": {
-    "zh-CN": "灵魂X1",
-    "en-US": "Beat Performer X1",
-    "ja-JP": "ビートパフォーマーX1",
-    "ko-KR": "비트 퍼포머X1"
-  },
-  "3057020": {
-    "zh-CN": "灵魂X2",
-    "en-US": "Beat Performer X2",
-    "ja-JP": "ビートパフォーマーX2",
-    "ko-KR": "비트 퍼포머X2"
-  },
-  "3057030": {
-    "zh-CN": "灵魂X3",
-    "en-US": "Beat Performer X3",
-    "ja-JP": "ビートパフォーマーX3",
-    "ko-KR": "비트 퍼포머X3"
-  },
-  "3057040": {
-    "zh-CN": "灵魂X4",
-    "en-US": "Beat Performer X4",
-    "ja-JP": "ビートパフォーマーX4",
-    "ko-KR": "비트 퍼포머X4"
-  },
-  "3057050": {
-    "zh-CN": "灵魂X5",
-    "en-US": "Beat Performer X5",
-    "ja-JP": "ビートパフォーマーX5",
-    "ko-KR": "비트 퍼포머X5"
-  },
-  "3057060": {
-    "zh-CN": "灵魂X6",
-    "en-US": "Beat Performer X6",
-    "ja-JP": "ビートパフォーマーX6",
-    "ko-KR": "비트 퍼포머X6"
-  },
-  "3057070": {
-    "zh-CN": "灵魂X7",
-    "en-US": "Beat Performer X7",
-    "ja-JP": "ビートパフォーマーX7",
-    "ko-KR": "비트 퍼포머X7"
-  },
-  "3057080": {
-    "zh-CN": "灵魂X8",
-    "en-US": "Beat Performer X8",
-    "ja-JP": "ビートパフォーマーX8",
-    "ko-KR": "비트 퍼포머X8"
-  },
-  "3057090": {
-    "zh-CN": "灵魂X9",
-    "en-US": "Beat Performer X9",
-    "ja-JP": "ビートパフォーマーX9",
-    "ko-KR": "비트 퍼포머X9"
-  },
-  "3057100": {
-    "zh-CN": "灵魂X10",
-    "en-US": "Beat Performer X10",
-    "ja-JP": "ビートパフォーマーX10",
-    "ko-KR": "비트 퍼포머X10"
-  },
-  "3057110": {
-    "zh-CN": "灵魂X11",
-    "en-US": "Beat Performer X11",
-    "ja-JP": "ビートパフォーマーX11",
-    "ko-KR": "비트 퍼포머X11"
-  },
-  "3057120": {
-    "zh-CN": "灵魂狂想X1",
-    "en-US": "Beat Performer Rhapsody X1",
-    "ja-JP": "ビートパフォーマー・狂想X1",
-    "ko-KR": "비트 퍼포머 광상X1"
-  },
-  "3057130": {
-    "zh-CN": "灵魂狂想X2",
-    "en-US": "Beat Performer Rhapsody X2",
-    "ja-JP": "ビートパフォーマー・狂想X2",
-    "ko-KR": "비트 퍼포머 광상X2"
-  },
-  "3057140": {
-    "zh-CN": "灵魂狂想X3",
-    "en-US": "Beat Performer Rhapsody X3",
-    "ja-JP": "ビートパフォーマー・狂想X3",
-    "ko-KR": "비트 퍼포머 광상X3"
-  },
-  "3057150": {
-    "zh-CN": "灵魂狂想X4",
-    "en-US": "Beat Performer Rhapsody X4",
-    "ja-JP": "ビートパフォーマー・狂想X4",
-    "ko-KR": "비트 퍼포머 광상X4"
-  },
-  "3057400": {
-    "zh-CN": "灵魂真实因子X1",
-    "en-US": "Beat Performer Reality Factor X1",
-    "ja-JP": "ビートパフォーマー・実像因子X1",
-    "ko-KR": "비트 퍼포머 진실 인자X1"
-  },
-  "3057410": {
-    "zh-CN": "灵魂真实因子X2",
-    "en-US": "Beat Performer Reality Factor X2",
-    "ja-JP": "ビートパフォーマー・実像因子X2",
-    "ko-KR": "비트 퍼포머 진실 인자X2"
-  },
-  "3057420": {
-    "zh-CN": "灵魂真实因子X3",
-    "en-US": "Beat Performer Reality Factor X3",
-    "ja-JP": "ビートパフォーマー・実像因子X3",
-    "ko-KR": "비트 퍼포머 진실 인자X3"
-  },
-  "3057430": {
-    "zh-CN": "灵魂真实因子X4",
-    "en-US": "Beat Performer Reality Factor X4",
-    "ja-JP": "ビートパフォーマー・実像因子X4",
-    "ko-KR": "비트 퍼포머 진실 인자X4"
-  },
-  "3057440": {
-    "zh-CN": "灵魂真实因子X5",
-    "en-US": "Beat Performer Reality Factor X5",
-    "ja-JP": "ビートパフォーマー・実像因子X5",
-    "ko-KR": "비트 퍼포머 진실 인자X5"
-  },
-  "3057450": {
-    "zh-CN": "灵魂真实因子X6",
-    "en-US": "Beat Performer Reality Factor X6",
-    "ja-JP": "ビートパフォーマー・実像因子X6",
-    "ko-KR": "비트 퍼포머 진실 인자X6"
   },
   "3057460": {
     "zh-CN": "灵魂灵感因子X1",
@@ -2513,180 +1511,6 @@
     "ja-JP": "ビートパフォーマー・恒常性因子X2",
     "ko-KR": "비트 퍼포머 안정 인자 X2"
   },
-  "3058050": {
-    "zh-CN": "极性X5",
-    "en-US": "Polarity X5",
-    "ja-JP": "極性X5",
-    "ko-KR": "극성X5"
-  },
-  "3058060": {
-    "zh-CN": "极性X6",
-    "en-US": "Polarity X6",
-    "ja-JP": "極性X6",
-    "ko-KR": "극성X6"
-  },
-  "3058070": {
-    "zh-CN": "极性X7",
-    "en-US": "Polarity X7",
-    "ja-JP": "極性X7",
-    "ko-KR": "극성X7"
-  },
-  "3058080": {
-    "zh-CN": "极性X8",
-    "en-US": "Polarity X8",
-    "ja-JP": "極性X8",
-    "ko-KR": "극성X8"
-  },
-  "3058090": {
-    "zh-CN": "极性X9",
-    "en-US": "Polarity X9",
-    "ja-JP": "極性X9",
-    "ko-KR": "극성X9"
-  },
-  "3058100": {
-    "zh-CN": "极性X10",
-    "en-US": "Polarity X10",
-    "ja-JP": "極性X10",
-    "ko-KR": "극성X10"
-  },
-  "3058110": {
-    "zh-CN": "极性X11",
-    "en-US": "Polarity X11",
-    "ja-JP": "極性X11",
-    "ko-KR": "극성X11"
-  },
-  "3059050": {
-    "zh-CN": "稳态X5",
-    "en-US": "Stasis X5",
-    "ja-JP": "恒常性X5",
-    "ko-KR": "안정X5"
-  },
-  "3059060": {
-    "zh-CN": "稳态X6",
-    "en-US": "Stasis X6",
-    "ja-JP": "恒常性X6",
-    "ko-KR": "안정X6"
-  },
-  "3059070": {
-    "zh-CN": "稳态X7",
-    "en-US": "Stasis X7",
-    "ja-JP": "恒常性X7",
-    "ko-KR": "안정X7"
-  },
-  "3059080": {
-    "zh-CN": "稳态X8",
-    "en-US": "Stasis X8",
-    "ja-JP": "恒常性X8",
-    "ko-KR": "안정X8"
-  },
-  "3059100": {
-    "zh-CN": "雷影稳态X1",
-    "en-US": "Stormblade Stasis X1",
-    "ja-JP": "ストームブレイド・恒常性X1",
-    "ko-KR": "스톰 블레이드 안정X1"
-  },
-  "3059110": {
-    "zh-CN": "雷影稳态X2",
-    "en-US": "Stormblade Stasis X2",
-    "ja-JP": "ストームブレイド・恒常性X2",
-    "ko-KR": "스톰 블레이드 안정X2"
-  },
-  "3059120": {
-    "zh-CN": "青岚稳态X1",
-    "en-US": "Wind Knight Stasis X1",
-    "ja-JP": "ゲイルランサー・恒常性X1",
-    "ko-KR": "윈드 나이트 안정X1"
-  },
-  "3059130": {
-    "zh-CN": "青岚稳态X2",
-    "en-US": "Wind Knight Stasis X2",
-    "ja-JP": "ゲイルランサー・恒常性X2",
-    "ko-KR": "윈드 나이트 안정X2"
-  },
-  "3059140": {
-    "zh-CN": "冰魔稳态X1",
-    "en-US": "Frost Mage Stasis X1",
-    "ja-JP": "フロストメイジ・恒常性X1",
-    "ko-KR": "프로스트 메이지 안정X1"
-  },
-  "3059150": {
-    "zh-CN": "冰魔稳态X2",
-    "en-US": "Frost Mage Stasis X2",
-    "ja-JP": "フロストメイジ・恒常性X2",
-    "ko-KR": "프로스트 메이지 안정X2"
-  },
-  "3059160": {
-    "zh-CN": "神射稳态X1",
-    "en-US": "Marksman Stasis X1",
-    "ja-JP": "ディバインアーチャー・恒常性X1",
-    "ko-KR": "디바인 아처 안정X1"
-  },
-  "3059170": {
-    "zh-CN": "神射稳态X2",
-    "en-US": "Marksman Stasis X2",
-    "ja-JP": "ディバインアーチャー・恒常性X2",
-    "ko-KR": "디바인 아처 안정X2"
-  },
-  "3059180": {
-    "zh-CN": "神盾稳态X1",
-    "en-US": "Shield Knight Stasis X1",
-    "ja-JP": "シールドファイター・恒常性X1",
-    "ko-KR": "실드 나이트 안정X1"
-  },
-  "3059190": {
-    "zh-CN": "神盾稳态X2",
-    "en-US": "Shield Knight Stasis X2",
-    "ja-JP": "シールドファイター・恒常性X2",
-    "ko-KR": "실드 나이트 안정X2"
-  },
-  "3059200": {
-    "zh-CN": "巨刃稳态X1",
-    "en-US": "Heavy Guardian Stasis X1",
-    "ja-JP": "ヘヴィガーディアン・恒常性X1",
-    "ko-KR": "헤비 가디언 안정X1"
-  },
-  "3059210": {
-    "zh-CN": "巨刃稳态X2",
-    "en-US": "Heavy Guardian Stasis X2",
-    "ja-JP": "ヘヴィガーディアン・恒常性X2",
-    "ko-KR": "헤비 가디언 안정X2"
-  },
-  "3059220": {
-    "zh-CN": "森语稳态X1",
-    "en-US": "Verdant Oracle Stasis X1",
-    "ja-JP": "ヴァーダントオラクル・恒常性X1",
-    "ko-KR": "실반 오라클 안정X1"
-  },
-  "3059230": {
-    "zh-CN": "森语稳态X2",
-    "en-US": "Verdant Oracle Stasis X2",
-    "ja-JP": "ヴァーダントオラクル・恒常性X2",
-    "ko-KR": "실반 오라클 안정X2"
-  },
-  "3059240": {
-    "zh-CN": "灵魂稳态X1",
-    "en-US": "Beat Performer Stasis X1",
-    "ja-JP": "ビートパフォーマー・恒常性X1",
-    "ko-KR": "비트 퍼포머 안정X1"
-  },
-  "3059250": {
-    "zh-CN": "灵魂稳态X2",
-    "en-US": "Beat Performer Stasis X2",
-    "ja-JP": "ビートパフォーマー・恒常性X2",
-    "ko-KR": "비트 퍼포머 안정X2"
-  },
-  "3059260": {
-    "zh-CN": "赤炎稳态X1",
-    "en-US": "Flame Vanguard Stasis X1",
-    "ja-JP": "ツインストライカー・恒常性X1",
-    "ko-KR": "트윈 스트라이커 안정X1"
-  },
-  "3059270": {
-    "zh-CN": "赤炎稳态X2",
-    "en-US": "Flame Vanguard Stasis X2",
-    "ja-JP": "ツインストライカー・恒常性X2",
-    "ko-KR": "트윈 스트라이커 안정X2"
-  },
   "3059280": {
     "zh-CN": "稳态因子X1",
     "en-US": "Stasis Factor X1",
@@ -2710,132 +1534,6 @@
     "en-US": "Stasis Factor X4",
     "ja-JP": "恒常性因子X4",
     "ko-KR": "안정 인자 X4"
-  },
-  "3060010": {
-    "zh-CN": "赤炎X1",
-    "en-US": "Flame Vanguard X1",
-    "ja-JP": "ツインストライカーX1",
-    "ko-KR": "트윈 스트라이커X1"
-  },
-  "3060020": {
-    "zh-CN": "赤炎X2",
-    "en-US": "Flame Vanguard X2",
-    "ja-JP": "ツインストライカーX2",
-    "ko-KR": "트윈 스트라이커X2"
-  },
-  "3060030": {
-    "zh-CN": "赤炎X3",
-    "en-US": "Flame Vanguard X3",
-    "ja-JP": "ツインストライカーX3",
-    "ko-KR": "트윈 스트라이커X3"
-  },
-  "3060040": {
-    "zh-CN": "赤炎X4",
-    "en-US": "Flame Vanguard X4",
-    "ja-JP": "ツインストライカーX4",
-    "ko-KR": "트윈 스트라이커X4"
-  },
-  "3060050": {
-    "zh-CN": "赤炎X5",
-    "en-US": "Flame Vanguard X5",
-    "ja-JP": "ツインストライカーX5",
-    "ko-KR": "트윈 스트라이커X5"
-  },
-  "3060060": {
-    "zh-CN": "赤炎X6",
-    "en-US": "Flame Vanguard X6",
-    "ja-JP": "ツインストライカーX6",
-    "ko-KR": "트윈 스트라이커X6"
-  },
-  "3060070": {
-    "zh-CN": "赤炎X7",
-    "en-US": "Flame Vanguard X7",
-    "ja-JP": "ツインストライカーX7",
-    "ko-KR": "트윈 스트라이커X7"
-  },
-  "3060080": {
-    "zh-CN": "赤炎X8",
-    "en-US": "Flame Vanguard X8",
-    "ja-JP": "ツインストライカーX8",
-    "ko-KR": "트윈 스트라이커X8"
-  },
-  "3060090": {
-    "zh-CN": "赤炎X9",
-    "en-US": "Flame Vanguard X9",
-    "ja-JP": "ツインストライカーX9",
-    "ko-KR": "트윈 스트라이커X9"
-  },
-  "3060100": {
-    "zh-CN": "赤炎X10",
-    "en-US": "Flame Vanguard X10",
-    "ja-JP": "ツインストライカーX10",
-    "ko-KR": "트윈 스트라이커X10"
-  },
-  "3060110": {
-    "zh-CN": "赤炎X11",
-    "en-US": "Flame Vanguard X11",
-    "ja-JP": "ツインストライカーX11",
-    "ko-KR": "트윈 스트라이커X11"
-  },
-  "3060120": {
-    "zh-CN": "赤炎狂想X1",
-    "en-US": "Flame Vanguard Rhapsody X1",
-    "ja-JP": "ツインストライカー・狂想X1",
-    "ko-KR": "트윈 스트라이커 광상X1"
-  },
-  "3060130": {
-    "zh-CN": "赤炎狂想X2",
-    "en-US": "Flame Vanguard Rhapsody X2",
-    "ja-JP": "ツインストライカー・狂想X2",
-    "ko-KR": "트윈 스트라이커 광상X2"
-  },
-  "3060140": {
-    "zh-CN": "赤炎狂想X3",
-    "en-US": "Flame Vanguard Rhapsody X3",
-    "ja-JP": "ツインストライカー・狂想X3",
-    "ko-KR": "트윈 스트라이커 광상X3"
-  },
-  "3060150": {
-    "zh-CN": "赤炎狂想X4",
-    "en-US": "Flame Vanguard Rhapsody X4",
-    "ja-JP": "ツインストライカー・狂想X4",
-    "ko-KR": "트윈 스트라이커 광상X4"
-  },
-  "3060400": {
-    "zh-CN": "赤炎真实因子X1",
-    "en-US": "Flame Vanguard Reality Factor X1",
-    "ja-JP": "ツインストライカー・実像因子X1",
-    "ko-KR": "트윈 스트라이커 진실 인자X1"
-  },
-  "3060410": {
-    "zh-CN": "赤炎真实因子X2",
-    "en-US": "Flame Vanguard Reality Factor X2",
-    "ja-JP": "ツインストライカー・実像因子X2",
-    "ko-KR": "트윈 스트라이커 진실 인자X2"
-  },
-  "3060420": {
-    "zh-CN": "赤炎真实因子X3",
-    "en-US": "Flame Vanguard Reality Factor X3",
-    "ja-JP": "ツインストライカー・実像因子X3",
-    "ko-KR": "트윈 스트라이커 진실 인자X3"
-  },
-  "3060430": {
-    "zh-CN": "赤炎真实因子X4",
-    "en-US": "Flame Vanguard Reality Factor X4",
-    "ja-JP": "ツインストライカー・実像因子X4",
-    "ko-KR": "트윈 스트라이커 진실 인자X4"
-  },
-  "3060440": {
-    "zh-CN": "赤炎真实因子X5",
-    "en-US": "Flame Vanguard Reality Factor X5",
-    "ja-JP": "ツインストライカー・実像因子X5",
-    "ko-KR": "트윈 스트라이커 진실 인자X5"
-  },
-  "3060450": {
-    "zh-CN": "赤炎真实因子X6",
-    "en-US": "Flame Vanguard Reality Factor X6",
-    "ja-JP": "ツインストライカー・実像因子X6",
-    "ko-KR": "트윈 스트라이커 진실 인자X6"
   },
   "3060460": {
     "zh-CN": "赤炎灵感因子X1",

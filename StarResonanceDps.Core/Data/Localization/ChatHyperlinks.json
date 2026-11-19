@@ -417,7 +417,7 @@
     "zh-CN": "{*string[1]*}[ <u><style=chat_fishing_share_profile><link=1>{*fishing.playerName*}的钓鱼档案</link></style></u> ]{*string[2]*}",
     "en-US": "{*string[1]*}[ <u><style=chat_fishing_share_profile><link=1>{*fishing.playerName*}'s fishing profile</link></style></u> ]{*string[2]*}",
     "ja-JP": "{*string[1]*}[ <u><style=chat_fishing_share_profile><link=1>{*fishing.playerName*}の釣りファイル</link></style></u> ]{*string[2]*}",
-    "ko-KR": "{*string[1]*}[ <u><style=chat_fishing_share_profile><link=1>{*fishing.playerName*} 님의 낚시 프로필</link></style></u> ]{*string[2]*}"
+    "ko-KR": "{*string[1]*}[ <u><style=chat_fishing_share_profile><link=1>{*fishing.playerName*} 님의 낚시 파일</link></style></u> ]{*string[2]*}"
   },
   "8009006": {
     "zh-CN": "讨伐领主活动已经开启，可通过推荐玩法参与。",

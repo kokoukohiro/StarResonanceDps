@@ -27,7 +27,7 @@
     "zh-CN": "蒙特诺尔溪谷",
     "en-US": "Montegnor Valley",
     "ja-JP": "モンテノール渓谷",
-    "ko-KR": "몬테놀 계곡"
+    "ko-KR": "몽테놀 계곡"
   },
   "11": {
     "zh-CN": "游星岛",
@@ -278,32 +278,32 @@
   "1231": {
     "zh-CN": "不稳定空间·弥妄·巨龙爪痕",
     "en-US": "Unstable - Illusion-Shroud - Dragon Claw Valley",
-    "ja-JP": "不安定な空間・巨竜の爪痕",
-    "ko-KR": "불안정 공간・거룡의 발톱"
+    "ja-JP": "不安定な空間・迷妄・巨竜の爪痕",
+    "ko-KR": "불안정 공간・미망・거룡의 발톱"
   },
   "1232": {
     "zh-CN": "不稳定空间·弥妄·巨龙爪痕",
     "en-US": "Unstable - Illusion-Shroud - Dragon Claw Valley",
-    "ja-JP": "不安定な空間・巨竜の爪痕",
-    "ko-KR": "불안정 공간・거룡의 발톱"
+    "ja-JP": "不安定な空間・迷妄・巨竜の爪痕",
+    "ko-KR": "불안정 공간・미망・거룡의 발톱"
   },
   "1233": {
     "zh-CN": "弥妄·巨龙爪痕",
     "en-US": "Illusion-Shroud - Dragon Claw Valley",
-    "ja-JP": "巨竜の爪痕",
-    "ko-KR": "거룡의 발톱"
+    "ja-JP": "迷妄・巨竜の爪痕",
+    "ko-KR": "미망・거룡의 발톱"
   },
   "1234": {
     "zh-CN": "弥妄·巨龙爪痕",
     "en-US": "Illusion-Shroud - Dragon Claw Valley",
-    "ja-JP": "巨竜の爪痕",
-    "ko-KR": "거룡의 발톱"
+    "ja-JP": "迷妄・巨竜の爪痕",
+    "ko-KR": "미망・거룡의 발톱"
   },
   "1235": {
     "zh-CN": "弥妄·巨龙爪痕",
     "en-US": "Illusion-Shroud - Dragon Claw Valley",
-    "ja-JP": "巨竜の爪痕",
-    "ko-KR": "거룡의 발톱"
+    "ja-JP": "迷妄・巨竜の爪痕",
+    "ko-KR": "미망・거룡의 발톱"
   },
   "1301": {
     "zh-CN": "黯影堡垒",
@@ -675,7 +675,7 @@
     "zh-CN": "梦境",
     "en-US": "Dreamscape",
     "ja-JP": "夢世界",
-    "ko-KR": "꿈"
+    "ko-KR": "꿈속"
   },
   "6001": {
     "zh-CN": "英雄本功能测试副本",
@@ -717,43 +717,43 @@
     "zh-CN": "不稳定空间·卡尼曼试炼",
     "en-US": "Unstable - Kanamia Trial",
     "ja-JP": "不安定な空間・カナミアの試練",
-    "ko-KR": "불안정 공간・카나미아 시련"
+    "ko-KR": "불안정 공간・카나미아의 시련"
   },
   "6012": {
     "zh-CN": "不稳定空间·卡尼曼试炼",
     "en-US": "Unstable - Kanamia Trial",
     "ja-JP": "不安定な空間・カナミアの試練",
-    "ko-KR": "불안정 공간・카나미아 시련"
+    "ko-KR": "불안정 공간・카나미아의 시련"
   },
   "6021": {
     "zh-CN": "卡尼曼试炼",
     "en-US": "Kanamia Trial",
     "ja-JP": "カナミアの試練",
-    "ko-KR": "카나미아 시련"
+    "ko-KR": "카나미아의 시련"
   },
   "6022": {
     "zh-CN": "卡尼曼试炼",
     "en-US": "Kanamia Trial",
     "ja-JP": "カナミアの試練",
-    "ko-KR": "카나미아 시련"
+    "ko-KR": "카나미아의 시련"
   },
   "6023": {
     "zh-CN": "卡尼曼试炼",
     "en-US": "Kanamia Trial",
     "ja-JP": "カナミアの試練",
-    "ko-KR": "카나미아 시련"
+    "ko-KR": "카나미아의 시련"
   },
   "6031": {
     "zh-CN": "不稳定空间·卡尼曼试炼",
     "en-US": "Unstable - Kanamia Trial",
     "ja-JP": "不安定な空間・カナミアの試練",
-    "ko-KR": "불안정 공간・카나미아 시련"
+    "ko-KR": "불안정 공간・카나미아의 시련"
   },
   "6032": {
     "zh-CN": "不稳定空间·卡尼曼试炼",
     "en-US": "Unstable - Kanamia Trial",
     "ja-JP": "不安定な空間・カナミアの試練",
-    "ko-KR": "불안정 공간・카나미아 시련"
+    "ko-KR": "불안정 공간・카나미아의 시련"
   },
   "6040": {
     "zh-CN": "群青环抱无音之都",
@@ -1245,7 +1245,7 @@
     "zh-CN": "抑制虚蚀喷涌",
     "en-US": "Suppress the Eruption",
     "ja-JP": "虚蝕噴出の抑制",
-    "ko-KR": "허무의 침식 분출 억제"
+    "ko-KR": "허식 분출 억제"
   },
   "7095": {
     "zh-CN": "躲避蜘蛛雷挑战",
@@ -1646,8 +1646,8 @@
   "13021": {
     "zh-CN": "回溯！遗忘幻梦之野",
     "en-US": "Rewind! Field of Forgotten Illusions",
-    "ja-JP": "激闘！忘られし幻夢の野",
-    "ko-KR": "격투! 잊혀진 환상꿈의 들판"
+    "ja-JP": "回帰！忘られし幻夢の野",
+    "ko-KR": "회상! 잊혀진 환상꿈의 들판"
   },
   "13022": {
     "zh-CN": "血战！遗忘幻梦之野",
@@ -1664,19 +1664,19 @@
   "13031": {
     "zh-CN": "血战！苍穹之上，昼夜尽头",
     "en-US": "Brutal! Twilight's Edge",
-    "ja-JP": "S4レイド・ハード配置",
+    "ja-JP": "血戦！蒼穹の彼方、昼夜の果て",
     "ko-KR": "혈전! 푸른 하늘 너머, 낮과 밤의 끝"
   },
   "13032": {
     "zh-CN": "决战！苍穹之上，昼夜尽头",
     "en-US": "Purge! Twilight's Edge",
-    "ja-JP": "S4レイド・ナイトメア配置",
+    "ja-JP": "決戦！蒼穹の彼方、昼夜の果て",
     "ko-KR": "결전! 푸른 하늘 너머, 낮과 밤의 끝"
   },
   "13033": {
     "zh-CN": "连战！苍穹之上，昼夜尽头",
     "en-US": "Relentless! Twilight's Edge",
-    "ja-JP": "S4レイド・チャレンジ配置",
+    "ja-JP": "連戦！蒼穹の彼方、昼夜の果て",
     "ko-KR": "연전! 푸른 하늘 너머, 낮과 밤의 끝"
   },
   "14001": {

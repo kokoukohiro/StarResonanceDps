@@ -1384,12 +1384,12 @@ public static class WidgetConfigDefaults
         "Unknown"
     ];
 
-    /// <summary>プレイヤーリストのアイコンカラーの鍵。クラスの鍵の後ろに、潜在心相晶の絵の10件と不明。</summary>
+    /// <summary>プレイヤーリストのアイコンカラーの鍵。クラスの鍵の後ろに、潜在心相晶の型ごとの行と不明。</summary>
     public static readonly string[] PlayerListClassColorKeys =
         [.. ClassColorKeys, .. StarResonanceDps.App.Services.SeasonTalentIcons.ColorKeys];
 
     /// <summary>
-    /// プレイヤー情報のアイコンカラーの鍵。クラス(不明を除く)、潜在心相晶の絵の10件と無効、シーズン、最後に不明。
+    /// プレイヤー情報のアイコンカラーの鍵。クラス(不明を除く)、潜在心相晶の型ごとの行と無効、シーズン、最後に不明。
     /// 不明はバッジ3つ(シーズン・クラス・潜在心相晶)のはてなを1色で塗る。絵が同じなので分けない。
     /// </summary>
     public static readonly string[] PlayerInfoClassColorKeys =
@@ -1784,7 +1784,10 @@ public static class WidgetConfigDefaults
         ["Unknown"] = ["#FFFFFF", "#A8A8A8"]
     };
 
-    /// <summary>プレイヤーリストの潜在心相晶の既定色。鍵は SeasonTalent.(絵の名前)。</summary>
+    /// <summary>
+    /// プレイヤーリストの潜在心相晶の既定色。鍵は SeasonTalent.(絵の名前)で、型の行(SeasonTalent.(型ID))は型の絵の色で始める
+    /// (同じ絵の型は同じ既定色、<see cref="TryGetDefaultSeasonTalentColors"/>)。
+    /// </summary>
     private static readonly Dictionary<string, string[]> PlayerListDefaultSeasonTalentColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
         ["SeasonTalent.s2talent01_01"] = ["#FFFFFF", "#F5EABF"],
@@ -1799,6 +1802,14 @@ public static class WidgetConfigDefaults
         ["SeasonTalent.s2talent054_01"] = ["#FFFFFF", "#F5D8F2"],
         ["SeasonTalent.Unknown"] = ["#FFFFFF", "#EEE9F2"]
     };
+
+    /// <summary>潜在心相晶の行の既定色。型の行は型の絵の鍵で引き、不明はそのままの鍵で引く。潜在心相晶の行でなければ false。</summary>
+    private static bool TryGetDefaultSeasonTalentColors(string key, out string[] colors)
+    {
+        return PlayerListDefaultSeasonTalentColorHexes.TryGetValue(
+            StarResonanceDps.App.Services.SeasonTalentIcons.GetLegacyIconColorKey(key) ?? key,
+            out colors!);
+    }
 
     /// <summary>
     /// プレイヤー情報だけにある行の既定色。心相晶の無効は不明と同じ色、シーズンは白と灰色の2枠で、2枠目から始める。
@@ -3371,9 +3382,9 @@ public static class WidgetConfigDefaults
         return (kind == WidgetKind.Map
                 && string.Equals(key, MapEntityColorKey, StringComparison.OrdinalIgnoreCase))
             || (kind == WidgetKind.PlayerList
-                && PlayerListDefaultSeasonTalentColorHexes.ContainsKey(key))
+                && TryGetDefaultSeasonTalentColors(key, out _))
             || (kind == WidgetKind.PlayerInfo
-                && (PlayerListDefaultSeasonTalentColorHexes.ContainsKey(key)
+                && (TryGetDefaultSeasonTalentColors(key, out _)
                     || string.Equals(key, StarResonanceDps.App.Services.SeasonTalentIcons.InactiveColorKey, StringComparison.OrdinalIgnoreCase)
                     || StarResonanceDps.App.Services.SeasonIcons.IsColorKey(key)))
             ? MinClassColorIndex + 1
@@ -3623,7 +3634,7 @@ public static class WidgetConfigDefaults
         }
 
         if ((kind is WidgetKind.PlayerList or WidgetKind.PlayerInfo)
-            && PlayerListDefaultSeasonTalentColorHexes.TryGetValue(key, out var seasonTalentColors))
+            && TryGetDefaultSeasonTalentColors(key, out var seasonTalentColors))
         {
             return [.. seasonTalentColors];
         }
@@ -4097,14 +4108,20 @@ public static class WidgetConfigDefaults
 
         foreach (var key in GetClassColorKeys(kind))
         {
+            // 4.2.0 までは潜在心相晶の色を絵ごと(SeasonTalent.(絵の名前))に持っていた。型の行の値が無ければ、その型の絵の値を使う。
+            var sourceKey = !palettes.ContainsKey(key)
+                && !indexes.ContainsKey(key)
+                && StarResonanceDps.App.Services.SeasonTalentIcons.GetLegacyIconColorKey(key) is { } legacyKey
+                    ? legacyKey
+                    : key;
             var defaultColors = CreateDefaultClassColors(kind, key);
-            var sourceColors = palettes.TryGetValue(key, out var colors)
+            var sourceColors = palettes.TryGetValue(sourceKey, out var colors)
                 ? colors
                 : defaultColors;
             var palette = NormalizeColorList(sourceColors, defaultColors, MaxPaletteColorCount);
             normalizedPalettes[key] = palette;
 
-            var selectedIndex = indexes.TryGetValue(key, out var index)
+            var selectedIndex = indexes.TryGetValue(sourceKey, out var index)
                 ? index
                 : GetDefaultClassColorIndex(kind, key);
             normalizedIndexes[key] = Math.Clamp(selectedIndex, MinClassColorIndex, palette.Count - 1);

@@ -3,6 +3,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
@@ -57,7 +58,8 @@ public static partial class PlayerInfoFormatFormatter
                 player.IsSelf,
                 player.IsNpc,
                 player.SeasonTalentBuffId,
-                player.IsSeasonTalentInactive),
+                player.IsSeasonTalentInactive,
+                player.SeasonId),
             formatString,
             nameDisplayMode,
             cache);
@@ -82,7 +84,8 @@ public static partial class PlayerInfoFormatFormatter
                 player.IsSelf,
                 player.IsNpc,
                 player.SeasonTalentBuffId,
-                player.IsSeasonTalentInactive),
+                player.IsSeasonTalentInactive,
+                SeasonTalentIcons.GetSeasonId(player)),
             formatString,
             nameDisplayMode,
             cache);
@@ -102,7 +105,8 @@ public static partial class PlayerInfoFormatFormatter
                 true,
                 false,
                 PreviewSeasonTalentBuffId,
-                false),
+                false,
+                SeasonStateStore.CurrentSeasonId),
             formatString,
             PlayerNameDisplayMode.Show,
             null);
@@ -124,7 +128,7 @@ public static partial class PlayerInfoFormatFormatter
             formatString,
             GetName(player, nameDisplayMode),
             GetClassSpecText(player.ClassSpec),
-            GetSeasonTalentText(player.SeasonTalentBuffId, player.IsSeasonTalentInactive),
+            GetSeasonTalentText(player.SeasonTalentBuffId, player.SeasonId, player.IsSeasonTalentInactive),
             player.AbilityScore,
             player.SeasonStrength,
             player.SeasonLevel,
@@ -261,12 +265,13 @@ public static partial class PlayerInfoFormatFormatter
     /// <summary>
     /// シーズンタレントの型の表示値。型が分かれば型の名前、無効なら「無効」、どちらでもなければ「不明」。
     /// 特化の <c>{Spec}</c> と同じく、不明も空にせず文字で出す。書式の <c>{Psych}</c> とプレイヤーリストのツールチップが使う。
+    /// 型は根のバフと回のシーズン(<paramref name="seasonId"/>)で決める(<see cref="SeasonTalentIcons.TryResolveType"/>)。
     /// </summary>
-    public static string GetSeasonTalentText(int seasonTalentBuffId, bool isSeasonTalentInactive)
+    public static string GetSeasonTalentText(int seasonTalentBuffId, int seasonId, bool isSeasonTalentInactive)
     {
         if (seasonTalentBuffId > 0)
         {
-            return CombatDataCatalog.GetSeasonTalentName(seasonTalentBuffId);
+            return SeasonTalentIcons.GetTypeName(seasonTalentBuffId, seasonId);
         }
 
         return LocalizationManager.Instance.GetString(
@@ -330,7 +335,8 @@ public static partial class PlayerInfoFormatFormatter
         bool IsSelf,
         bool IsNpc,
         int SeasonTalentBuffId,
-        bool IsSeasonTalentInactive);
+        bool IsSeasonTalentInactive,
+        int SeasonId);
 }
 
 /// <summary>書式に差し込む値。同じなら結果の文字列も同じ。</summary>

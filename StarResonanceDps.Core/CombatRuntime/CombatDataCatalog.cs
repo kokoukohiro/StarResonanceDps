@@ -185,7 +185,10 @@ public static class CombatDataCatalog
     /// </summary>
     private static FrozenDictionary<int, int> _imagineSkillIdByPassiveRoot = FrozenDictionary<int, int>.Empty;
 
-    /// <summary>シーズンタレントの型の根ノードのバフID → 根ノードの名前。<c>Data/Localization/SeasonTalentNames.json</c>。</summary>
+    /// <summary>
+    /// シーズンタレントの型の根ノードのバフID → 根ノードの名前。<c>Data/Localization/SeasonTalentNames.json</c>。
+    /// 同じ根のバフを使う型がシーズンをまたいであれば、一番新しいシーズンの型の名前。型が分かるときは <see cref="_seasonTalentTypeNames"/> を使う。
+    /// </summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _seasonTalentNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
@@ -195,6 +198,14 @@ public static class CombatDataCatalog
     /// 名前の辞書は空の値を落とすので、判定は名前ではなくこの鍵で行う。
     /// </summary>
     private static FrozenSet<int> _seasonTalentRootBuffIds = FrozenSet<int>.Empty;
+
+    /// <summary>
+    /// シーズンタレントの型ID(<c>SeasonTalentTemplateTable.Id</c>)→ 根ノードの名前。<c>Data/Localization/SeasonTalentTypeNames.json</c>。
+    /// シーズンをまたいで同じ根のバフを使う型も、型ごとに名前を引ける。
+    /// </summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _seasonTalentTypeNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>特化の番号(<c>SubProfessionId</c>)→ 特化の名前。<c>Data/Localization/ClassSpecNames.json</c>。</summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _classSpecNames =
@@ -426,7 +437,7 @@ public static class CombatDataCatalog
     /// <summary><see cref="ReadLocalizedFile"/> で読む名前テーブル(<c>Data/Localization/{名前}.json</c>)。<see cref="StartReads"/> が先に解き始める。</summary>
     private static readonly string[] LocalizedFileNames =
     [
-        "SkillNames", "SkillTalkNames", "BuffNames", "MonsterNames", "DbmNames", "RogueEntryNames", "SeasonTalentNames", "ClassSpecNames",
+        "SkillNames", "SkillTalkNames", "BuffNames", "MonsterNames", "DbmNames", "RogueEntryNames", "SeasonTalentNames", "SeasonTalentTypeNames", "ClassSpecNames",
         "SeasonNames", "SeasonRankNames", "TeamTargetNames", "SeasonActNames", "ItemNames", "EquipEffectTexts",
         "CuisineBuffs", "PotionBuffs", "SceneNames", "DungeonTypeNames", "RootBuffNames", "ModuleEffectNames", "TalentNames", "ChatHyperlinks",
         "UnionBuildingNames",
@@ -521,6 +532,7 @@ public static class CombatDataCatalog
             _imagineSkillIdByPassiveRoot = BuildImagineSkillIdByPassiveRoot();
             _seasonTalentNames = LoadLocalizedText(reads, "SeasonTalentNames", out var seasonTalentRootBuffIds);
             _seasonTalentRootBuffIds = seasonTalentRootBuffIds;
+            _seasonTalentTypeNames = LoadLocalizedText(reads, "SeasonTalentTypeNames", out _);
             _classSpecNames = LoadLocalizedText(reads, "ClassSpecNames", out _);
             _seasonNames = LoadLocalizedText(reads, "SeasonNames", out _);
             _seasonRankNames = LoadLocalizedText(reads, "SeasonRankNames", out _);
@@ -900,12 +912,25 @@ public static class CombatDataCatalog
 
     /// <summary>
     /// シーズンタレントの型の根ノードの名前。鍵は根ノードのバフID。表示中の言語で引き、無ければ空。
+    /// 同じ根のバフを使う型がシーズンをまたいであれば、一番新しいシーズンの型の名前。型が分かるときは <see cref="GetSeasonTalentTypeName"/> を使う。
     /// 内部IDの注記はバフと同じ設定で付く。
     /// </summary>
     public static string GetSeasonTalentName(int rootBuffId)
     {
         return AppendInternalId(
             ResolveText(_seasonTalentNames, Volatile.Read(ref _cultureName), rootBuffId),
+            InternalIdDisplayMode.BuffOnly,
+            rootBuffId);
+    }
+
+    /// <summary>
+    /// シーズンタレントの型の名前(根ノードの名前)。鍵は型ID。表示中の言語で引き、無ければ空。
+    /// 内部IDの注記はバフと同じ設定で、型の根ノードのバフID(<paramref name="rootBuffId"/>)を付ける。
+    /// </summary>
+    public static string GetSeasonTalentTypeName(int typeId, int rootBuffId)
+    {
+        return AppendInternalId(
+            ResolveText(_seasonTalentTypeNames, Volatile.Read(ref _cultureName), typeId),
             InternalIdDisplayMode.BuffOnly,
             rootBuffId);
     }

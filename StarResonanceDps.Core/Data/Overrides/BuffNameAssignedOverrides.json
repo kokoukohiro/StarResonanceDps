@@ -355,8 +355,8 @@
     "Name": {
       "zh-CN": "智力+2.5%",
       "en-US": "Intellect +2.5%",
-      "ja-JP": "",
-      "ko-KR": ""
+      "ja-JP": "知力+2.5%",
+      "ko-KR": "지력 +2.5%"
     }
   },
   "2402221": {
@@ -379,16 +379,16 @@
     "Name": {
       "zh-CN": "伤害减免+15%，每1秒回复2点能量",
       "en-US": "DMG Reduction +15%, restores 2 Energy every second",
-      "ja-JP": "",
-      "ko-KR": ""
+      "ja-JP": "受けるダメージ-15%、1秒ごとにエネルギーを2回復",
+      "ko-KR": "받는 대미지 -15%, 1초마다 에너지 2pt 회복"
     }
   },
   "2404191": {
     "Name": {
       "zh-CN": "幸运一击伤害+20%",
       "en-US": "Lucky Strike DMG +20%",
-      "ja-JP": "",
-      "ko-KR": ""
+      "ja-JP": "幸運の一撃のダメージ+20%",
+      "ko-KR": "행운의 일격 대미지 +20%"
     }
   },
   "2404261": {
@@ -411,8 +411,8 @@
     "Name": {
       "zh-CN": "护盾",
       "en-US": "Shield",
-      "ja-JP": "",
-      "ko-KR": ""
+      "ja-JP": "バリア",
+      "ko-KR": "실드"
     }
   },
   "2405131": {
@@ -443,8 +443,8 @@
     "Name": {
       "zh-CN": "暴击伤害+3%",
       "en-US": "Crit DMG +3%",
-      "ja-JP": "",
-      "ko-KR": ""
+      "ja-JP": "会心ダメージ+3%",
+      "ko-KR": "치명타 대미지 +3%"
     }
   },
   "2406161": {
@@ -459,8 +459,8 @@
     "Name": {
       "zh-CN": "伤害-5%",
       "en-US": "DMG -5%",
-      "ja-JP": "",
-      "ko-KR": ""
+      "ja-JP": "ダメージ-5%",
+      "ko-KR": "대미지 -5%"
     }
   },
   "2407141": {
@@ -475,8 +475,8 @@
     "Name": {
       "zh-CN": "畏光",
       "en-US": "Photophobia",
-      "ja-JP": "",
-      "ko-KR": ""
+      "ja-JP": "忌光",
+      "ko-KR": "빛 공포"
     }
   },
   "2407231": {
@@ -523,16 +523,16 @@
     "Name": {
       "zh-CN": "暴击治疗+10%",
       "en-US": "Crit Healing +10%",
-      "ja-JP": "",
-      "ko-KR": ""
+      "ja-JP": "会心回復+10%",
+      "ko-KR": "치명타 치료 +10%"
     }
   },
   "2408291": {
     "Name": {
       "zh-CN": "暴击治疗+5%",
       "en-US": "Crit Healing +5%",
-      "ja-JP": "",
-      "ko-KR": ""
+      "ja-JP": "会心回復+5%",
+      "ko-KR": "치명타 치유량 +5%"
     }
   },
   "2409081": {
@@ -547,16 +547,16 @@
     "Name": {
       "zh-CN": "攻击+12%",
       "en-US": "ATK +12%",
-      "ja-JP": "",
-      "ko-KR": ""
+      "ja-JP": "攻撃力+12%",
+      "ko-KR": "공격력 +12%"
     }
   },
   "3002411": {
     "Name": {
       "zh-CN": "梦幻箭雨",
       "en-US": "Dreamlike Arrow Rain",
-      "ja-JP": "夢幻の矢",
-      "ko-KR": "몽환의 화살"
+      "ja-JP": "夢幻アローレイン",
+      "ko-KR": "몽환의 화살비"
     }
   },
   "3002812": {
@@ -587,8 +587,8 @@
     "Name": {
       "zh-CN": "激励·绝唱护魂",
       "en-US": "Inspire: Soulguard Finale",
-      "ja-JP": "幻夢の執念",
-      "ko-KR": "환상꿈 집념"
+      "ja-JP": "激励・護魂絶唱",
+      "ko-KR": "격려・영혼 수호의 선율"
     }
   },
   "3003054": {
@@ -602,31 +602,41 @@
   "3005001": {
     "Name": {
       "zh-CN": "幻灭·削弱",
-      "en-US": "Disillusion: Weakening"
+      "en-US": "Disillusion: Weakening",
+      "ja-JP": "幻滅・弱体化",
+      "ko-KR": "환멸・약화"
     }
   },
   "3005502": {
     "Name": {
       "zh-CN": "战意削减",
-      "en-US": "Bloodthirst Reduction"
+      "en-US": "Bloodthirst Reduction",
+      "ja-JP": "戦意減少",
+      "ko-KR": "전의 감소"
     }
   },
   "3005703": {
     "Name": {
       "zh-CN": "激励",
-      "en-US": "Inspire"
+      "en-US": "Inspire",
+      "ja-JP": "激励",
+      "ko-KR": "격려"
     }
   },
   "3005721": {
     "Name": {
       "zh-CN": "激励·破甲赞歌",
-      "en-US": "Inspire: Armorbreak Anthem"
+      "en-US": "Inspire: Armorbreak Anthem",
+      "ja-JP": "激励・破甲賛歌",
+      "ko-KR": "격려・파갑의 찬가"
     }
   },
   "3005781": {
     "Name": {
       "zh-CN": "激励·圣盾咏调",
-      "en-US": "Inspire: Holy Shield Melody"
+      "en-US": "Inspire: Holy Shield Melody",
+      "ja-JP": "激励・聖盾旋律",
+      "ko-KR": "격려・신성 방패의 선율"
     }
   },
   "3050081": {
@@ -664,7 +674,9 @@
   "3050581": {
     "Name": {
       "zh-CN": "雷影稳态因子X1",
-      "en-US": "Stormblade Stasis Factor X1"
+      "en-US": "Stormblade Stasis Factor X1",
+      "ja-JP": "ストームブレイド・恒常性因子X1",
+      "ko-KR": "스톰 블레이드 안정 인자 X1"
     }
   },
   "3051081": {
@@ -686,25 +698,33 @@
   "3051461": {
     "Name": {
       "zh-CN": "青岚灵感因子X1",
-      "en-US": "Wind Knight Inspiration Factor X1"
+      "en-US": "Wind Knight Inspiration Factor X1",
+      "ja-JP": "ゲイルランサー・想像因子X1",
+      "ko-KR": "윈드 나이트 영감 인자 X1"
     }
   },
   "3051542": {
     "Name": {
       "zh-CN": "青岚奇点因子X1",
-      "en-US": "Wind Knight Singularity Factor X1"
+      "en-US": "Wind Knight Singularity Factor X1",
+      "ja-JP": "ゲイルランサー・特異因子X1",
+      "ko-KR": "윈드 나이트 특이점 인자 X1"
     }
   },
   "3051572": {
     "Name": {
       "zh-CN": "青岚奇点因子X4",
-      "en-US": "Wind Knight Singularity Factor X4"
+      "en-US": "Wind Knight Singularity Factor X4",
+      "ja-JP": "ゲイルランサー・特異因子X4",
+      "ko-KR": "윈드 나이트 특이점 인자 X4"
     }
   },
   "3051591": {
     "Name": {
       "zh-CN": "青岚稳态因子X2",
-      "en-US": "Wind Knight Stasis Factor X2"
+      "en-US": "Wind Knight Stasis Factor X2",
+      "ja-JP": "ゲイルランサー・恒常性因子X2",
+      "ko-KR": "윈드 나이트 안정 인자 X2"
     }
   },
   "3052402": {
@@ -719,8 +739,8 @@
     "Name": {
       "zh-CN": "冰魔灵感因子X3",
       "en-US": "Frost Mage Inspiration Factor X3",
-      "ja-JP": "フロストメイジ・実像因子X3",
-      "ko-KR": "프로스트 메이지 진실 인자X3"
+      "ja-JP": "フロストメイジ・想像因子X3",
+      "ko-KR": "프로스트 메이지 영감 인자 X3"
     }
   },
   "3052431": {
@@ -750,19 +770,25 @@
   "3052491": {
     "Name": {
       "zh-CN": "冰魔灵感因子X4",
-      "en-US": "Frost Mage Inspiration Factor X4"
+      "en-US": "Frost Mage Inspiration Factor X4",
+      "ja-JP": "フロストメイジ・想像因子X4",
+      "ko-KR": "프로스트 메이지 영감 인자 X4"
     }
   },
   "3052521": {
     "Name": {
       "zh-CN": "冰魔灵感因子X5",
-      "en-US": "Frost Mage Inspiration Factor X5"
+      "en-US": "Frost Mage Inspiration Factor X5",
+      "ja-JP": "フロストメイジ・想像因子X5",
+      "ko-KR": "프로스트 메이지 영감 인자 X5"
     }
   },
   "3052591": {
     "Name": {
       "zh-CN": "冰魔稳态因子X2",
-      "en-US": "Frost Mage Stasis Factor X2"
+      "en-US": "Frost Mage Stasis Factor X2",
+      "ja-JP": "フロストメイジ・恒常性因子X2",
+      "ko-KR": "프로스트 메이지 안정 인자 X2"
     }
   },
   "3053101": {
@@ -792,7 +818,9 @@
   "3053531": {
     "Name": {
       "zh-CN": "神射灵感因子X8",
-      "en-US": "Marksman Inspiration Factor X8"
+      "en-US": "Marksman Inspiration Factor X8",
+      "ja-JP": "ディバインアーチャー・想像因子X8",
+      "ko-KR": "디바인 아처 영감 인자 X8"
     }
   },
   "3054091": {
@@ -822,7 +850,9 @@
   "3054591": {
     "Name": {
       "zh-CN": "神盾稳态因子X2",
-      "en-US": "Shield Knight Stasis Factor X2"
+      "en-US": "Shield Knight Stasis Factor X2",
+      "ja-JP": "シールドファイター・恒常性因子X2",
+      "ko-KR": "실드 나이트 안정 인자 X2"
     }
   },
   "3055081": {
@@ -868,7 +898,9 @@
   "3055511": {
     "Name": {
       "zh-CN": "巨刃灵感因子X6",
-      "en-US": "Heavy Guardian Inspiration Factor X6"
+      "en-US": "Heavy Guardian Inspiration Factor X6",
+      "ja-JP": "ヘヴィガーディアン・想像因子X6",
+      "ko-KR": "헤비 가디언 영감 인자 X6"
     }
   },
   "3056021": {
@@ -930,31 +962,41 @@
   "3056481": {
     "Name": {
       "zh-CN": "森语灵感因子X3",
-      "en-US": "Verdant Oracle Inspiration Factor X3"
+      "en-US": "Verdant Oracle Inspiration Factor X3",
+      "ja-JP": "ヴァーダントオラクル・想像因子X3",
+      "ko-KR": "실반 오라클 영감 인자 X3"
     }
   },
   "3056521": {
     "Name": {
       "zh-CN": "森语灵感因子X7",
-      "en-US": "Verdant Oracle Inspiration Factor X7"
+      "en-US": "Verdant Oracle Inspiration Factor X7",
+      "ja-JP": "ヴァーダントオラクル・想像因子X7",
+      "ko-KR": "실반 오라클 영감 인자 X7"
     }
   },
   "3056551": {
     "Name": {
       "zh-CN": "森语奇点因子X2",
-      "en-US": "Verdant Oracle Singularity Factor X2"
+      "en-US": "Verdant Oracle Singularity Factor X2",
+      "ja-JP": "ヴァーダントオラクル・特異因子X2",
+      "ko-KR": "실반 오라클 특이점 인자 X2"
     }
   },
   "3056561": {
     "Name": {
       "zh-CN": "森语奇点因子X3",
-      "en-US": "Verdant Oracle Singularity Factor X3"
+      "en-US": "Verdant Oracle Singularity Factor X3",
+      "ja-JP": "ヴァーダントオラクル・特異因子X3",
+      "ko-KR": "실반 오라클 특이점 인자 X3"
     }
   },
   "3056591": {
     "Name": {
       "zh-CN": "森语稳态因子X2",
-      "en-US": "Verdant Oracle Stasis Factor X2"
+      "en-US": "Verdant Oracle Stasis Factor X2",
+      "ja-JP": "ヴァーダントオラクル・恒常性因子X2",
+      "ko-KR": "실반 오라클 안정 인자 X2"
     }
   },
   "3057101": {
@@ -984,19 +1026,25 @@
   "3057571": {
     "Name": {
       "zh-CN": "灵魂奇点因子X4",
-      "en-US": "Beat Performer Singularity Factor X4"
+      "en-US": "Beat Performer Singularity Factor X4",
+      "ja-JP": "ビートパフォーマー・特異因子X4",
+      "ko-KR": "비트 퍼포머 특이점 인자 X4"
     }
   },
   "3057581": {
     "Name": {
       "zh-CN": "灵魂稳态因子X1",
-      "en-US": "Beat Performer Stasis Factor X1"
+      "en-US": "Beat Performer Stasis Factor X1",
+      "ja-JP": "ビートパフォーマー・恒常性因子X1",
+      "ko-KR": "비트 퍼포머 안정 인자 X1"
     }
   },
   "3057591": {
     "Name": {
       "zh-CN": "灵魂稳态因子X2",
-      "en-US": "Beat Performer Stasis Factor X2"
+      "en-US": "Beat Performer Stasis Factor X2",
+      "ja-JP": "ビートパフォーマー・恒常性因子X2",
+      "ko-KR": "비트 퍼포머 안정 인자 X2"
     }
   },
   "3058111": {
@@ -1074,13 +1122,17 @@
   "3059301": {
     "Name": {
       "zh-CN": "稳态因子X3",
-      "en-US": "Stasis Factor X3"
+      "en-US": "Stasis Factor X3",
+      "ja-JP": "恒常性因子X3",
+      "ko-KR": "안정 인자 X3"
     }
   },
   "3059311": {
     "Name": {
       "zh-CN": "稳态因子X4",
-      "en-US": "Stasis Factor X4"
+      "en-US": "Stasis Factor X4",
+      "ja-JP": "恒常性因子X4",
+      "ko-KR": "안정 인자 X4"
     }
   },
   "3060041": {

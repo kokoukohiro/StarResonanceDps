@@ -192,12 +192,13 @@ public sealed partial class PlayerListEntry : ObservableObject
         ClassSpecDisplayName = PlayerInfoFormatFormatter.GetClassSpecText(player.ClassSpec);
         SeasonTalentBuffId = player.SeasonTalentBuffId;
         IsSeasonTalentInactive = player.IsSeasonTalentInactive;
+        var seasonId = SeasonTalentIcons.GetSeasonId(player);
         SeasonTalentName = player.SeasonTalentBuffId > 0
-            ? CombatDataCatalog.GetSeasonTalentName(player.SeasonTalentBuffId)
+            ? SeasonTalentIcons.GetTypeName(player.SeasonTalentBuffId, seasonId)
             : string.Empty;
         SeasonTalentDisplayText = PlayerInfoFormatFormatter.GetSeasonTalentText(
-            player.SeasonTalentBuffId, player.IsSeasonTalentInactive);
-        SeasonTalentIconMask = SeasonTalentIcons.GetIconMask(player.SeasonTalentBuffId, player.IsSeasonTalentInactive);
+            player.SeasonTalentBuffId, seasonId, player.IsSeasonTalentInactive);
+        SeasonTalentIconMask = SeasonTalentIcons.GetIconMask(player.SeasonTalentBuffId, seasonId, player.IsSeasonTalentInactive);
         IsNpc = player.IsNpc;
         IsLive = player.IsLive;
         IsPartyMember = player.IsPartyMember;
@@ -229,7 +230,7 @@ public sealed partial class PlayerListEntry : ObservableObject
             ClassBrush = CreateBrush(classColor);
         }
 
-        var seasonTalentColor = GetClassColor(settings, SeasonTalentIcons.GetColorKey(player.SeasonTalentBuffId));
+        var seasonTalentColor = GetClassColor(settings, SeasonTalentIcons.GetColorKey(player.SeasonTalentBuffId, seasonId));
         if (SeasonTalentBrush.Color != seasonTalentColor)
         {
             SeasonTalentBrush = CreateBrush(seasonTalentColor);

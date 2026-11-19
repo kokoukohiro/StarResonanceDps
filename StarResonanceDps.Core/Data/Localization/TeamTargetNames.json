@@ -38,38 +38,38 @@
   "3001": {
     "zh-CN": "不稳定·镜中的审判",
     "en-US": "Unstable - Mirror Judgment",
-    "ja-JP": "不安定・機械化工場",
-    "ko-KR": "불안정・기계화 처리소"
+    "ja-JP": "不安定・鏡中の審判",
+    "ko-KR": "불안정・거울 속의 심판"
   },
   "3002": {
     "zh-CN": "不稳定·弥妄·巨龙爪痕",
     "en-US": "Unstable - Illusion-Shroud - Dragon Claw Valley",
-    "ja-JP": "不安定・呪われし煌墓",
-    "ko-KR": "불안정・저주받은 무덤"
+    "ja-JP": "不安定・迷妄・巨竜の爪痕",
+    "ko-KR": "불안정・미망・거룡의 발톱"
   },
   "3003": {
     "zh-CN": "不稳定·荒芜之庭",
     "en-US": "Unstable - Barren Courtyard",
-    "ja-JP": "不安定・霧海の猟場",
-    "ko-KR": "불안정・안개 속 사냥터"
+    "ja-JP": "不安定・荒廃の庭",
+    "ko-KR": "불안정・황폐한 정원"
   },
   "3004": {
     "zh-CN": "不稳定·弥妄·流月之野",
     "en-US": "Unstable - Illusion-Shroud - Moonveil Wilds",
-    "ja-JP": "不安定・珊瑚岩の谷",
-    "ko-KR": "불안정・환해 암초 지대"
+    "ja-JP": "不安定・迷妄・流月の野",
+    "ko-KR": "불안정・미망・빛이 흐르는 들판"
   },
   "3005": {
     "zh-CN": "不稳定·弥妄·黯影堡垒",
     "en-US": "Unstable - Illusion-Shroud - Dark Mist Fortress",
-    "ja-JP": "不安定・蝕・ティナの精神領域",
-    "ko-KR": "불안정・침식・티나의 정신 세계"
+    "ja-JP": "不安定・迷妄・暗霧要塞",
+    "ko-KR": "불안정・미망・검은 안개 요새"
   },
   "3006": {
     "zh-CN": "不稳定·远天的神槛",
     "en-US": "Unstable - Cavern Zero",
-    "ja-JP": "不安定・蝕・巨塔の遺跡",
-    "ko-KR": "불안정・침식・거탑 유적"
+    "ja-JP": "不安定・遠天の神檻",
+    "ko-KR": "불안정・먼 하늘의 신단"
   },
   "5000": {
     "zh-CN": "极限空间",
@@ -77,185 +77,149 @@
     "ja-JP": "極限空間",
     "ko-KR": "극한 공간"
   },
-  "5001": {
-    "zh-CN": "极限·诅咒的煌墓·简单",
-    "en-US": "Chaotic - Cursed Radiant Tomb - Easy",
-    "ja-JP": "極限・呪われし煌墓・イージー",
-    "ko-KR": "극한・저주받은 무덤・노멀"
-  },
   "5002": {
     "zh-CN": "极限·镜中的审判·困难",
     "en-US": "Chaotic - Mirror Judgment - Hard",
-    "ja-JP": "極限・呪われし煌墓・ハード",
-    "ko-KR": "극한・저주받은 무덤・하드"
+    "ja-JP": "極限・鏡中の審判・ハード",
+    "ko-KR": "극한・거울 속의 심판・하드"
   },
   "5003": {
     "zh-CN": "极限·镜中的审判大师1",
     "en-US": "Chaotic - Mirror Judgment - Master 1",
-    "ja-JP": "極限・呪われし煌墓マスター1",
-    "ko-KR": "극한・저주받은 무덤 마스터1"
-  },
-  "5004": {
-    "zh-CN": "极限·机化处理所·简单",
-    "en-US": "Chaotic - Mech Facility - Easy",
-    "ja-JP": "極限・機械化工場・イージー",
-    "ko-KR": "극한・기계화 처리소・노멀"
+    "ja-JP": "極限・鏡中の審判・マスター1",
+    "ko-KR": "극한・거울 속의 심판 마스터1"
   },
   "5005": {
     "zh-CN": "极限·弥妄·巨龙爪痕·困难",
     "en-US": "Chaotic - Illusion-Shroud - Dragon Claw Valley - Hard",
-    "ja-JP": "極限・機械化工場・ハード",
-    "ko-KR": "극한・기계화 처리소・하드"
+    "ja-JP": "極限・迷妄・巨竜の爪痕・ハード",
+    "ko-KR": "극한・미망・거룡의 발톱・하드"
   },
   "5006": {
     "zh-CN": "极限·弥妄·巨龙爪痕大师1",
     "en-US": "Chaotic - Illusion-Shroud - Dragon Claw Valley - Master 1",
-    "ja-JP": "極限・機械化工場マスター1",
-    "ko-KR": "극한・기계화 처리소 마스터1"
-  },
-  "5007": {
-    "zh-CN": "极限·蚀·蒂娜精神之界·简单",
-    "en-US": "Chaotic - Void - Tina's Mindrealm - Easy",
-    "ja-JP": "極限・蝕・ティナの精神領域・イージー",
-    "ko-KR": "극한・침식・티나의 정신 세계・노멀"
+    "ja-JP": "極限・迷妄・巨竜の爪痕マスター1",
+    "ko-KR": "극한・미망・거룡의 발톱 마스터1"
   },
   "5008": {
     "zh-CN": "极限·荒芜之庭·困难",
     "en-US": "Chaotic - Barren Courtyard - Hard",
-    "ja-JP": "極限・蝕・ティナの精神領域・ハード",
-    "ko-KR": "극한・침식・티나의 정신 세계・하드"
+    "ja-JP": "極限・荒廃の庭・ハード",
+    "ko-KR": "극한・황폐한 정원・하드"
   },
   "5009": {
     "zh-CN": "极限·荒芜之庭大师1",
     "en-US": "Chaotic - Barren Courtyard - Master 1",
-    "ja-JP": "極限・蝕・ティナの精神領域マスター1",
-    "ko-KR": "극한・침식・티나의 정신 세계 마스터 1"
-  },
-  "5010": {
-    "zh-CN": "极限·隐雾猎场·简单",
-    "en-US": "Chaotic - Mistveil Hunting Ground - Easy",
-    "ja-JP": "極限・霧海の猟場・イージー",
-    "ko-KR": "극한・안개 속 사냥터・노멀"
+    "ja-JP": "極限・荒廃の庭マスター1",
+    "ko-KR": "극한・황폐한 정원 마스터1"
   },
   "5011": {
     "zh-CN": "极限·弥妄·流月之野·困难",
     "en-US": "Chaotic - Illusion-Shroud - Moonveil Wilds - Hard",
-    "ja-JP": "極限・霧海の猟場・ハード",
-    "ko-KR": "극한・안개 속 사냥터・하드"
+    "ja-JP": "極限・迷妄・流月の野・ハード",
+    "ko-KR": "극한・미망・빛이 흐르는 들판・하드"
   },
   "5012": {
     "zh-CN": "极限·弥妄·流月之野大师1",
     "en-US": "Chaotic - Illusion-Shroud - Moonveil Wilds - Master 1",
-    "ja-JP": "極限・霧海の猟場マスター1",
-    "ko-KR": "극한・안개 속 사냥터 마스터1"
-  },
-  "5013": {
-    "zh-CN": "极限·蚀·巨塔遗迹·简单",
-    "en-US": "Chaotic - Void - Towering Ruin - Easy",
-    "ja-JP": "極限・蝕・巨塔の遺跡・イージー",
-    "ko-KR": "극한・침식・거탑 유적・노멀"
+    "ja-JP": "極限・迷妄・流月の野・マスター1",
+    "ko-KR": "극한・미망・빛이 흐르는 들판 마스터1"
   },
   "5014": {
     "zh-CN": "极限·弥妄·黯影堡垒·困难",
     "en-US": "Chaotic - Illusion-Shroud - Dark Mist Fortress - Hard",
-    "ja-JP": "極限・蝕・巨塔の遺跡・ハード",
-    "ko-KR": "극한・침식・거탑 유적・하드"
+    "ja-JP": "極限・迷妄・暗霧要塞・ハード",
+    "ko-KR": "극한・미망・검은 안개 요새・하드"
   },
   "5015": {
     "zh-CN": "极限·弥妄·黯影堡垒大师1",
     "en-US": "Chaotic - Illusion-Shroud - Dark Mist Fortress - Master 1",
-    "ja-JP": "極限・蝕・巨塔の遺跡マスター1",
-    "ko-KR": "극한・침식・거탑 유적 마스터 1"
-  },
-  "5016": {
-    "zh-CN": "极限·环海石礁·简单",
-    "en-US": "Chaotic - Sea-Ringed Reef - Easy",
-    "ja-JP": "極限・珊瑚岩の谷・イージー",
-    "ko-KR": "극한・환해 암초 지대・노멀"
+    "ja-JP": "極限・迷妄・暗霧要塞マスター1",
+    "ko-KR": "극한・미망・검은 안개 요새 마스터1"
   },
   "5017": {
     "zh-CN": "极限·远天的神槛·困难",
     "en-US": "Chaotic - Cavern Zero - Hard",
-    "ja-JP": "極限・珊瑚岩の谷・ハード",
-    "ko-KR": "극한・환해 암초 지대・하드"
+    "ja-JP": "極限・遠天の神檻・ハード",
+    "ko-KR": "극한・먼 하늘의 신단・하드"
   },
   "5018": {
     "zh-CN": "极限·远天的神槛大师1",
     "en-US": "Chaotic - Cavern Zero - Master 1",
-    "ja-JP": "極限・珊瑚岩の谷マスター1",
-    "ko-KR": "극한・환해 암초 지대 마스터1"
+    "ja-JP": "極限・遠天の神檻マスター1",
+    "ko-KR": "극한・먼 하늘의 신단 마스터1"
   },
   "5019": {
     "zh-CN": "极限·镜中的审判大师6",
     "en-US": "Chaotic - Mirror Judgment - Master 6",
-    "ja-JP": "極限・呪われし煌墓マスター6",
-    "ko-KR": "극한・저주받은 무덤 마스터 6"
+    "ja-JP": "極限・鏡中の審判・マスター6",
+    "ko-KR": "극한・거울 속의 심판 마스터6"
   },
   "5020": {
     "zh-CN": "极限·弥妄·巨龙爪痕大师6",
     "en-US": "Chaotic - Illusion-Shroud - Dragon Claw Valley - Master 6",
-    "ja-JP": "極限・機械化工場マスター6",
-    "ko-KR": "극한・기계화 처리소 마스터 6"
+    "ja-JP": "極限・迷妄・巨竜の爪痕マスター6",
+    "ko-KR": "극한・미망・거룡의 발톱 마스터6"
   },
   "5021": {
     "zh-CN": "极限·荒芜之庭大师6",
     "en-US": "Chaotic - Barren Courtyard - Master 6",
-    "ja-JP": "極限・蝕・ティナの精神領域マスター6",
-    "ko-KR": "극한・침식・티나의 정신 세계 마스터 6"
+    "ja-JP": "極限・荒廃の庭マスター6",
+    "ko-KR": "극한・황폐한 정원 마스터6"
   },
   "5022": {
     "zh-CN": "极限·弥妄·流月之野大师6",
     "en-US": "Chaotic - Illusion-Shroud - Moonveil Wilds - Master 6",
-    "ja-JP": "極限・霧海の猟場マスター6",
-    "ko-KR": "극한・안개 속 사냥터 마스터 6"
+    "ja-JP": "極限・迷妄・流月の野・マスター6",
+    "ko-KR": "극한・미망・빛이 흐르는 들판 마스터6"
   },
   "5023": {
     "zh-CN": "极限·弥妄·黯影堡垒大师6",
     "en-US": "Chaotic - Illusion-Shroud - Dark Mist Fortress - Master 6",
-    "ja-JP": "極限・蝕・巨塔の遺跡マスター6",
-    "ko-KR": "극한・침식・거탑 유적 마스터 6"
+    "ja-JP": "極限・迷妄・暗霧要塞マスター6",
+    "ko-KR": "극한・미망・검은 안개 요새 마스터6"
   },
   "5024": {
     "zh-CN": "极限·远天的神槛大师6",
     "en-US": "Chaotic - Cavern Zero - Master 6",
-    "ja-JP": "極限・珊瑚岩の谷マスター6",
-    "ko-KR": "극한・환해 암초 지대 마스터 6"
+    "ja-JP": "極限・遠天の神檻マスター6",
+    "ko-KR": "극한・먼 하늘의 신단 마스터6"
   },
   "5901": {
     "zh-CN": "极限·镜中的审判",
     "en-US": "Chaotic - Mirror Judgment",
-    "ja-JP": "極限・呪われし煌墓",
-    "ko-KR": "극한・저주받은 무덤"
+    "ja-JP": "極限・鏡中の審判",
+    "ko-KR": "극한・거울 속의 심판"
   },
   "5902": {
     "zh-CN": "极限·弥妄·巨龙爪痕",
     "en-US": "Chaotic - Illusion-Shroud - Dragon Claw Valley",
-    "ja-JP": "極限・機械化工場",
-    "ko-KR": "극한・기계화 처리소"
+    "ja-JP": "極限・迷妄・巨竜の爪痕",
+    "ko-KR": "극한・미망・거룡의 발톱"
   },
   "5903": {
     "zh-CN": "极限·荒芜之庭",
     "en-US": "Chaotic - Barren Courtyard",
-    "ja-JP": "極限・蝕・ティナの精神領域",
-    "ko-KR": "극한・침식・티나의 정신 세계"
+    "ja-JP": "極限・荒廃の庭",
+    "ko-KR": "극한・황폐한 정원"
   },
   "5904": {
     "zh-CN": "极限·弥妄·流月之野",
     "en-US": "Chaotic - Illusion-Shroud - Moonveil Wilds",
-    "ja-JP": "極限・霧海の猟場",
-    "ko-KR": "극한・안개 속 사냥터"
+    "ja-JP": "極限・迷妄・流月の野",
+    "ko-KR": "극한・미망・빛이 흐르는 들판"
   },
   "5905": {
     "zh-CN": "极限·弥妄·黯影堡垒",
     "en-US": "Chaotic - Illusion-Shroud - Dark Mist Fortress",
-    "ja-JP": "極限・蝕・巨塔の遺跡",
-    "ko-KR": "극한・침식・거탑 유적"
+    "ja-JP": "極限・迷妄・暗霧要塞",
+    "ko-KR": "극한・미망・검은 안개 요새"
   },
   "5906": {
     "zh-CN": "极限·远天的神槛",
     "en-US": "Chaotic - Cavern Zero",
-    "ja-JP": "極限・珊瑚岩の谷",
-    "ko-KR": "극한・환해 암초 지대"
+    "ja-JP": "極限・遠天の神檻",
+    "ko-KR": "극한・먼 하늘의 신단"
   },
   "6000": {
     "zh-CN": "司第门遗迹",
@@ -464,8 +428,8 @@
   "7021": {
     "zh-CN": "回溯！遗忘幻梦之野",
     "en-US": "Rewind! Field of Forgotten Illusions",
-    "ja-JP": "激闘！忘られし幻夢の野",
-    "ko-KR": "격투! 잊혀진 환상꿈의 들판"
+    "ja-JP": "回帰！忘られし幻夢の野",
+    "ko-KR": "회상! 잊혀진 환상꿈의 들판"
   },
   "7022": {
     "zh-CN": "血战！遗忘幻梦之野",
@@ -502,29 +466,5 @@
     "en-US": "Relentless! Twilight's Edge",
     "ja-JP": "連戦！蒼穹の彼方・昼夜の果て",
     "ko-KR": "연전! 푸른 하늘 너머・낮과 밤의 끝"
-  },
-  "8000": {
-    "zh-CN": "弥妄栖林",
-    "en-US": "Illusion-Shroud Woods",
-    "ja-JP": "迷妄の森",
-    "ko-KR": "미망의 숲"
-  },
-  "8001": {
-    "zh-CN": "弥妄栖林·简单",
-    "en-US": "Illusion-Shroud Woods (Easy)",
-    "ja-JP": "迷妄の森・イージー",
-    "ko-KR": "미망의 숲・노멀"
-  },
-  "8002": {
-    "zh-CN": "弥妄栖林·困难",
-    "en-US": "Illusion-Shroud Woods (Hard)",
-    "ja-JP": "迷妄の森・ハード",
-    "ko-KR": "미망의 숲・하드"
-  },
-  "8003": {
-    "zh-CN": "弥妄栖林·噩梦",
-    "en-US": "Illusion-Shroud Woods (Nightmare)",
-    "ja-JP": "迷妄の森・ナイトメア",
-    "ko-KR": "미망의 숲・나이트메어"
   }
 }

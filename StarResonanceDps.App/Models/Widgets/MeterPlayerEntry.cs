@@ -93,7 +93,7 @@ public sealed partial class MeterPlayerEntry : ObservableObject
         SeasonTalentBuffId = player.SeasonTalentBuffId;
         IsSeasonTalentInactive = player.IsSeasonTalentInactive;
         SeasonTalentName = player.SeasonTalentBuffId > 0
-            ? CombatDataCatalog.GetSeasonTalentName(player.SeasonTalentBuffId)
+            ? SeasonTalentIcons.GetTypeName(player.SeasonTalentBuffId, player.SeasonId)
             : string.Empty;
         DisplayName = PlayerInfoFormatFormatter.Format(player, settings.PlayerInfoFormatString, playerNameDisplayMode, _displayNameFormat);
         ValueText = $"{MeterNumberFormatter.Format(player.TotalValue, numberDisplayFormatIndex)} ({MeterNumberFormatter.Format(player.ValuePerSecond, numberDisplayFormatIndex)}) {player.Contribution:F2}%";

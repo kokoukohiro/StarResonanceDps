@@ -40,7 +40,7 @@ python gen_images.py          # アプリの画像の足りないものを表示
 
 **言語別のJSONテーブル一式が要る。リポジトリには含まれないので、各自で用意する。**
 
-[StarResonanceTool](https://github.com/PotRooms/StarResonanceTool)の内部コードに手を入れると、言語別のZtableを取り出せる。
+[kokoukohiro/StarResonanceTool](https://github.com/kokoukohiro/StarResonanceTool)の`--lang all`で、4言語のZtableを取り出せる。
 
 `Star`と`StarASIA`の両方を、次の形で置く。`gen_skill_warnings.py`・`gen_maps.py`・`gen_images.py`は同じツールの出力の`Unk`と`Bundles`も読む。
 
@@ -77,7 +77,7 @@ export BPSR_TABLES=<置き場所>     # bash
 | `gen_skill_warnings.py` | `Data/Generated/SkillWarnings.json` |
 | `gen_rogue_entries.py` | `Data/Localization/RogueEntryNames.json` |
 | `gen_buff_groups.py` | `Data/Localization/CuisineBuffs.json`<br>`Data/Localization/PotionBuffs.json` |
-| `gen_season_talents.py` | `Data/Localization/SeasonTalentNames.json` |
+| `gen_season_talents.py` | `Data/Localization/SeasonTalentNames.json`<br>`Data/Localization/SeasonTalentTypeNames.json` |
 | `gen_class_specs.py` | `Data/Localization/ClassSpecNames.json` |
 | `gen_seasons.py` | `Data/Localization/SeasonNames.json`<br>`Data/Localization/SeasonRankNames.json` |
 | `gen_equips.py` | `Data/Generated/Equips.json`<br>`Data/Localization/EquipEffectTexts.json` |

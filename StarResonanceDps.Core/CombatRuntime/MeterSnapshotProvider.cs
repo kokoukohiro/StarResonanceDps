@@ -64,7 +64,9 @@ public sealed record MeterPlayerSnapshot(
     int SeasonTalentBuffId = 0,
     bool IsSeasonTalentInactive = false,
     // 他のプレイヤーについて、まだ届いていない情報(ウィジェットの状態の印の材料)。自分はいつも無し。
-    PlayerDataGaps DataGaps = PlayerDataGaps.None);
+    PlayerDataGaps DataGaps = PlayerDataGaps.None,
+    // 表示している回のシーズン番号(EncounterExData.SeasonId、0 は分からない)。根のバフから潜在心相晶の型を決めるのに使う。
+    int SeasonId = 0);
 
 public sealed record MeterSnapshot(
     MeterSnapshotKind Kind,
@@ -535,7 +537,7 @@ public static class MeterSnapshotProvider
         var clock = encounter.ReadCombatClock();
         var source = encounter.Entities
             .Where(pair => pair.Value.EntityType == EEntityType.EntChar)
-            .Select(pair => CreatePlayerValue(pair.Key, pair.Value, kind, clock))
+            .Select(pair => CreatePlayerValue(pair.Key, pair.Value, kind, clock, encounter.ExData.SeasonId))
             .Where(player => player.TotalValue > 0UL)
             .OrderByDescending(player => player.TotalValue)
             .ThenBy(player => player.Name, StringComparer.Ordinal)
@@ -3778,7 +3780,7 @@ public static class MeterSnapshotProvider
                 : currentEncounter;
     }
 
-    private static MeterPlayerSnapshot CreatePlayerValue(long characterId, Entity entity, MeterSnapshotKind kind, CombatClockReading clock)
+    private static MeterPlayerSnapshot CreatePlayerValue(long characterId, Entity entity, MeterSnapshotKind kind, CombatClockReading clock, int seasonId)
     {
         var totalValue = GetPlayerTotalValue(entity, kind);
         // ヘイトとブレイク値は秒ごとの値を持たないので、合計を戦闘の経過時間で割る。
@@ -3810,7 +3812,8 @@ public static class MeterSnapshotProvider
             0d,
             source.SeasonTalentBuffId,
             source.IsSeasonTalentInactive,
-            source.DataGaps);
+            source.DataGaps,
+            seasonId);
     }
 
     private static bool IsSelf(Entity entity)

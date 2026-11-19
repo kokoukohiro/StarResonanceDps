@@ -105,13 +105,13 @@
     "zh-CN": "虚蚀烙印",
     "en-US": "Void Corruption Mark",
     "ja-JP": "虚蝕の烙印",
-    "ko-KR": "허무의 침식 낙인"
+    "ko-KR": "허식 낙인"
   },
   "170207": {
     "zh-CN": "虚蚀碎裂贯穿",
     "en-US": "Void Corruption: Fracture",
     "ja-JP": "虚蝕ペネトレイト",
-    "ko-KR": "허무의 침식 파쇄 관통"
+    "ko-KR": "허식 파쇄 관통"
   },
   "170208": {
     "zh-CN": "终焉前奏",
@@ -123,19 +123,19 @@
     "zh-CN": "虚蚀烙印",
     "en-US": "Void Corruption Mark",
     "ja-JP": "虚蝕の烙印",
-    "ko-KR": "허무의 침식 낙인"
+    "ko-KR": "허식 낙인"
   },
   "170210": {
     "zh-CN": "虚蚀半灭死域",
     "en-US": "Void Corruption: Decimation",
     "ja-JP": "半死の虚蝕フィールド",
-    "ko-KR": "허무의 침식 반멸 사역"
+    "ko-KR": "허식 반멸 사역"
   },
   "170211": {
     "zh-CN": "虚蚀圆舞",
     "en-US": "Void Corruption Waltz",
     "ja-JP": "虚蝕のワルツ",
-    "ko-KR": "허무의 침식 댄스"
+    "ko-KR": "허식의 왈츠"
   },
   "170213": {
     "zh-CN": "虚蚀灭迹",
@@ -147,19 +147,19 @@
     "zh-CN": "虚蚀穿刺",
     "en-US": "Void Corruption Thrust",
     "ja-JP": "虚蝕の刺突",
-    "ko-KR": "허무의 침식 관통 찌르기"
+    "ko-KR": "허식 관통 찌르기"
   },
   "300011": {
     "zh-CN": "虚蚀净化",
     "en-US": "Void Purify",
     "ja-JP": "虚蝕浄化",
-    "ko-KR": "허무의 침식 정화"
+    "ko-KR": "허식 정화"
   },
   "300031": {
     "zh-CN": "虚蚀印记",
     "en-US": "Void Sigil",
     "ja-JP": "虚蝕発印",
-    "ko-KR": "침식 인장"
+    "ko-KR": "허식 인장"
   },
   "300060": {
     "zh-CN": "心像巨大化",
@@ -459,19 +459,19 @@
     "zh-CN": "解放虚蚀之力",
     "en-US": "Unleash Void Corruption Power",
     "ja-JP": "虚蝕の力解放",
-    "ko-KR": "침식의 힘 해방"
+    "ko-KR": "허식의 힘 해방"
   },
   "10240130": {
     "zh-CN": "虚蚀毁灭",
     "en-US": "Erosive Annihilation",
     "ja-JP": "虚蝕壊滅",
-    "ko-KR": "허무의 침식 섬멸"
+    "ko-KR": "허식 섬멸"
   },
   "10240131": {
     "zh-CN": "虚蚀放逐",
     "en-US": "Void Corruption Banishment",
     "ja-JP": "虚蝕追放",
-    "ko-KR": "허무의 침식 방출"
+    "ko-KR": "허식 방출"
   },
   "10240132": {
     "zh-CN": "束缚解除",
