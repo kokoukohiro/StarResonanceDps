@@ -66,7 +66,6 @@ public sealed partial class FeedbackItemViewModel : ObservableObject
         {
             ResidentDetectionKind.BlankSourceName => "Feedback_Detection_BlankSourceName",
             ResidentDetectionKind.SourceLandingConflict => "Feedback_Detection_SourceLandingConflict",
-            ResidentDetectionKind.SpecTalentConflict or ResidentDetectionKind.SpecSkillConflict => "Feedback_Detection_SpecConflict",
             _ => throw new ArgumentOutOfRangeException(nameof(Detection), Detection.Kind, null)
         });
         ItemText = LocalizationManager.Instance.Format("Feedback_Detection_ItemFormat", kindText, Detection.Id);

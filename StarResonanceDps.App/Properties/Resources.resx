@@ -2727,9 +2727,6 @@ Change the settings again if needed.</value>
   <data name="Feedback_Detection_SourceLandingConflict" xml:space="preserve">
     <value>Skill name mismatch</value>
   </data>
-  <data name="Feedback_Detection_SpecConflict" xml:space="preserve">
-    <value>Class detection mismatch</value>
-  </data>
   <data name="Feedback_Detection_ItemFormat" xml:space="preserve">
     <value>{0} ({1})</value>
   </data>

@@ -50,6 +50,9 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IDisposab
     /// <summary>枠からバフ・デバフカードを開く経路。</summary>
     private readonly Action<EntityWindowTarget, PlayerBuffListKind, string, int> _openCard;
 
+    /// <summary>ヘイトの枠からヘイトメーターを開く経路。</summary>
+    private readonly Action _openHateMeter;
+
     private readonly EntityHatePlayerResolver _hatePlayers = new();
     private readonly ObservableCollection<PlayerBuffEntry> _buffs = [];
     private readonly ObservableCollection<PlayerBuffEntry> _debuffs = [];
@@ -96,12 +99,14 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IDisposab
         IReadOnlyList<PlayerRosterEntry> roster,
         IReadOnlyList<NearbyEntityEntry> nearbyEntities,
         Action<WidgetKind, EntityTargetInfo> openList,
-        Action<EntityWindowTarget, PlayerBuffListKind, string, int> openCard)
+        Action<EntityWindowTarget, PlayerBuffListKind, string, int> openCard,
+        Action openHateMeter)
     {
         _widget = widget;
         _dispatcher = Dispatcher.CurrentDispatcher;
         _openList = openList;
         _openCard = openCard;
+        _openHateMeter = openHateMeter;
         _settings = widget.GetEntityInfoSettingsSnapshot();
         _rowSettings = EntityRowSettings.FromEntityInfo(_settings);
         _hatePlayers.SetRoster(roster);
@@ -387,6 +392,13 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IDisposab
         }
 
         _openList(entry.IsDebuff ? WidgetKind.DebuffList : WidgetKind.BuffList, entity);
+    }
+
+    /// <summary>ヘイトの枠(狙われている印・ゲージ・クラスアイコン・名前)の左クリック。ヘイトメーターを開くか前に出す。</summary>
+    [RelayCommand]
+    private void OpenHateMeter()
+    {
+        _openHateMeter();
     }
 
     /// <summary>メニューの2つ目。映している敵のバフカード・デバフカードを開く(カードはその敵を追い続ける)。</summary>

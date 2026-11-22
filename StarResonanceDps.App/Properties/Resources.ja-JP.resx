@@ -2731,9 +2731,6 @@ VOICEVOXを起動し直してください。</value>
   <data name="Feedback_Detection_SourceLandingConflict" xml:space="preserve">
     <value>スキル名判定の不一致</value>
   </data>
-  <data name="Feedback_Detection_SpecConflict" xml:space="preserve">
-    <value>クラス判定の不一致</value>
-  </data>
   <data name="Feedback_Detection_ItemFormat" xml:space="preserve">
     <value>{0}({1})</value>
   </data>

@@ -2730,9 +2730,6 @@
   <data name="Feedback_Detection_SourceLandingConflict" xml:space="preserve">
     <value>技能名称判定不一致</value>
   </data>
-  <data name="Feedback_Detection_SpecConflict" xml:space="preserve">
-    <value>职业判定不一致</value>
-  </data>
   <data name="Feedback_Detection_ItemFormat" xml:space="preserve">
     <value>{0}({1})</value>
   </data>

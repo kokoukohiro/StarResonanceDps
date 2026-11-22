@@ -23,6 +23,7 @@ This widget shows the enemy you are targeting in one place: its HP, chanting, th
 
 - Click "Back to Target" in the header to show your target. It also returns to showing your target when you use a skill on the chosen enemy, or when the chosen enemy is no longer around you (defeated or moved away).
 - Click a buff slot to open the enemy's [Buff List](Buff-List), or click a debuff slot to open its [Debuff List](Debuff-List).
+- Click the crosshair mark, gauge, class icon, or player name in an aggro slot to open the [Threat Meter](Threat-Meter).
 - Right-click a slot to choose "Buff List", "Buff Card", "Prioritize This Buff" ("Stop Prioritizing This Buff" while it is prioritized), or "Hide This Buff" (debuff slots have the matching debuff items, such as "Debuff List", "Debuff Card", and "Hide This Debuff"). Prioritizing and hiding are saved immediately.
 - Hover to see a tooltip: the name for buff and debuff slots, "In Combat" for the combat state icon, and the class spec followed by "(Targeted)" or "(Aggro: value)" for an aggro slot.
 - When the window is small, scroll with the mouse wheel or the scroll bar on the right.

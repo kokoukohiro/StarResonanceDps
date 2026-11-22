@@ -2727,9 +2727,6 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="Feedback_Detection_SourceLandingConflict" xml:space="preserve">
     <value>스킬 이름 판정 불일치</value>
   </data>
-  <data name="Feedback_Detection_SpecConflict" xml:space="preserve">
-    <value>클래스 판정 불일치</value>
-  </data>
   <data name="Feedback_Detection_ItemFormat" xml:space="preserve">
     <value>{0}({1})</value>
   </data>

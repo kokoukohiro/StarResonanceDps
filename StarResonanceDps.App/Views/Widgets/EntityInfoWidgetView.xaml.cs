@@ -18,6 +18,7 @@ namespace StarResonanceDps.App.Views.Widgets;
 ///
 /// <para>
 /// 詠唱の文字とゲージは画面が出ている間だけ 0.1 秒ごとに当て直す(エンティティリストと同じ)。
+/// ヘイトの枠の TIPS を持つ4つの左クリックはヘイトメーターを開く(<see cref="EntityInfoWidgetViewModel.OpenHateMeterCommand"/>)。
 /// バフ・デバフの枠の右クリックはメニュー(バフリスト・カード・優先表示にする/やめる・非表示)を開く。メニューの開き方はバフ・デバフグループと同じで、
 /// 文言(バフかデバフか、優先表示の項目は今の状態も)は開いた枠で決める(<see cref="EntityInfoWidgetViewModel.MenuEntry"/>)。
 /// </para>
@@ -120,6 +121,16 @@ public partial class EntityInfoWidgetView : UserControl, IWidgetVerticalScrollCo
         if (DataContext is EntityInfoWidgetViewModel viewModel)
         {
             viewModel.RefreshCast();
+        }
+    }
+
+    /// <summary>ヘイトの枠の TIPS を持つ4つ(狙われている印・ゲージ・クラスアイコン・名前)の左クリック。ヘイトメーターを開く。</summary>
+    private void HateSlotPart_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is EntityInfoWidgetViewModel viewModel)
+        {
+            viewModel.OpenHateMeterCommand.Execute(null);
+            e.Handled = true;
         }
     }
 

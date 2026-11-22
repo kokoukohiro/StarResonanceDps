@@ -198,6 +198,18 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         }
     }
 
+    /// <summary>
+    /// ターゲット情報のヘイトの枠を押した。ヘイトメーターの窓を開くか前に出す。
+    /// 起動していないカードは起動する(窓はその場で開く)。
+    /// </summary>
+    private void OpenHateMeter()
+    {
+        if (_hostWidgets.TryGetValue(WidgetKind.HateMeter, out var widget))
+        {
+            OpenSingleWindow(widget);
+        }
+    }
+
     /// <summary>マップの窓を開くか前に出す。起動していないカードは起動する(窓はその場で開く)。カードが無ければ偽。</summary>
     private bool TryOpenMap()
     {
@@ -2221,7 +2233,8 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             PlayerRosterPresentationStore.Instance.Current.Entries,
             NearbyEntityStore.Instance.Current.Entries,
             OpenEntityWindow,
-            OpenBuffCardForEntity);
+            OpenBuffCardForEntity,
+            OpenHateMeter);
         _entityInfoViewModel = viewModel;
         return new WidgetWindowComposition(
             new EntityInfoWidgetView

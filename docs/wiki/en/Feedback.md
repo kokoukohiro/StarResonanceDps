@@ -11,7 +11,6 @@ This tab lets you post bug reports and feature requests to GitHub.
 |---|---|
 | Unnamed skill | A skill whose row name in Skill Details could not be determined. |
 | Skill name mismatch | A skill whose row name in Skill Details was determined in two different ways. |
-| Class detection mismatch | An effect or skill for which the class was detected in two different ways. |
 
 ## Controls
 

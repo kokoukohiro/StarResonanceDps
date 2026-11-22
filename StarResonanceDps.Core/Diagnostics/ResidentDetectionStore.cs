@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
@@ -15,13 +16,7 @@ public enum ResidentDetectionKind
     BlankSourceName,
 
     /// <summary>着地先が決まった鍵が、別の先に着いた(<see cref="BlankSourceNameProbe"/>)。番号は <c>ownerId:枝番</c>。</summary>
-    SourceLandingConflict,
-
-    /// <summary>タレント由来のバフが、控えてあるマーカーと違う特化を書こうとした(<see cref="SpecConflictProbe"/>)。番号は届いたバフID。</summary>
-    SpecTalentConflict,
-
-    /// <summary>置換後スキルIDが、控えてあるマーカーと違う特化を示した(<see cref="SpecConflictProbe"/>)。番号は技ID。</summary>
-    SpecSkillConflict
+    SourceLandingConflict
 }
 
 /// <summary>検知の1件。</summary>
@@ -70,7 +65,7 @@ public static class ResidentDetectionStore
             _appVersion = appVersion;
             Items.Clear();
 
-            var saved = ReadFile();
+            var saved = ReadFile(appVersion);
             if (saved?.AppVersion == appVersion)
             {
                 Items.AddRange(saved.Items);
@@ -143,14 +138,25 @@ public static class ResidentDetectionStore
         return detection.Kind == item.Kind && detection.Id == item.Id;
     }
 
-    private static SavedDetections? ReadFile()
+    /// <summary>
+    /// 控えのファイルを読む。前のバージョンのファイルはバージョンだけを読み、一覧は解かずに空で返す
+    /// (前のバージョンの種類が今の <see cref="ResidentDetectionKind"/> に無くても、更新の判定が失敗しないため)。
+    /// </summary>
+    private static SavedDetections? ReadFile(string appVersion)
     {
         var path = CombatRuntimePaths.ResidentDetectionsPath;
         try
         {
-            return File.Exists(path)
-                ? JsonConvert.DeserializeObject<SavedDetections>(File.ReadAllText(path))
-                : null;
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            var root = JObject.Parse(File.ReadAllText(path));
+            var savedVersion = root.Value<string>(nameof(SavedDetections.AppVersion));
+            return savedVersion == appVersion
+                ? root.ToObject<SavedDetections>()
+                : new SavedDetections(savedVersion ?? string.Empty, []);
         }
         catch (Exception exception)
         {

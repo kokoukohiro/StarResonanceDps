@@ -3744,10 +3744,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         ///
         /// <para>
         /// <b><c>FightSourceType</c> を採用条件にしない。</b><c>srcType==6</c> を必須にすると
-        /// 強化側のツリー副産物が全部落ちる。観測のため、食い違いの検知の詳細には残す。
+        /// 強化側のツリー副産物が全部落ちる。親で引き直すときにだけ使う。
         /// </para>
         ///
         /// <para>あることしか示さない。除去は見ない。</para>
+        ///
+        /// <para>術者がマーカーを控えている間は、マーカーだけで決める(枝タレントは使わない)。</para>
         ///
         /// <para>術者の今の職の特化でなければ何も書かない(<see cref="Entity.AcceptsSubProfessionId"/>)。</para>
         /// </summary>
@@ -3792,26 +3794,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            // 常設の食い違い検知。枝タレント(距離1以上)が、控えてあるマーカーと違う特化を
-            // 書こうとしたら記録する(同じ職の2特化のあいだだけ)。鳴ったら判定表か10刻み丸めの誤りを疑う。
-            //
-            // マーカー自身(距離0)は除く。クラス変更でも、ビルドプリセットの一括配信でも
-            // 別のマーカーが正当に来るため、食い違いの証拠にならない。
-            if (!isMarker
-                && target.SpecMarkerBuffId != 0
-                && DataTypes.SpecDetectionTables.TryResolveSpecTalentBuff(
-                    target.SpecMarkerBuffId, out _, out var markerSpec, out _)
-                && markerSpec != spec)
+            // マーカーを控えている術者は、特化をマーカーだけで決める。枝タレント(距離1以上)は使わない。
+            // 特化を替えると新しいマーカーが届いて置き換わるので、替えた瞬間に先に届く新しい木の効果や、
+            // 味方に配られた効果で、マーカーと違う特化を書かない。枝タレントで決めるのはマーカーをまだ受けていない間だけ(途中起動など)。
+            if (!isMarker && target.SpecMarkerBuffId != 0)
             {
-                Diagnostics.SpecConflictProbe.CaptureTalentConflict(
-                    observedBuffId,
-                    grantedBuffId,
-                    spec.ToString(),
-                    distanceFromRoot,
-                    fightSourceType,
-                    sourceConfigId,
-                    target.SpecMarkerBuffId,
-                    markerSpec.ToString());
+                return;
             }
 
             target.UpdateSubProfessionFromTalentBuff(
@@ -4092,7 +4080,10 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int ProfessionId { get; set; }
         public int SubProfessionId { get; set; }
 
-        /// <summary>いま乗っている特化マーカーバフのID。0 なら未観測。</summary>
+        /// <summary>
+        /// いま乗っている特化マーカーバフのID。0 なら未観測。
+        /// 0 以外の間は特化をこのマーカーだけで決め、枝タレントのバフと置換後スキルは使わない。
+        /// </summary>
         public int SpecMarkerBuffId { get; set; }
 
         /// <summary>上のマーカーバフの実体UUID。除去イベントは BaseId を運ばないため、これで突き合わせる。</summary>
@@ -5067,24 +5058,16 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         public void UpdateSubProfessionFromReplacedSkill(int skillId)
         {
-            var resolved = DataTypes.SpecDetectionTables.GetSubProfessionIdByReplacedSkillId(skillId);
-            var subProfessionId = (int)resolved;
+            var subProfessionId = (int)DataTypes.SpecDetectionTables.GetSubProfessionIdByReplacedSkillId(skillId);
+
+            // マーカーを控えているなら、特化はマーカーだけで決める(タレント由来のバフの枝と同じ、
+            // <see cref="EncounterManager.ApplySpecFromTalentBuff"/>)。置換後スキルで決めるのはマーカーをまだ受けていない間だけ。
             if (subProfessionId <= 0
                 || SubProfessionId == subProfessionId
+                || SpecMarkerBuffId != 0
                 || !AcceptsSubProfessionId(subProfessionId))
             {
                 return;
-            }
-
-            // 常設の食い違い検知。置換後スキルが示す特化と、控えてあるマーカーが違うなら記録する(同じ職の2特化のあいだだけ)。
-            // 味方に発生させるスキル(安可など)を自分のものとして数えていると、この形で出る。
-            if (SpecMarkerBuffId != 0
-                && DataTypes.SpecDetectionTables.TryResolveSpecTalentBuff(
-                    SpecMarkerBuffId, out _, out var markerSpec, out _)
-                && markerSpec != resolved)
-            {
-                Diagnostics.SpecConflictProbe.CaptureReplacedSkillConflict(
-                    skillId, resolved.ToString(), SpecMarkerBuffId, markerSpec.ToString());
             }
 
             SetSubProfessionId(subProfessionId);

@@ -384,6 +384,7 @@
             ヘイトの枠(EntityHateSlot)。中身と TIPS はエンティティリストのヘイトの枠と同じ(説明はエンティティリストの画面)。
             ここでは並べる人数だけ枠があるので、隠す枠は無い。枠の下の 4 は行の間(折り返したときの行の間と、次の行までの間)。
             ツールチップの色は窓のパレット(TIPS を持つ要素の Tag にウィジェットを入れる)。
+            TIPS を持つ4つ(狙われている印・ゲージ・クラスアイコン・名前)の左クリックはヘイトメーターを開く(画面のコードが受ける)。
         -->
         <DataTemplate x:Key="EntityInfo.HateSlotTemplate">
             <Grid Width="42"
@@ -400,7 +401,7 @@
                            Visibility="{Binding IsTarget, Converter={StaticResource BooleanToVisibilityConverter}}"
                            Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}"
                            behaviors:ToolTipBehavior.IsEnabled="True"
-                           behaviors:ToolTipBehavior.KeepsOnClick="True">
+                           MouseLeftButtonUp="HateSlotPart_MouseLeftButtonUp">
                     <Rectangle.ToolTip>
                         <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                  Style="{StaticResource ToolTip.WidgetWindowInfo}">
@@ -476,7 +477,7 @@
                                Fill="Transparent"
                                Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}"
                                behaviors:ToolTipBehavior.IsEnabled="True"
-                               behaviors:ToolTipBehavior.KeepsOnClick="True">
+                               MouseLeftButtonUp="HateSlotPart_MouseLeftButtonUp">
                         <Rectangle.ToolTip>
                             <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                      Style="{StaticResource ToolTip.WidgetWindowInfo}">
@@ -499,7 +500,7 @@
                                Effect="{StaticResource Effect.ProfessionIconShadow}"
                                Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}"
                                behaviors:ToolTipBehavior.IsEnabled="True"
-                               behaviors:ToolTipBehavior.KeepsOnClick="True">
+                               MouseLeftButtonUp="HateSlotPart_MouseLeftButtonUp">
                         <Rectangle.ToolTip>
                             <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                      Style="{StaticResource ToolTip.WidgetWindowInfo}">
@@ -521,7 +522,7 @@
                                        TextTrimming="CharacterEllipsis"
                                        Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}"
                                        behaviors:ToolTipBehavior.IsEnabled="True"
-                                       behaviors:ToolTipBehavior.KeepsOnClick="True">
+                                       MouseLeftButtonUp="HateSlotPart_MouseLeftButtonUp">
                                 <TextBlock.ToolTip>
                                     <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                              Style="{StaticResource ToolTip.WidgetWindowInfo}">

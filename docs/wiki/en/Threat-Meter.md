@@ -4,7 +4,8 @@ This widget lists players by the threat (aggro) they built up on enemies, from m
 
 ## How to open
 
-Click the start button on the "Threat Meter" card in "[Widgets](Widgets)".
+- Click the start button on the "Threat Meter" card in "[Widgets](Widgets)".
+- You can also open it by clicking an aggro slot (the crosshair mark, gauge, class icon, or player name) in [Target Info](Target-Info).
 
 ## What it shows
 
