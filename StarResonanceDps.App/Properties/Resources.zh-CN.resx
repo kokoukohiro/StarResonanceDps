@@ -1711,8 +1711,8 @@
   <data name="Settings_Display_SelfDisplay" xml:space="preserve">
     <value>自己高亮显示</value>
   </data>
-  <data name="Settings_Display_MaxGradeSkillHighlight" xml:space="preserve">
-    <value>高亮显示最大强化的幻想与职责技能</value>
+  <data name="Settings_Display_SkillGrades" xml:space="preserve">
+    <value>显示幻想与职责技能等阶</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>全部显示</value>

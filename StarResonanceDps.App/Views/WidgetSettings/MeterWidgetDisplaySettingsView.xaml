@@ -249,7 +249,7 @@
                     </Grid>
                 </Border>
 
-                <!-- プレイヤーリストは下に「最大強化のイマジン・ロールスキルを強調表示」が続くので線を引き、メーター2種は最後の行なので引かない。 -->
+                <!-- プレイヤーリストは下に「イマジン・ロールスキルのランクを表示」が続くので線を引き、メーター2種は最後の行なので引かない。 -->
                 <Border Visibility="{Binding ShowsSelfDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Border.Style>
                         <Style TargetType="{x:Type Border}"
@@ -292,7 +292,7 @@
 
                 <!-- プレイヤーリストだけ。下に「潜在心相晶を表示」が続くので線を引く。 -->
                 <Border Style="{StaticResource Panel.SettingField}"
-                        Visibility="{Binding ShowsMaxGradeSkillSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        Visibility="{Binding ShowsSkillGradeSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -301,7 +301,7 @@
 
                         <TextBlock Grid.Column="0"
                                    VerticalAlignment="Center"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_MaxGradeSkillHighlight]}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_SkillGrades]}"
                                    Foreground="{DynamicResource Brush.TextPrimary}"
                                    FontSize="14"
                                    FontWeight="SemiBold" />
@@ -310,11 +310,11 @@
                                     Orientation="Horizontal"
                                     VerticalAlignment="Center">
                             <ToggleButton Style="{StaticResource Input.Switch}"
-                                          IsChecked="{Binding HighlightMaxGradeSkills, Mode=TwoWay}" />
+                                          IsChecked="{Binding ShowSkillGrades, Mode=TwoWay}" />
                             <TextBlock Margin="8,0,0,0"
                                        VerticalAlignment="Center"
                                        MinWidth="28"
-                                       Text="{Binding HighlightMaxGradeSkillsStateText}"
+                                       Text="{Binding ShowSkillGradesStateText}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />

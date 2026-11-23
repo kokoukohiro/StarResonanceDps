@@ -12,11 +12,11 @@ namespace StarResonanceDps.App.Models.Widgets;
 /// <param name="Name">TIPS に出す技の名前。名前が無ければ「不明」。</param>
 /// <param name="Frame">アイコンの背景の枠。</param>
 /// <param name="UsesImagineAsset">アイコンがイマジンの絵か(大きさと位置の調整を変える)。</param>
-/// <param name="IsMaxGrade">技が最大の段階か(<c>MeterSnapshotProvider.IsMaxSkillGrade</c>)。枠の左下に星を出す。</param>
+/// <param name="GradeStarCount">枠の左の縁に積む星の数(<c>MeterSnapshotProvider.GetSkillGradeStarCount</c>)。出すのは表示設定「イマジン・ロールスキルのランクを表示」がオンのときだけ。</param>
 public sealed record MetricGraphSkillMarker(
     double Seconds,
     string? IconPath,
     string Name,
     SkillIconFrame Frame,
     bool UsesImagineAsset,
-    bool IsMaxGrade);
+    int GradeStarCount);

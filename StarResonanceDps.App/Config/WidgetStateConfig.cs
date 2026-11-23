@@ -207,8 +207,8 @@ public sealed class MetricGraphWidgetSettingsConfig
     /// <summary>横軸の下に押した技のアイコンの行(スキルログ)を出すか。</summary>
     public bool ShowSkillLog { get; set; } = true;
 
-    /// <summary>スキルログの技が最大の段階なら、アイコンの枠の左下に星を出すか。</summary>
-    public bool HighlightMaxGradeSkills { get; set; } = true;
+    /// <summary>表示設定「イマジン・ロールスキルのランクを表示」。スキルログの技のアイコンの枠の左の縁に、ランク(G)の数だけ星を出すか。</summary>
+    public bool ShowSkillGrades { get; set; }
 
     public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DpsMeter);
 
@@ -221,7 +221,7 @@ public sealed class MetricGraphWidgetSettingsConfig
             AggregationIntervalSeconds = AggregationIntervalSeconds,
             VisibleSeconds = VisibleSeconds,
             ShowSkillLog = ShowSkillLog,
-            HighlightMaxGradeSkills = HighlightMaxGradeSkills,
+            ShowSkillGrades = ShowSkillGrades,
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DpsMeter)
                 : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
@@ -645,8 +645,8 @@ public sealed class MeterWidgetSettingsConfig
     /// <summary>プレイヤーリストに潜在心相晶の型の絵を出すか。使うのはプレイヤーリストだけ。</summary>
     public bool ShowSeasonTalent { get; set; } = true;
 
-    /// <summary>技の枠の技が最大の段階なら、枠の左下に星を出すか。使うのはプレイヤーリストだけ。</summary>
-    public bool HighlightMaxGradeSkills { get; set; } = true;
+    /// <summary>表示設定「イマジン・ロールスキルのランクを表示」。技の枠の左の縁に、ランク(G)の数だけ星を出すか。使うのはプレイヤーリストだけ。</summary>
+    public bool ShowSkillGrades { get; set; }
 
     /// <summary>
     /// プレイヤーリストとエンティティリストの設定「戦闘状態」(戦闘状態の人・実体の名前の左に印を出すか)。
@@ -702,7 +702,7 @@ public sealed class MeterWidgetSettingsConfig
             PlayerInfoFormatString = PlayerInfoFormatString,
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             ShowSeasonTalent = ShowSeasonTalent,
-            HighlightMaxGradeSkills = HighlightMaxGradeSkills,
+            ShowSkillGrades = ShowSkillGrades,
             CombatStateDisplayModeIndex = CombatStateDisplayModeIndex,
             TargetedPlayerDisplayModeIndex = TargetedPlayerDisplayModeIndex,
             HateRankDisplayModeIndex = HateRankDisplayModeIndex,
@@ -3099,7 +3099,7 @@ public static class WidgetConfigDefaults
             AggregationIntervalSeconds = DefaultMetricGraphAggregationIntervalSeconds,
             VisibleSeconds = DefaultMetricGraphVisibleSeconds,
             ShowSkillLog = true,
-            HighlightMaxGradeSkills = true,
+            ShowSkillGrades = false,
             ClassColorIndexes = CreateDefaultClassColorIndexes(source),
             ClassColorPalettes = CreateDefaultClassColorPalettes(source)
         };

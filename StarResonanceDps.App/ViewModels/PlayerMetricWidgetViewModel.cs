@@ -83,7 +83,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     private int _graphVisibleSeconds = WidgetConfigDefaults.DefaultMetricGraphVisibleSeconds;
     private int _graphNumberDisplayFormatIndex;
     private bool _graphShowsSkillLog = true;
-    private bool _graphHighlightsMaxGradeSkills = true;
+    private bool _graphShowsSkillGrades;
     private Brush? _graphLineBrush;
     private readonly DispatcherTimer _wheelSaveTimer;
 
@@ -157,11 +157,11 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         private set => SetProperty(ref _graphShowsSkillLog, value);
     }
 
-    /// <summary>技のアイコンの技が最大の段階なら枠の左下に星を出すか。設定「最大強化のイマジン・ロールスキルを強調表示」。</summary>
-    public bool GraphHighlightsMaxGradeSkills
+    /// <summary>技のアイコンの枠の左の縁にランクの数だけ星を出すか。設定「イマジン・ロールスキルのランクを表示」。</summary>
+    public bool GraphShowsSkillGrades
     {
-        get => _graphHighlightsMaxGradeSkills;
-        private set => SetProperty(ref _graphHighlightsMaxGradeSkills, value);
+        get => _graphShowsSkillGrades;
+        private set => SetProperty(ref _graphShowsSkillGrades, value);
     }
 
     /// <summary>推移グラフの線の色。その人のクラスのグラフカラー。相手が分かるまでは null。</summary>
@@ -316,7 +316,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         {
             GraphVisibleSeconds = graphSettings.VisibleSeconds;
             GraphShowsSkillLog = graphSettings.ShowSkillLog;
-            GraphHighlightsMaxGradeSkills = graphSettings.HighlightMaxGradeSkills;
+            GraphShowsSkillGrades = graphSettings.ShowSkillGrades;
             GraphNumberDisplayFormatIndex = _configManager.CurrentSettings.NumberDisplayFormatIndex;
         }
 
@@ -434,7 +434,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
                 MeterSnapshotProvider.FormatSkillNameWithGrade(name, activation.Grade),
                 activation.Frame,
                 activation.UsesImagineAsset,
-                MeterSnapshotProvider.IsMaxSkillGrade(activation.SkillId, activation.Grade));
+                MeterSnapshotProvider.GetSkillGradeStarCount(activation.SkillId, activation.Grade));
         }
 
         GraphSkillMarkers = _graphMarkerCount == 0

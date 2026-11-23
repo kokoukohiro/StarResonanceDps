@@ -90,9 +90,9 @@ public sealed partial class PlayerListEntry : ObservableObject
     [ObservableProperty]
     private bool _showsSeasonTalent = true;
 
-    /// <summary>技の枠の技が最大の段階なら枠の左下に星を出すか。設定「最大強化のイマジン・ロールスキルを強調表示」。</summary>
+    /// <summary>技の枠の左の縁にランクの数だけ星を出すか。設定「イマジン・ロールスキルのランクを表示」。</summary>
     [ObservableProperty]
-    private bool _highlightsMaxGradeSkills = true;
+    private bool _showsSkillGrades;
 
     /// <summary>
     /// 名前の左に戦闘状態の印を出すか。いま戦闘状態の人のうち、設定「戦闘状態」が表示なら全員、自分のみ表示なら自分だけ。
@@ -223,7 +223,7 @@ public sealed partial class PlayerListEntry : ObservableObject
         _currentShield = player.CurrentShield;
         _healthValueDisplayModeIndex = settings.HealthValueDisplayModeIndex;
         ShowsSeasonTalent = settings.ShowSeasonTalent;
-        HighlightsMaxGradeSkills = settings.HighlightMaxGradeSkills;
+        ShowsSkillGrades = settings.ShowSkillGrades;
         ShowsCombatState = player.IsInCombat
             && (settings.CombatStateDisplayModeIndex == WidgetConfigDefaults.CombatStateDisplayShowIndex
                 || (settings.CombatStateDisplayModeIndex == WidgetConfigDefaults.CombatStateDisplaySelfOnlyIndex && player.IsSelf));

@@ -1710,8 +1710,8 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="Settings_Display_SelfDisplay" xml:space="preserve">
     <value>자신 강조 표시</value>
   </data>
-  <data name="Settings_Display_MaxGradeSkillHighlight" xml:space="preserve">
-    <value>최대 강화 이매진·역할 스킬 강조 표시</value>
+  <data name="Settings_Display_SkillGrades" xml:space="preserve">
+    <value>이매진·역할 스킬 등급 표시</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>모두 표시</value>

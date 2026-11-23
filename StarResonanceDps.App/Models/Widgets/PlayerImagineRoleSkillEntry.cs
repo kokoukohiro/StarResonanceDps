@@ -62,9 +62,9 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
     [ObservableProperty]
     private string _nameDisplayText = string.Empty;
 
-    /// <summary>中の技が最大の段階か(<c>MeterSnapshotProvider.IsMaxSkillGrade</c>)。枠の左下に星を出す。</summary>
+    /// <summary>枠の左の縁に積む星の数(<c>MeterSnapshotProvider.GetSkillGradeStarCount</c>)。出すのは表示設定「イマジン・ロールスキルのランクを表示」がオンのときだけ。</summary>
     [ObservableProperty]
-    private bool _isMaxGrade;
+    private int _gradeStarCount;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowsUnknownIcon))]
@@ -101,7 +101,7 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
             HasSkill = false;
             UsesImagineAsset = false;
             NameDisplayText = string.Empty;
-            IsMaxGrade = false;
+            GradeStarCount = 0;
             IconPath = null;
             HasChargeCount = false;
             UpdateEffects(null, null);
@@ -117,7 +117,7 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
         HasSkill = true;
         UsesImagineAsset = CombatDataCatalog.IsImagineArtIcon(snapshot.IconName);
         NameDisplayText = MeterSnapshotProvider.FormatSkillNameWithGrade(snapshot.Name, snapshot.Grade);
-        IsMaxGrade = MeterSnapshotProvider.IsMaxSkillGrade(snapshot.SkillId, snapshot.Grade);
+        GradeStarCount = MeterSnapshotProvider.GetSkillGradeStarCount(snapshot.SkillId, snapshot.Grade);
         IconPath = CombatIconResolver.ResolveSkillIcon(snapshot.IconName);
         HasChargeCount = snapshot.MaxCharges > 1;
     }

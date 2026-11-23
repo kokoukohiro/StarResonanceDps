@@ -1712,8 +1712,8 @@ VOICEVOXを起動し直してください。</value>
   <data name="Settings_Display_SelfDisplay" xml:space="preserve">
     <value>自分の強調表示</value>
   </data>
-  <data name="Settings_Display_MaxGradeSkillHighlight" xml:space="preserve">
-    <value>最大強化のイマジン・ロールスキルを強調表示</value>
+  <data name="Settings_Display_SkillGrades" xml:space="preserve">
+    <value>イマジン・ロールスキルのランクを表示</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>すべて表示</value>

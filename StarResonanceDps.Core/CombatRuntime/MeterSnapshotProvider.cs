@@ -1937,14 +1937,14 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// 技の G○ の数字(<see cref="ResolveSkillGrade"/>)が、その技の最大の段階か(<see cref="CombatDataCatalog.GetSkillMaxGrade"/>)。
-    /// プレイヤーリストの技の枠と推移グラフの技のアイコンが、枠を最大の段階の色にするのに使う。
+    /// 技の枠の左の縁に積む星の数。技の G○ の数字(<see cref="ResolveSkillGrade"/>)を、その技の最大の段階(<see cref="CombatDataCatalog.GetSkillMaxGrade"/>)で上限にした値。
+    /// G が無いか、最大の段階が表に無ければ 0。プレイヤーリストの技の枠と推移グラフの技のアイコンが、表示設定「イマジン・ロールスキルのランクを表示」で使う。
     /// </summary>
-    public static bool IsMaxSkillGrade(int skillId, int? grade)
+    public static int GetSkillGradeStarCount(int skillId, int? grade)
     {
-        return grade is { } value
-            && CombatDataCatalog.GetSkillMaxGrade(skillId) is { } maxGrade
-            && value >= maxGrade;
+        return grade is { } value && CombatDataCatalog.GetSkillMaxGrade(skillId) is { } maxGrade
+            ? Math.Min(value, maxGrade)
+            : 0;
     }
 
     /// <summary>

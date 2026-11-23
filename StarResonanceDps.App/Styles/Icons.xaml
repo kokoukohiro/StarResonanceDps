@@ -506,21 +506,92 @@
     </Geometry>
 
     <!--
-        中の技が最大の段階(<c>MeterSnapshotProvider.IsMaxSkillGrade</c>)のとき、01・02 の枠(31 × 34 の箱)の左下に重ねる星。
-        形はウィジェットのカードのお気に入りと同じ。プレイヤーリストと推移グラフの技の枠が使う。
+        表示設定「イマジン・ロールスキルのランクを表示」で、01・02 の枠(31 × 34 の箱)の左の縁に積む星。プレイヤーリストと推移グラフの技の枠が使う。
+        形はウィジェットのカードのお気に入りと同じで、1つが縁を含めて 7 × 7・縁の太さ 0.726。中心は箱の左から 2.0(枠の左の白い縁の中心)、
+        3つ目の星が技の絵の円の中心の高さ(18.8)で、間 4.3 で下から積む。座標は箱のもの(星の番号 0 が一番下)。
     -->
-    <Style x:Key="Icon.SkillMaxGradeStar" TargetType="{x:Type Path}">
+    <GeometryGroup x:Key="Geometry.SkillGradeStar0" Transform="0.31370338062675257,0,0,0.31370338062675257,-1.7644407918991738,23.635485462484557">
+        <StaticResource ResourceKey="Icon.Favorite.Filled" />
+    </GeometryGroup>
+    <GeometryGroup x:Key="Geometry.SkillGradeStar1" Transform="0.31370338062675257,0,0,0.31370338062675257,-1.7644407918991738,19.335485462484559">
+        <StaticResource ResourceKey="Icon.Favorite.Filled" />
+    </GeometryGroup>
+    <GeometryGroup x:Key="Geometry.SkillGradeStar2" Transform="0.31370338062675257,0,0,0.31370338062675257,-1.7644407918991738,15.035485462484559">
+        <StaticResource ResourceKey="Icon.Favorite.Filled" />
+    </GeometryGroup>
+    <GeometryGroup x:Key="Geometry.SkillGradeStar3" Transform="0.31370338062675257,0,0,0.31370338062675257,-1.7644407918991738,10.735485462484558">
+        <StaticResource ResourceKey="Icon.Favorite.Filled" />
+    </GeometryGroup>
+    <GeometryGroup x:Key="Geometry.SkillGradeStar4" Transform="0.31370338062675257,0,0,0.31370338062675257,-1.7644407918991738,6.435485462484559">
+        <StaticResource ResourceKey="Icon.Favorite.Filled" />
+    </GeometryGroup>
+    <SolidColorBrush x:Key="Brush.SkillGradeStarFill" Color="#FFD65C" />
+    <Pen x:Key="Pen.SkillGradeStar" Brush="#281E0A" Thickness="0.72578444747612558" />
+    <!-- どの絵にも入れる透明な四角。星5つの範囲より広く取り、絵の大きさを星の数に関係なく同じにする(使う側は Margin で箱の中に置く)。 -->
+    <RectangleGeometry x:Key="Geometry.SkillGradeStarsBounds" Rect="-2.5,5.7,9,26.2" />
+
+    <!-- 星の数(技のランクの数)ごとの絵。下の星から描き、上の星が手前に重なる。 -->
+    <DrawingImage x:Key="Icon.SkillGradeStars1">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="Transparent" Geometry="{StaticResource Geometry.SkillGradeStarsBounds}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar0}" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    <DrawingImage x:Key="Icon.SkillGradeStars2">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="Transparent" Geometry="{StaticResource Geometry.SkillGradeStarsBounds}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar0}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar1}" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    <DrawingImage x:Key="Icon.SkillGradeStars3">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="Transparent" Geometry="{StaticResource Geometry.SkillGradeStarsBounds}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar0}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar1}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar2}" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    <DrawingImage x:Key="Icon.SkillGradeStars4">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="Transparent" Geometry="{StaticResource Geometry.SkillGradeStarsBounds}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar0}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar1}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar2}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar3}" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    <DrawingImage x:Key="Icon.SkillGradeStars5">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="Transparent" Geometry="{StaticResource Geometry.SkillGradeStarsBounds}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar0}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar1}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar2}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar3}" />
+                <GeometryDrawing Brush="{StaticResource Brush.SkillGradeStarFill}" Pen="{StaticResource Pen.SkillGradeStar}" Geometry="{StaticResource Geometry.SkillGradeStar4}" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <!-- 技の枠の星の画像の置き方。絵の透明な四角(Geometry.SkillGradeStarsBounds)と同じ大きさで箱の中に置き、星の数で絵を替える(0 なら出さない)。 -->
+    <Style x:Key="Icon.SkillGradeStars" TargetType="{x:Type Image}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        <Setter Property="Data" Value="{StaticResource Icon.Favorite.Filled}" />
-        <Setter Property="Fill" Value="#FFD65C" />
-        <Setter Property="Stroke" Value="#281E0A" />
-        <Setter Property="StrokeThickness" Value="0.76" />
-        <Setter Property="Stretch" Value="Uniform" />
-        <Setter Property="Width" Value="7.33" />
-        <Setter Property="Height" Value="7.33" />
-        <Setter Property="Margin" Value="2.22,23.65,0,0" />
+        <Setter Property="Width" Value="9" />
+        <Setter Property="Height" Value="26.2" />
+        <Setter Property="Margin" Value="-2.5,5.7,0,0" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="Stretch" Value="Fill" />
+        <Setter Property="IsHitTestVisible" Value="False" />
     </Style>
 
     <GeometryGroup x:Key="Icon.Pin.Unfixed" FillRule="EvenOdd">

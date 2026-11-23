@@ -14,7 +14,7 @@ This widget shows one player's damage per second as a line graph over the battle
 - Line: A line that connects the per-second values for each "Drawing interval" in the display settings. Its color is the color of the person's class. It starts from 0 at the beginning of the battle (0:00).
 - Vertical axis: From the top, the maximum, half of it, and 0. The maximum is the maximum of the whole battle, including the time that is not visible.
 - Horizontal axis: The battle's elapsed time (in the form "2:55"). The length that fits in the window is "X-axis length" in the display settings, and by default the latest 12 seconds are shown.
-- Skill icons: Placed below the horizontal axis at the time they were used. The icon frame differs for Imagines, ultimate skills (and the skills derived from them), and other skills. Skills with no icon show a question mark. Skills at their highest current grade (G5 for Imagines, G4 for role skills) show a star at the lower left of the frame ("Highlight max-upgraded Imagine and role skills" in the display settings).
+- Skill icons: Placed below the horizontal axis at the time they were used. The icon frame differs for Imagines, ultimate skills (and the skills derived from them), and other skills. Skills with no icon show a question mark. When "Show Imagine and Role Skill Tiers" is on in the display settings, the left edge of the frame shows one star per current tier, stacked vertically (up to 5 for Imagines and 4 for role skills).
 - Until the target's class is known, no line is shown.
 
 ## Controls
@@ -32,7 +32,7 @@ The window settings and theme are described in [Common Widget Settings](Common-W
 - Drawing interval: Choose the number of seconds combined into one point of the line from 5s, 3s, 2s, and 1s. Each point is the total for that number of seconds divided by the number of seconds (default: 2s).
 - X-axis length: Choose the length of time that fits in the window, from 4 to 120 seconds. It also changes with the mouse wheel over the window (default: 12s).
 - Show Skill Log: Shows the row of skill icons. When it is off, the height of the icon row is also removed (default: on).
-- Highlight max-upgraded Imagine and role skills: Shows a star at the lower left of the icon frame for skills at their highest current grade (default: on).
+- Show Imagine and Role Skill Tiers: Shows one star per current tier along the left edge of the icon frame (default: off).
 
 ### Graph Colors
 

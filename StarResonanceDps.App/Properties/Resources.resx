@@ -1710,8 +1710,8 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Settings_Display_SelfDisplay" xml:space="preserve">
     <value>Self highlight</value>
   </data>
-  <data name="Settings_Display_MaxGradeSkillHighlight" xml:space="preserve">
-    <value>Highlight max-upgraded Imagine and role skills</value>
+  <data name="Settings_Display_SkillGrades" xml:space="preserve">
+    <value>Show Imagine and Role Skill Tiers</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>Show all</value>

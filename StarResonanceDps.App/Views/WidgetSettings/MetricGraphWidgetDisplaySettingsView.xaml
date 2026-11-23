@@ -126,7 +126,7 @@
 
                         <TextBlock Grid.Column="0"
                                    VerticalAlignment="Center"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_MaxGradeSkillHighlight]}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_SkillGrades]}"
                                    Foreground="{DynamicResource Brush.TextPrimary}"
                                    FontSize="14"
                                    FontWeight="SemiBold" />
@@ -135,11 +135,11 @@
                                     Orientation="Horizontal"
                                     VerticalAlignment="Center">
                             <ToggleButton Style="{StaticResource Input.Switch}"
-                                          IsChecked="{Binding HighlightMaxGradeSkills, Mode=TwoWay}" />
+                                          IsChecked="{Binding ShowSkillGrades, Mode=TwoWay}" />
                             <TextBlock Margin="8,0,0,0"
                                        VerticalAlignment="Center"
                                        MinWidth="28"
-                                       Text="{Binding HighlightMaxGradeSkillsStateText}"
+                                       Text="{Binding ShowSkillGradesStateText}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />

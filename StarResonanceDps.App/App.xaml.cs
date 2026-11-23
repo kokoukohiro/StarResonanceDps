@@ -78,6 +78,9 @@ public partial class App : Application
         ApplyLanguageAndTheme(configManager.GetSettingsSnapshot());
         base.OnStartup(e);
 
+        // 右クリックのメニューを、開いたときから押し続けている Alt で閉じさせない(全部のメニューの型の受け手)。
+        ContextMenuAltGuard.Register();
+
         // Npcap が無いとキャプチャ用のアダプタを引けない(初期化の中で SharpPcap が例外になる)ので、初期化の前に見る。
         // 古いときは初期化の後、メイン窓が出たところで知らせて続ける(MainWindow)。
         var npcapVersion = NpcapVersionProbe.GetVersion();
