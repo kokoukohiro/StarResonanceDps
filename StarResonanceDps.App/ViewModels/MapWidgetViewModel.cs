@@ -121,8 +121,11 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
     /// </summary>
     private const string SharedPositionIconKey = "Icon.MapSharedPosition";
 
-    /// <summary>フィールドマークの番号の絵の鍵(<c>Icons.xaml</c>)の頭。後ろにマークの番号(1〜6)を付ける。</summary>
+    /// <summary>フィールドマークの番号の絵の鍵(<c>Icons.xaml</c>)の頭。後ろにマークの番号(0〜9)を付ける。</summary>
     private const string FieldMarkIconKeyPrefix = "Icon.FieldMark";
+
+    /// <summary>プレイヤーのマークの絵の鍵(<c>Icons.xaml</c>)の頭。後ろにマークの種類(1〜6)を付ける。</summary>
+    private const string TeammateMarkIconKeyPrefix = "Icon.TeammateMark";
 
     /// <summary>アプリの画像のフォルダに無かった地図の画像の名前。名前ごとに1回だけログに残す(画面のスレッドだけで使う)。</summary>
     private static readonly HashSet<string> LoggedMissingImageNames = new(StringComparer.OrdinalIgnoreCase);
@@ -145,6 +148,12 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
 
     /// <summary>フィールドマークの控えの写し。更新のたびに使い回す。</summary>
     private readonly List<FieldMarkStore.FieldMark> _fieldMarks = [];
+
+    /// <summary>プレイヤーのマークの控えの写し(キャラID → 種類 1〜6)。控えが変わったときだけ写し直す(<see cref="BeginMarkers"/>)。</summary>
+    private readonly Dictionary<long, int> _teammateMarks = [];
+
+    /// <summary><see cref="_teammateMarks"/> を写したときの控えの版。</summary>
+    private int _teammateMarkVersion = -1;
 
     private readonly Dictionary<string, SolidColorBrush> _iconBrushes = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ImageBrush> _iconMasks = new(StringComparer.Ordinal);
@@ -874,7 +883,9 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
                 hasSelfRow = true;
             }
 
-            if (!party.ShouldInclude(row.CharacterId, row.IsSelf, partyDisplayMode))
+            // マークを付けられた人は、フィルター「プレイヤー」に関係なく出す。
+            if (!party.ShouldInclude(row.CharacterId, row.IsSelf, partyDisplayMode)
+                && !_teammateMarks.ContainsKey(row.CharacterId))
             {
                 continue;
             }
@@ -922,8 +933,9 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
             }
         }
 
-        // 名簿に自分の行がまだ無くても、自分の位置は出す(名前は UID、アイコンは不明)。フィルターは自分の行と同じ。
-        var showsSelfWithoutRow = !hasSelfRow && party.ShouldInclude(AppState.PlayerUID, true, partyDisplayMode);
+        // 名簿に自分の行がまだ無くても、自分の位置は出す(名前は UID、アイコンは不明)。フィルターとマークは自分の行と同じ。
+        var showsSelfWithoutRow = !hasSelfRow
+            && (party.ShouldInclude(AppState.PlayerUID, true, partyDisplayMode) || _teammateMarks.ContainsKey(AppState.PlayerUID));
         if (showsSelfWithoutRow)
         {
             playerCount++;
@@ -949,6 +961,7 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
                     ? GetSimplifiedPlayerShape(isSelf: true)
                     : MapMarkerShape.Icon;
                 ApplyIcon(selfMarker, PlayerProfession.GetKey(0));
+                ApplyTeammateMark(selfMarker, AppState.PlayerUID);
             }
 
             ApplySelfFacing(selfMarker, selfUuid);
@@ -1016,7 +1029,7 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
         {
             var row = roster[index];
             if (row.IsFromRecord
-                || !party.ShouldInclude(row.CharacterId, row.IsSelf, partyDisplayMode)
+                || (!party.ShouldInclude(row.CharacterId, row.IsSelf, partyDisplayMode) && !_teammateMarks.ContainsKey(row.CharacterId))
                 || !TryGetPartyMemberPosition(row, sceneId, out var position))
             {
                 continue;
@@ -1139,17 +1152,17 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
     }
 
     /// <summary>
-    /// ダンジョンで隊長が置いたフィールドマーク(Core <see cref="FieldMarkStore"/>)。自分のいるマップを見ているときだけ置き、階層は問わない
+    /// パーティで置いたフィールドマーク(Core <see cref="FieldMarkStore"/>)。自分のいるマップを見ているときだけ置き、階層は問わない
     /// (マークに階層の情報が無い)。絵はゲームのマークの番号の絵で、色は変えない。名前も得点も出さず、押しても何もしない。
     /// 場に置く印なので、人と敵の印より奥に描く。
     /// </summary>
     private void PlaceFieldMarkMarkers(double originX, double originZ, double scale)
     {
-        FieldMarkStore.Instance.CopyTo(_fieldMarks);
+        FieldMarkStore.Instance.CopyFieldMarksTo(_fieldMarks);
         foreach (var mark in _fieldMarks)
         {
             var placed = TryPlaceMarker(
-                new MapMarkerKey(MapMarkerKind.FieldMark, mark.OwnerUuid * 8 + mark.Number),
+                new MapMarkerKey(MapMarkerKind.FieldMark, mark.Number),
                 mark.Position,
                 originX,
                 originZ,
@@ -1193,13 +1206,21 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
     }
 
     /// <summary>
-    /// 印を当て始める。名簿か周りの実体の一覧か、今の場所が得点を求めているかが前回から変わったか、設定・言語が変わっていれば、
+    /// 印を当て始める。名簿か周りの実体の一覧か、今の場所が得点を求めているか、プレイヤーのマークが前回から変わったか、設定・言語が変わっていれば、
     /// ある印の名前・アイコン・得点も引き直す(戻り値が真)。
     /// </summary>
     private bool BeginMarkers(IReadOnlyList<PlayerRosterEntry> roster, IReadOnlyList<NearbyEntityEntry>? entities, bool isScoreRequested)
     {
         _placedKeys.Clear();
+        var teammateMarkVersion = FieldMarkStore.Instance.Version;
+        var teammateMarksChanged = teammateMarkVersion != _teammateMarkVersion;
+        if (teammateMarksChanged)
+        {
+            _teammateMarkVersion = FieldMarkStore.Instance.CopyTeammateMarksTo(_teammateMarks);
+        }
+
         var refreshesPresentation = _isPresentationStale
+            || teammateMarksChanged
             || !ReferenceEquals(roster, _lastRoster)
             || !ReferenceEquals(entities, _lastEntities)
             || isScoreRequested != _lastIsScoreRequested;
@@ -1308,6 +1329,22 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
             ? GetSimplifiedPlayerShape(row.IsSelf)
             : MapMarkerShape.Icon;
         ApplyIcon(marker, PlayerProfession.GetKey(row.ProfessionId, row.ClassSpec));
+        ApplyTeammateMark(marker, row.CharacterId);
+    }
+
+    /// <summary>
+    /// マークを付けられた人は、上で決めた形(クラスアイコン・簡略化)に関係なく、マークの絵にする。色は変えない。
+    /// 名前の欄は今までどおり(表示設定「プレイヤー名」と「交戦中の名前非表示」)。
+    /// </summary>
+    private void ApplyTeammateMark(MapMarkerEntry marker, long characterId)
+    {
+        if (!_teammateMarks.TryGetValue(characterId, out var markType))
+        {
+            return;
+        }
+
+        marker.Shape = MapMarkerShape.TeammateMark;
+        marker.IconImage = (ImageSource)Application.Current.FindResource(TeammateMarkIconKeyPrefix + markType);
     }
 
     /// <summary>
@@ -1316,7 +1353,7 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
     /// </summary>
     private void ApplySelfFacing(MapMarkerEntry marker, long selfUuid)
     {
-        if (marker.Shape == MapMarkerShape.Icon)
+        if (marker.Shape is MapMarkerShape.Icon or MapMarkerShape.TeammateMark)
         {
             return;
         }
@@ -1345,7 +1382,8 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
     {
         marker.Name = EntityListEntry.ResolveName(entity);
         marker.ShowsName = showsName && !IsInCombatTarget(entity.IsInCombat, _settings.HideNamesInCombatModeIndex, isPlayer: false);
-        // ボスだけアイコン(ボスの印の絵)で、ほかは戦闘状態にかかわらず小さい円。色は全部アイコンカラー「エンティティ」。
+        // ボスだけアイコン(ボスの印の絵)で、ほかは戦闘状態にかかわらず小さい円。色はアイコンカラー「エンティティ」で、
+        // 自分と同じ陣営(味方)のエンティティだけ「エンティティ(味方)」。味方の判定はエンティティリストの HP バーの緑と同じ。
         var isBoss = EntityListEntry.IsBoss(entity);
         marker.Shape = isBoss
             ? MapMarkerShape.Icon
@@ -1355,7 +1393,12 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
         marker.ScoreText = isBoss || !entity.IsInCombat
             ? EntityListEntry.FormatDisplayedScore(entity, isScoreRequested)
             : string.Empty;
-        ApplyIcon(marker, WidgetConfigDefaults.MapEntityColorKey);
+        ApplyIcon(
+            marker,
+            WidgetConfigDefaults.MapEntityColorKey,
+            entity.CampRelation == EntityCampRelation.Friendly
+                ? WidgetConfigDefaults.MapFriendlyEntityColorKey
+                : WidgetConfigDefaults.MapEntityColorKey);
     }
 
     /// <summary>
@@ -1378,11 +1421,14 @@ public sealed partial class MapWidgetViewModel : ViewModelBase, IDisposable, IWi
         };
     }
 
-    /// <summary>アイコンの形と色。鍵はアイコンカラーの鍵(敵の種類かプレイヤーのクラス)。</summary>
-    private void ApplyIcon(MapMarkerEntry marker, string iconKey)
+    /// <summary>
+    /// アイコンの形と色。鍵はアイコンカラーの鍵(エンティティかプレイヤーのクラス)。
+    /// 色の鍵を渡したときは色だけその行で塗る(味方のエンティティは「エンティティ」の絵を「エンティティ(味方)」の色で塗る)。
+    /// </summary>
+    private void ApplyIcon(MapMarkerEntry marker, string iconKey, string? colorKey = null)
     {
         marker.IconMask = GetIconMask(iconKey);
-        marker.IconBrush = GetIconBrush(iconKey);
+        marker.IconBrush = GetIconBrush(colorKey ?? iconKey);
     }
 
     /// <summary>アイコンの形。絵は鍵ごとに1つなので使い回す。</summary>

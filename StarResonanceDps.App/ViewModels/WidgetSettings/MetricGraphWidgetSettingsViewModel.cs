@@ -31,6 +31,10 @@ public sealed partial class MetricGraphWidgetSettingsViewModel : ObservableObjec
     [ObservableProperty]
     private bool _showSkillLog = true;
 
+    /// <summary>「最大強化のイマジン・ロールスキルを強調表示」のスイッチ。</summary>
+    [ObservableProperty]
+    private bool _highlightMaxGradeSkills = true;
+
     public MetricGraphWidgetSettingsViewModel(WidgetKind kind, MetricGraphWidgetSettingsConfig? config)
     {
         _kind = kind;
@@ -69,6 +73,10 @@ public sealed partial class MetricGraphWidgetSettingsViewModel : ObservableObjec
     public string ShowSkillLogStateText => LocalizationManager.Instance.GetString(
         ShowSkillLog ? "Settings_Switch_On" : "Settings_Switch_Off");
 
+    /// <summary>「最大強化のイマジン・ロールスキルを強調表示」のスイッチの右に出す ON / OFF。</summary>
+    public string HighlightMaxGradeSkillsStateText => LocalizationManager.Instance.GetString(
+        HighlightMaxGradeSkills ? "Settings_Switch_On" : "Settings_Switch_Off");
+
     /// <summary>グラフカラーの節(線の色)。</summary>
     public GraphColorSettingsViewModel GraphColors { get; }
 
@@ -88,6 +96,7 @@ public sealed partial class MetricGraphWidgetSettingsViewModel : ObservableObjec
             AggregationIntervalSeconds = AggregationIntervalSeconds,
             VisibleSeconds = RoundVisibleSeconds(VisibleSeconds),
             ShowSkillLog = ShowSkillLog,
+            HighlightMaxGradeSkills = HighlightMaxGradeSkills,
             ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
             ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
         };
@@ -147,6 +156,7 @@ public sealed partial class MetricGraphWidgetSettingsViewModel : ObservableObjec
             AggregationIntervalSeconds = normalized.AggregationIntervalSeconds;
             VisibleSeconds = normalized.VisibleSeconds;
             ShowSkillLog = normalized.ShowSkillLog;
+            HighlightMaxGradeSkills = normalized.HighlightMaxGradeSkills;
             GraphColors.Load(normalized.ClassColorIndexes, normalized.ClassColorPalettes);
         }
         finally
@@ -181,6 +191,7 @@ public sealed partial class MetricGraphWidgetSettingsViewModel : ObservableObjec
     {
         RebuildSecondsOptions();
         OnPropertyChanged(nameof(ShowSkillLogStateText));
+        OnPropertyChanged(nameof(HighlightMaxGradeSkillsStateText));
         OnPropertyChanged(nameof(VisibleSecondsText));
         OnPropertyChanged(nameof(VisibleSecondsMaxText));
     }
@@ -197,6 +208,7 @@ public sealed partial class MetricGraphWidgetSettingsViewModel : ObservableObjec
         return left.AggregationIntervalSeconds == right.AggregationIntervalSeconds
             && left.VisibleSeconds == right.VisibleSeconds
             && left.ShowSkillLog == right.ShowSkillLog
+            && left.HighlightMaxGradeSkills == right.HighlightMaxGradeSkills
             && GraphColors.ColorsEqual(
                 left.ClassColorIndexes,
                 left.ClassColorPalettes,
@@ -229,6 +241,12 @@ public sealed partial class MetricGraphWidgetSettingsViewModel : ObservableObjec
     partial void OnShowSkillLogChanged(bool value)
     {
         OnPropertyChanged(nameof(ShowSkillLogStateText));
+        NotifyChanged();
+    }
+
+    partial void OnHighlightMaxGradeSkillsChanged(bool value)
+    {
+        OnPropertyChanged(nameof(HighlightMaxGradeSkillsStateText));
         NotifyChanged();
     }
 }

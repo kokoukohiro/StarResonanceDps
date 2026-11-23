@@ -17,7 +17,7 @@ public enum MapMarkerKind
     /// <summary>チャットで共有された位置。窓に1つだけなので番号は 0。</summary>
     SharedPosition,
 
-    /// <summary>ダンジョンで隊長が置いたフィールドマーク。番号は置いた人の UUID × 8 ＋ マークの番号(1〜6)。</summary>
+    /// <summary>パーティで置いたフィールドマーク。番号はマークの番号(0〜9)。</summary>
     FieldMark
 }
 
@@ -40,7 +40,10 @@ public enum MapMarkerShape
     Image,
 
     /// <summary>フィールドマークの番号の絵をそのまま出す(色を変えない)。</summary>
-    FieldMark
+    FieldMark,
+
+    /// <summary>マークを付けられたプレイヤー。クラスアイコンの代わりにマークの絵をそのまま出す(色を変えない)。</summary>
+    TeammateMark
 }
 
 /// <summary>
@@ -70,7 +73,7 @@ public sealed partial class MapMarkerEntry(MapMarkerKey key) : ObservableObject
 
     /// <summary>
     /// 印の出し方。エンティティはボスだけアイコンでほかは円。プレイヤーは、表示設定「交戦中のプレイヤーを簡略化表示」のときの戦闘状態のプレイヤーと、
-    /// 「自分を常に簡略化表示」のときの自分を簡略化する。
+    /// 「自分を常に簡略化表示」のときの自分を簡略化する。マークを付けられたプレイヤーは、設定に関係なくマークの絵。
     /// 簡略化した印はアイコンの代わりに小さい形で、自分は向きを指す矢先、ほかは円。プレイヤーの円と矢先は白い縁で、縁の無い敵の円と見分ける。
     /// </summary>
     [ObservableProperty]
@@ -88,7 +91,9 @@ public sealed partial class MapMarkerEntry(MapMarkerKey key) : ObservableObject
     [ObservableProperty]
     private Brush? _iconBrush;
 
-    /// <summary>そのまま出す絵(<see cref="MapMarkerShape.Image"/> と <see cref="MapMarkerShape.FieldMark"/> のときだけ)。色は変えない。</summary>
+    /// <summary>
+    /// そのまま出す絵(<see cref="MapMarkerShape.Image"/>・<see cref="MapMarkerShape.FieldMark"/>・<see cref="MapMarkerShape.TeammateMark"/> のときだけ)。色は変えない。
+    /// </summary>
     [ObservableProperty]
     private ImageSource? _iconImage;
 
@@ -99,7 +104,7 @@ public sealed partial class MapMarkerEntry(MapMarkerKey key) : ObservableObject
     [ObservableProperty]
     private string _scoreText = string.Empty;
 
-    /// <summary>重なりの順。大きいほど手前(フィールドマーク → 実体 → 周りのプレイヤー → パーティの人 → 自分)。</summary>
+    /// <summary>重なりの順。大きいほど手前(フィールドマーク → 実体 → 周りのプレイヤー → パーティの人 → 自分。マークを付けられた人もその人の順)。</summary>
     [ObservableProperty]
     private int _zIndex;
 }

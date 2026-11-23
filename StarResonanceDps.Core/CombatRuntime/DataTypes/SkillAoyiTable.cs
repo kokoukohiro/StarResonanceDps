@@ -30,6 +30,9 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
         /// <summary>その段階のイマジンの技ID。</summary>
         public int SkillId { get; set; }
 
+        /// <summary>改造段階(1 から)。技の G○ の数字(<c>MeterSnapshotProvider.ResolveSkillGrade</c>)のイマジンの値と同じ。</summary>
+        public int Level { get; set; }
+
         /// <summary>付ける効果。<c>[3, バフID, 1]</c> はイマジンのパッシブの根のバフ。</summary>
         public List<List<int>> TransformationType { get; set; } = [];
     }

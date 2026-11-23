@@ -345,6 +345,40 @@
                             </Rectangle>
 
                             <!--
+                                マークを付けられたプレイヤー。クラスアイコンの代わりにマークの絵をそのまま出し(色は変えない)、中心は同じ座標。
+                                影・TIPS・左クリックはクラスアイコンと同じ。
+                            -->
+                            <Image Canvas.Left="-12"
+                                   Canvas.Top="-12"
+                                   Width="25"
+                                   Height="25"
+                                   Source="{Binding IconImage}"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   Effect="{StaticResource Effect.ProfessionIconShadow}"
+                                   Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:MapWidgetView}}}"
+                                   behaviors:ToolTipBehavior.IsEnabled="True">
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Shape}" Value="TeammateMark">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                                <Image.ToolTip>
+                                    <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                             Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                                        <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                                   FontSize="12"
+                                                   Text="{Binding Name}" />
+                                    </ToolTip>
+                                </Image.ToolTip>
+                            </Image>
+
+                            <!--
                                 簡略化した印(ボス以外のエンティティと、簡略化するプレイヤー)。アイコンの代わりの小さい円で、中心は同じ座標。影と TIPS はアイコンと同じ。
                                 プレイヤーの円は白い縁を付けて少し大きくし、縁の無い敵の円と形で見分ける(縁は円の大きさの内側に描かれる)。
                             -->
@@ -451,7 +485,7 @@
                             </Image>
 
                             <!--
-                                ダンジョンで隊長が置いたフィールドマーク。ゲームが場に出すマークと同じく、枠の絵と番号の絵を同じ大きさで重ねる(色は変えない)。
+                                パーティで置いたフィールドマーク。ゲームが場に出すマークと同じく、枠の絵と番号の絵を同じ大きさで重ねる(色は変えない)。
                                 中心は同じ座標。大きさは外側の枠で決まり、枠と番号が一緒に変わる。
                                 押しても何もしないのでマウスを受けず、下の地図をそのまま掴める。
                             -->

@@ -1937,6 +1937,17 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
+    /// 技の G○ の数字(<see cref="ResolveSkillGrade"/>)が、その技の最大の段階か(<see cref="CombatDataCatalog.GetSkillMaxGrade"/>)。
+    /// プレイヤーリストの技の枠と推移グラフの技のアイコンが、枠を最大の段階の色にするのに使う。
+    /// </summary>
+    public static bool IsMaxSkillGrade(int skillId, int? grade)
+    {
+        return grade is { } value
+            && CombatDataCatalog.GetSkillMaxGrade(skillId) is { } maxGrade
+            && value >= maxGrade;
+    }
+
+    /// <summary>
     /// 技の枠と推移グラフの技のアイコンの TIPS に出す名前。G○ の数字(<see cref="ResolveSkillGrade"/>)があれば「名前 G○」、無ければ名前だけ。
     /// </summary>
     public static string FormatSkillNameWithGrade(string name, int? grade)

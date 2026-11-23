@@ -70,6 +70,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncSceneEvents, ProcessSyncSceneEvents);
 
+            netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.NotifySceneMark, ProcessNotifySceneMark);
+
             netCap.RegisterNotifyHandler(936649811, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldActivityNtf.SyncHitInfo, ProcessSyncHitInfo);
 
             netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncDungeonData, ProcessSyncDungeonData);
@@ -3398,7 +3400,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 NearbyMonsterIndex.Instance.Remove(disappearedEntity.Uuid);
                 EnemyContributionBaseline.Instance.Remove(disappearedEntity.Uuid);
                 EntityPositionStore.Instance.RemoveEntity(disappearedEntity.Uuid);
-                FieldMarkStore.Instance.RemoveOwner(disappearedEntity.Uuid);
                 PlayerDeathStates.Remove(disappearedEntity.Uuid);
                 LastPassiveHealTicks.Remove(disappearedEntity.Uuid);
                 EncounterManager.Current.RemoveDisappearedEntity(disappearedEntity.Uuid);
@@ -3416,12 +3417,6 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 EncounterManager.Current.SetEntityType(entity.Uuid, entity.EntType);
                 ResetCombatStateMissingFromFullAttrs(entity.Uuid, entity.Attrs?.Attrs);
-
-                // 出現の一覧のパッシブの技は、その実体の今の全部。フィールドマークを置けるのは隊長(プレイヤー)だけ。
-                if (entity.EntType == EEntityType.EntChar)
-                {
-                    FieldMarkStore.Instance.ApplyAppear(entity.Uuid, entity.PassiveSkillInfos);
-                }
 
                 // 出現の一覧はその実体の一時属性の全部(無ければ一時属性が無い)。前に見たときの値を置き換える。
                 var appearTempAttrs = entity.TempAttrs?.Attrs ?? (IEnumerable<Zproto.TempAttr>)[];
@@ -3710,9 +3705,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 return;
             }
-
-            // フィールドマークは持ち主のパッシブの技で届く。下の早い return(精算・投票の間)より前で当てる。
-            FieldMarkStore.Instance.ApplyDelta(targetUuid, delta.PassiveSkillInfos, delta.PassiveSkillEndInfos);
 
             bool isTargetPlayer = (Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar);
             var isSelfTarget = isTargetPlayer && IsSelfPlayer(targetUuid);
@@ -4313,6 +4305,13 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         public static long currentUserUuid = 0;
+
+        /// <summary>パーティで置くマーク(フィールドマークとプレイヤーのマーク)。中身はその時のマークの全部で、控えを丸ごと置き換える。</summary>
+        public static void ProcessNotifySceneMark(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
+        {
+            var notify = global::Zproto.WorldNtf.Types.NotifySceneMark.Parser.ParseFrom(payloadBuffer);
+            FieldMarkStore.Instance.Apply(notify.VInfo);
+        }
 
         public static void ProcessSyncServerTime(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
         {

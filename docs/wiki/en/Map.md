@@ -12,12 +12,13 @@ This widget shows where you, the players and enemies around you, and your party 
 
 - Map: The map you are on, centered on you. When you change maps, it switches to the map you moved to. On maps with layers, the map of the layer you are on is shown. On maps without a map image, only the icons are shown.
 - Players: Shown with their class icons. Players in combat are shown as small circles with a white border. You are shown as a triangle with a white border that points in the direction you are facing ("Simplify Players In Combat" in the display settings). With "Always Simplify Self" in the display settings, you are shown as the triangle even when you are not in combat.
-- Enemies: Bosses are shown with the boss icon, and other enemies as small circles without a border. All of them use the color of "Entity" in the icon colors.
+- Enemies: Bosses are shown with the boss icon, and other enemies as small circles without a border. They use the color of "Entity" in the icon colors, and allies (those whose HP bar is green in the Entity List) use the color of "Entity (Ally)".
 - Points: In dungeons where you collect points through the spatial investigation, the enemy's points (such as "60pt") are shown above the circles of enemies that are not in combat. A boss's points are shown in the center of its icon.
 - Names: Shown below the icons. Choose whose names are shown in the display settings. Hover over an icon to see the name in a tooltip, even when the name is not shown.
-- Markers: The markers 1 to 6 that the captain places in dungeons ("Marker 1" to "Marker 6") are shown with the same images as the game, regardless of the layer.
+- Markers: The markers 0 to 9 that the captain places in dungeons are shown with the same images as the game, regardless of the layer.
+- Player markers: Players the captain marks in dungeons (including you) are shown with the same marker images as the game, regardless of "Players", "Simplify Players In Combat", and "Always Simplify Self" in the display settings.
 - Position marker: Shown at a spot shared with a link in chat.
-- Footer: The left shows the name of the map being shown (with the channel in the form "ch12" if there is one), and the right shows the number of "Entities" and "Players". The numbers count those on that map after the display settings filter them, including those outside the window. While you are collecting points through the spatial investigation, it changes to "In Combat" (the total points of the enemies in combat) and "Current" (the current points).
+- Footer: The left shows the name of the map being shown (with the channel in the form "ch12" if there is one), and the right shows the number of "Entities" and "Players". The numbers count those on that map after the display settings filter them, including marked players and those outside the window. While you are collecting points through the spatial investigation, it changes to "In Combat" (the total points of the enemies in combat) and "Current" (the current points).
 
 ![While collecting points through the spatial investigation](images/en/Map2.png)
 
@@ -48,13 +49,14 @@ The window settings and theme are described in [Common Widget Settings](Common-W
 
 ### Icon Colors
 
-"Entity" in the first row is the color of the enemies' icons and circles (the default is the orange in the second slot). The class rows that follow (including transformations) and "Unknown" (players whose class cannot be determined) are the colors of the players' icons and circles.
+"Entity" in the first row is the color of the enemies' icons and circles (the default is the orange in the second slot). "Entity (Ally)" in the second row is the color of the allies among them (the default is the green in the second slot). The class rows that follow (including transformations) and "Unknown" (players whose class cannot be determined) are the colors of the players' icons and circles.
 
 ## Notes
 
 - Players and enemies around you are shown only when they are near you (within about 90m).
 - Party members are shown even when they are far away, as long as they are on the same map. Whether they are in combat can be determined only while they are near you, so party members who are far away are always shown as not in combat.
-- Markers are shown only while the player who placed them is near you. They disappear when you change maps.
+- Markers and player markers disappear when you change maps.
 - The position marker disappears when you click a new link, choose "Clear Position Marker", or log out. It does not disappear when you change maps.
 - If you start the app while the game is already running, nothing may be shown until you move.
+- If you start the app while the game is already running, allies and enemies cannot be told apart until you change maps, and all enemies use the color of "Entity".
 - Even while a history entry is open, the current positions are shown.

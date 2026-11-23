@@ -29,7 +29,7 @@ The window settings and theme are described in [Common Widget Settings](Common-W
 
 ### Display
 
-There are Drawing interval (default: 2s), X-axis length (default: 12s), and Show Skill Log (default: on). They work the same way as in the [DPS Trend Graph](DPS-Trend-Graph).
+There are Drawing interval (default: 2s), X-axis length (default: 12s), Show Skill Log (default: on), and Highlight max-upgraded Imagine and role skills (default: on). They work the same way as in the [DPS Trend Graph](DPS-Trend-Graph).
 
 ### Graph Colors
 

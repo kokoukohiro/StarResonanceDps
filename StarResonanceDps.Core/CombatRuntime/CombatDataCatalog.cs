@@ -21,6 +21,8 @@ public static class CombatDataCatalog
         new Dictionary<int, FrozenDictionary<int, float>>().ToFrozenDictionary();
     /// <summary>技ID → 技のアイコンの背景の枠(<see cref="BuildSkillIconFrames"/>)。技の表の全部の技。</summary>
     private static FrozenDictionary<int, SkillIconFrame> _skillIconFrames = FrozenDictionary<int, SkillIconFrame>.Empty;
+    /// <summary>技ID → 技の G○ の数字の最大(<see cref="BuildSkillMaxGrades"/>)。イマジンと、CD がレベルで変わるロールスキルだけ。</summary>
+    private static FrozenDictionary<int, int> _skillMaxGrades = FrozenDictionary<int, int>.Empty;
     /// <summary>技の名前。技の表の名前(<c>SkillNames</c>)に古い版の名前(<c>SkillNameOverrides</c>)と <c>SkillTalk</c> を重ねたもの。</summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _skillNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
@@ -509,6 +511,7 @@ public static class CombatDataCatalog
             _buffs = LoadNumericCatalog(HelperMethods.DataTables.Buffs.Data);
             _skillCooldownsByLevel = LoadSkillCooldowns();
             _skillIconFrames = BuildSkillIconFrames();
+            _skillMaxGrades = BuildSkillMaxGrades();
             var skillNames = LoadLocalizedText(reads, "SkillNames", out var skillNameIds);
             (_skillTableNames, _) = ApplyNameOverrides(reads, skillNames, skillNameIds, "SkillNameOverrides.json");
             _skillTalkNames = LoadLocalizedText(reads, "SkillTalkNames", out _);
@@ -2422,6 +2425,43 @@ public static class CombatDataCatalog
         return _skillIconFrames.TryGetValue(skillId, out var frame)
             ? frame
             : SkillIconFrame.Standard;
+    }
+
+    /// <summary>技の G○ の数字の最大(<see cref="BuildSkillMaxGrades"/>)。G の無い技は null。</summary>
+    public static int? GetSkillMaxGrade(int skillId)
+    {
+        return _skillMaxGrades.TryGetValue(skillId, out var maxGrade)
+            ? maxGrade
+            : null;
+    }
+
+    /// <summary>
+    /// 技の G○ の数字(<c>MeterSnapshotProvider.ResolveSkillGrade</c>)の最大。対象も同じで、
+    /// イマジンは改造段階の表(<c>SkillAoyiStarTable</c>)の最大の段階、CD がレベルで変わるロールスキルはレベルごとの CD の表の最大のレベル。
+    /// </summary>
+    private static FrozenDictionary<int, int> BuildSkillMaxGrades()
+    {
+        var maxGrades = new Dictionary<int, int>();
+        foreach (var star in HelperMethods.DataTables.SkillAoyiStars.Data.Values)
+        {
+            if (star.SkillId > 0
+                && star.Level > (maxGrades.TryGetValue(star.SkillId, out var current) ? current : 0))
+            {
+                maxGrades[star.SkillId] = star.Level;
+            }
+        }
+
+        foreach (var (skillId, cooldownsByLevel) in _skillCooldownsByLevel)
+        {
+            if (!maxGrades.ContainsKey(skillId)
+                && IsSkillRole(skillId)
+                && HasLevelDependentCooldown(skillId))
+            {
+                maxGrades[skillId] = cooldownsByLevel.Keys.Max();
+            }
+        }
+
+        return maxGrades.ToFrozenDictionary();
     }
 
     /// <summary>イマジンの絵の置き場所(技の表の <c>Icon</c> の全体のパスの先頭)。</summary>

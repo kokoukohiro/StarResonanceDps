@@ -9,7 +9,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>StarResonanceDps</AssemblyName>
-    <Version>4.3.1</Version>
+    <Version>4.3.2</Version>
     <Copyright>Copyright © 2026 kokoukohiro</Copyright>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\Images\ApplicationIcon.ico</ApplicationIcon>
@@ -77,6 +77,12 @@
     <None Remove="Assets\Images\common_icon06.png" />
     <None Remove="Assets\Images\head_photo_000.png" />
     <None Remove="Assets\Images\idcard_common_01.png" />
+    <None Remove="Assets\Images\img_punctuate_symbol01.png" />
+    <None Remove="Assets\Images\img_punctuate_symbol02.png" />
+    <None Remove="Assets\Images\img_punctuate_symbol03.png" />
+    <None Remove="Assets\Images\img_punctuate_symbol04.png" />
+    <None Remove="Assets\Images\img_punctuate_symbol05.png" />
+    <None Remove="Assets\Images\img_punctuate_symbol06.png" />
     <None Remove="Assets\Images\img_seasontalent_main_btn_bg1.png" />
     <None Remove="Assets\Images\main_progress_icon_dark.png" />
     <None Remove="Assets\Images\main_progress_icon_electricity.png" />
@@ -116,12 +122,16 @@
     <None Remove="Assets\Images\talent_icon_red.png" />
     <None Remove="Assets\Images\talk_icon_union_54.png" />
     <None Remove="Assets\Images\team_num_frame.png" />
+    <None Remove="Assets\Images\t_fx_marking_00.png" />
     <None Remove="Assets\Images\t_fx_marking_01.png" />
     <None Remove="Assets\Images\t_fx_marking_02.png" />
     <None Remove="Assets\Images\t_fx_marking_03.png" />
     <None Remove="Assets\Images\t_fx_marking_04.png" />
     <None Remove="Assets\Images\t_fx_marking_05.png" />
     <None Remove="Assets\Images\t_fx_marking_06.png" />
+    <None Remove="Assets\Images\t_fx_marking_07.png" />
+    <None Remove="Assets\Images\t_fx_marking_08.png" />
+    <None Remove="Assets\Images\t_fx_marking_09.png" />
     <None Remove="Assets\Images\t_fx_marking_background.png" />
     <None Remove="Assets\Images\trialroad_icon_assist.png" />
     <None Remove="Assets\Images\trialroad_icon_attack.png" />
@@ -242,6 +252,12 @@
     <EmbeddedResource Include="Assets\Images\ApplicationIcon_32x32.png" LogicalName="Icon.png" />
     <Resource Include="Assets\Images\ApplicationIcon.ico" />
     <Resource Include="Assets\Images\com_icon_question.png" />
+    <Resource Include="Assets\Images\img_punctuate_symbol01.png" />
+    <Resource Include="Assets\Images\img_punctuate_symbol02.png" />
+    <Resource Include="Assets\Images\img_punctuate_symbol03.png" />
+    <Resource Include="Assets\Images\img_punctuate_symbol04.png" />
+    <Resource Include="Assets\Images\img_punctuate_symbol05.png" />
+    <Resource Include="Assets\Images\img_punctuate_symbol06.png" />
     <Resource Include="Assets\Images\img_seasontalent_main_btn_bg1.png" />
     <Resource Include="Assets\Images\main_progress_icon_dark.png" />
     <Resource Include="Assets\Images\main_progress_icon_electricity.png" />
@@ -281,12 +297,16 @@
     <Resource Include="Assets\Images\talent_icon_red.png" />
     <Resource Include="Assets\Images\talk_icon_union_54.png" />
     <Resource Include="Assets\Images\team_num_frame.png" />
+    <Resource Include="Assets\Images\t_fx_marking_00.png" />
     <Resource Include="Assets\Images\t_fx_marking_01.png" />
     <Resource Include="Assets\Images\t_fx_marking_02.png" />
     <Resource Include="Assets\Images\t_fx_marking_03.png" />
     <Resource Include="Assets\Images\t_fx_marking_04.png" />
     <Resource Include="Assets\Images\t_fx_marking_05.png" />
     <Resource Include="Assets\Images\t_fx_marking_06.png" />
+    <Resource Include="Assets\Images\t_fx_marking_07.png" />
+    <Resource Include="Assets\Images\t_fx_marking_08.png" />
+    <Resource Include="Assets\Images\t_fx_marking_09.png" />
     <Resource Include="Assets\Images\t_fx_marking_background.png" />
   </ItemGroup>
 

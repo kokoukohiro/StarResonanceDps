@@ -62,12 +62,53 @@
     <!-- マップの印(チャットで共有された位置)。ゲームがこの位置の追跡に出すアイコンと同じ絵で、色は変えずにそのまま出す。 -->
     <BitmapImage x:Key="Icon.MapSharedPosition" UriSource="/Assets/Images/map_dynamic_icon.png" />
     <BitmapImage x:Key="Icon.FieldMarkFrame" UriSource="/Assets/Images/t_fx_marking_background.png" />
+    <!-- 0・7〜9 の絵は数字の周りの余白が 1〜6 より広い。数字の高さと位置が 1〜6 と同じ割合になる範囲を切り抜く。 -->
+    <DrawingImage x:Key="Icon.FieldMark0">
+        <DrawingImage.Drawing>
+            <DrawingGroup ClipGeometry="M30,20 H482 V472 H30 Z">
+                <ImageDrawing ImageSource="/Assets/Images/t_fx_marking_00.png"
+                  Rect="0,0,512,512" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
     <BitmapImage x:Key="Icon.FieldMark1" UriSource="/Assets/Images/t_fx_marking_01.png" />
     <BitmapImage x:Key="Icon.FieldMark2" UriSource="/Assets/Images/t_fx_marking_02.png" />
     <BitmapImage x:Key="Icon.FieldMark3" UriSource="/Assets/Images/t_fx_marking_03.png" />
     <BitmapImage x:Key="Icon.FieldMark4" UriSource="/Assets/Images/t_fx_marking_04.png" />
     <BitmapImage x:Key="Icon.FieldMark5" UriSource="/Assets/Images/t_fx_marking_05.png" />
     <BitmapImage x:Key="Icon.FieldMark6" UriSource="/Assets/Images/t_fx_marking_06.png" />
+    <DrawingImage x:Key="Icon.FieldMark7">
+        <DrawingImage.Drawing>
+            <DrawingGroup ClipGeometry="M27,18 H484 V475 H27 Z">
+                <ImageDrawing ImageSource="/Assets/Images/t_fx_marking_07.png"
+                  Rect="0,0,512,512" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    <DrawingImage x:Key="Icon.FieldMark8">
+        <DrawingImage.Drawing>
+            <DrawingGroup ClipGeometry="M30,20 H482 V472 H30 Z">
+                <ImageDrawing ImageSource="/Assets/Images/t_fx_marking_08.png"
+                  Rect="0,0,512,512" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    <DrawingImage x:Key="Icon.FieldMark9">
+        <DrawingImage.Drawing>
+            <DrawingGroup ClipGeometry="M28,20 H482 V474 H28 Z">
+                <ImageDrawing ImageSource="/Assets/Images/t_fx_marking_09.png"
+                  Rect="0,0,512,512" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <!-- マップの印(マークを付けられたプレイヤー)。ゲームがその人の頭上に出すマークと同じ絵で、色は変えずにそのまま出す。 -->
+    <BitmapImage x:Key="Icon.TeammateMark1" UriSource="/Assets/Images/img_punctuate_symbol01.png" />
+    <BitmapImage x:Key="Icon.TeammateMark2" UriSource="/Assets/Images/img_punctuate_symbol02.png" />
+    <BitmapImage x:Key="Icon.TeammateMark3" UriSource="/Assets/Images/img_punctuate_symbol03.png" />
+    <BitmapImage x:Key="Icon.TeammateMark4" UriSource="/Assets/Images/img_punctuate_symbol04.png" />
+    <BitmapImage x:Key="Icon.TeammateMark5" UriSource="/Assets/Images/img_punctuate_symbol05.png" />
+    <BitmapImage x:Key="Icon.TeammateMark6" UriSource="/Assets/Images/img_punctuate_symbol06.png" />
 
     <!--
         戦闘状態の印の見た目。Brush.CombatState で塗った面を絵で型抜きし、影は文字と同じ。
@@ -463,6 +504,24 @@
     <Geometry x:Key="Icon.Favorite.Filled">
         M9.153 5.408C10.42 3.136 11.053 2 12 2s1.58 1.136 2.847 3.408l.328.588c.36.646.54.969.82 1.182s.63.292 1.33.45l.636.144c2.46.557 3.689.835 3.982 1.776c.292.94-.546 1.921-2.223 3.882l-.434.507c-.476.557-.715.836-.822 1.18c-.107.345-.071.717.001 1.46l.066.677c.253 2.617.38 3.925-.386 4.506s-1.918.051-4.22-1.009l-.597-.274c-.654-.302-.981-.452-1.328-.452s-.674.15-1.328.452l-.596.274c-2.303 1.06-3.455 1.59-4.22 1.01c-.767-.582-.64-1.89-.387-4.507l.066-.676c.072-.744.108-1.116 0-1.46c-.106-.345-.345-.624-.821-1.18l-.434-.508c-1.677-1.96-2.515-2.941-2.223-3.882S3.58 8.328 6.04 7.772l.636-.144c.699-.158 1.048-.237 1.329-.45s.46-.536.82-1.182z
     </Geometry>
+
+    <!--
+        中の技が最大の段階(<c>MeterSnapshotProvider.IsMaxSkillGrade</c>)のとき、01・02 の枠(31 × 34 の箱)の左下に重ねる星。
+        形はウィジェットのカードのお気に入りと同じ。プレイヤーリストと推移グラフの技の枠が使う。
+    -->
+    <Style x:Key="Icon.SkillMaxGradeStar" TargetType="{x:Type Path}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Data" Value="{StaticResource Icon.Favorite.Filled}" />
+        <Setter Property="Fill" Value="#FFD65C" />
+        <Setter Property="Stroke" Value="#281E0A" />
+        <Setter Property="StrokeThickness" Value="0.76" />
+        <Setter Property="Stretch" Value="Uniform" />
+        <Setter Property="Width" Value="7.33" />
+        <Setter Property="Height" Value="7.33" />
+        <Setter Property="Margin" Value="2.22,23.65,0,0" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
 
     <GeometryGroup x:Key="Icon.Pin.Unfixed" FillRule="EvenOdd">
         <GeometryGroup.Transform>

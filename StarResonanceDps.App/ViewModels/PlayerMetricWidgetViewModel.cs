@@ -83,6 +83,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     private int _graphVisibleSeconds = WidgetConfigDefaults.DefaultMetricGraphVisibleSeconds;
     private int _graphNumberDisplayFormatIndex;
     private bool _graphShowsSkillLog = true;
+    private bool _graphHighlightsMaxGradeSkills = true;
     private Brush? _graphLineBrush;
     private readonly DispatcherTimer _wheelSaveTimer;
 
@@ -154,6 +155,13 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     {
         get => _graphShowsSkillLog;
         private set => SetProperty(ref _graphShowsSkillLog, value);
+    }
+
+    /// <summary>技のアイコンの技が最大の段階なら枠の左下に星を出すか。設定「最大強化のイマジン・ロールスキルを強調表示」。</summary>
+    public bool GraphHighlightsMaxGradeSkills
+    {
+        get => _graphHighlightsMaxGradeSkills;
+        private set => SetProperty(ref _graphHighlightsMaxGradeSkills, value);
     }
 
     /// <summary>推移グラフの線の色。その人のクラスのグラフカラー。相手が分かるまでは null。</summary>
@@ -308,6 +316,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         {
             GraphVisibleSeconds = graphSettings.VisibleSeconds;
             GraphShowsSkillLog = graphSettings.ShowSkillLog;
+            GraphHighlightsMaxGradeSkills = graphSettings.HighlightMaxGradeSkills;
             GraphNumberDisplayFormatIndex = _configManager.CurrentSettings.NumberDisplayFormatIndex;
         }
 
@@ -424,7 +433,8 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
                 CombatIconResolver.ResolveSkillIcon(activation.IconName),
                 MeterSnapshotProvider.FormatSkillNameWithGrade(name, activation.Grade),
                 activation.Frame,
-                activation.UsesImagineAsset);
+                activation.UsesImagineAsset,
+                MeterSnapshotProvider.IsMaxSkillGrade(activation.SkillId, activation.Grade));
         }
 
         GraphSkillMarkers = _graphMarkerCount == 0

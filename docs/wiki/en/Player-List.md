@@ -14,7 +14,7 @@ Click the start button on the "Player List" card in "[Widgets](Widgets)".
   - Deep-Slumber Psychoscope type: The image at the lower right of the class icon. Only the frame is shown if it is not enabled, and a question mark until it is known.
   - Upper line: The party number (party members only), the combat state icon (only for people in combat), and the player name. Your own name is shown in yellow ("Self highlight" in the display settings).
   - Lower line: The HP bar. Green is HP, the light gray part on the right is the shield, and the numbers are "HP+shield/max HP" ("HP value" in the display settings). While the player is defeated and cannot be revived, it changes to "No Revive (seconds)".
-  - Skill slots: Two Imagines and the role skills. They show the cooldown (seconds) after use and, for skills with charges, the remaining charges. The debuff applied by the skill appears at the upper right, and the buff icon and its remaining seconds at the lower right.
+  - Skill slots: Two Imagines and the role skills. They show the cooldown (seconds) after use and, for skills with charges, the remaining charges. The debuff applied by the skill appears at the upper right, and the buff icon and its remaining seconds at the lower right. Skills at their highest grade (G5 for Imagines, G4 for role skills) show a star at the lower left of the slot ("Highlight max-upgraded Imagine and role skills" in the display settings).
 - Rows with a gray HP bar: People who are neither around you nor in your party. The values are from when they were last seen. The rows of helper NPCs also have a gray HP bar.
 - Order: You come first, followed by the other party members in order of party number. After them come the people outside the party, in the order of people who are neither around you nor in your party, then people in combat, then everyone else.
 - Footer: The left shows the current map (with the channel in the form "ch12" if there is one), and the right shows the number of people "In Combat" and "Nearby". "Nearby" counts the people around you (including yourself), and "In Combat" counts those of them who are in combat.
@@ -48,6 +48,7 @@ The window settings and theme are described in [Common Widget Settings](Common-W
 - Filter settings: Choose who is shown from "Show all", "Party members only", "Non-party members", and "Self only" (default: "Show all"). "Party members only" includes yourself, and "Non-party members" does not.
 - Sort Order: Choose the order of people outside the party from "Discovery Order" and "Name Order" (default: "Discovery Order").
 - Self highlight: Shows the name in your own row in yellow (default: on).
+- Highlight max-upgraded Imagine and role skills: Shows a star at the lower left of the slot for skills at their highest grade (default: on).
 - Show Deep-Slumber Psychoscope: Shows the Deep-Slumber Psychoscope type image. When it is off, the space reserved for the image is also removed (default: on).
 - Combat State: Choose how the combat state icon is shown from "Show", "Hide", and "Show Self Only" (default: "Show").
 

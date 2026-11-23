@@ -133,8 +133,7 @@
                     </ToolTip>
                 </Grid.ToolTip>
                 <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
-                       Stretch="Uniform"
-                       RenderOptions.BitmapScalingMode="HighQuality" />
+                       Stretch="Uniform" />
                 <!-- 絵のパスはあるのにファイルが無いバフははてな(技の枠と同じ作り)。大きさは絵の枠いっぱい。 -->
                 <Rectangle Fill="White"
                            Effect="{StaticResource Effect.ProfessionIconShadow}">
@@ -204,7 +203,7 @@
                 </Grid.ToolTip>
 
                 <!--
-                    枠の箱(枠の絵の大きさ 31 × 34)。箱と中の部品は丸めず、枠の絵は箱いっぱいに描き、絵とはてなは箱の中の決まった座標に置く。
+                    枠の箱(枠の絵の大きさ 31 × 34)。箱と中の部品は丸めず、枠の絵は箱いっぱいに描き、絵・はてな・最大の段階の星は箱の中の決まった座標に置く。
                     Windows の表示の拡大(125%・150% など)で、枠と中身の関係がずれないようにするため(位置を画素へ丸める格子が変わっても、箱の中は同じ比で描かれる)。
                     箱の左上は組の左上で、組は丸める。座標は推移グラフの 01・02 の枠と同じ値。
                 -->
@@ -261,6 +260,27 @@
                                 </Style>
                             </Rectangle.Style>
                         </Rectangle>
+                        <!--
+                            中の技が最大の段階なら、枠の左下に星。設定「最大強化のイマジン・ロールスキルを強調表示」は、
+                            技の枠を並べる一覧(DataContext が行)から読む。
+                        -->
+                        <Path>
+                            <Path.Style>
+                                <Style TargetType="{x:Type Path}" BasedOn="{StaticResource Icon.SkillMaxGradeStar}">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsMaxGrade}" Value="True" />
+                                                <Condition Binding="{Binding DataContext.HighlightsMaxGradeSkills, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" Value="True" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Path.Style>
+                        </Path>
                     </Grid>
                 </Grid>
 

@@ -21,7 +21,7 @@
 
         <!--
             横軸の下の技のアイコン1つ(中身は MetricGraphSkillMarker)。組み方はプレイヤーリストの技の枠と同じで、
-            箱の中に下寄せで枠の箱(枠の画像の大きさ)を置き、枠の画像を箱いっぱいに描き、絵かクラス不明のアイコンを箱の中の決まった座標に置く。
+            箱の中に下寄せで枠の箱(枠の画像の大きさ)を置き、枠の画像を箱いっぱいに描き、絵かクラス不明のアイコンと最大の段階の星を箱の中の決まった座標に置く。
             枠の箱と中の部品は丸めない(Windows の表示の拡大で、位置を画素へ丸める格子が変わっても枠と中身の関係がずれないようにする)。
             枠の画像と、絵・クラス不明のアイコンの大きさと座標は、枠の種類(01 / 02 / 03)とイマジンの絵かで変える。
             01・02 はプレイヤーリストの技の枠と同じ値。03 の枠の画像は1高く(31 × 35)、座標は 01 との中の円の位置の差だけずらした値から手で合わせたもの。
@@ -136,6 +136,28 @@
                                 </Style>
                             </Rectangle.Style>
                         </Rectangle>
+
+                        <!--
+                            技が最大の段階なら、枠の左下に星(最大の段階になるのは 01・02 の枠の技だけ)。
+                            設定「最大強化のイマジン・ロールスキルを強調表示」はグラフの DataContext(ウィジェットの VM)から読む。
+                        -->
+                        <Path>
+                            <Path.Style>
+                                <Style TargetType="{x:Type Path}" BasedOn="{StaticResource Icon.SkillMaxGradeStar}">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsMaxGrade, Mode=OneTime}" Value="True" />
+                                                <Condition Binding="{Binding DataContext.GraphHighlightsMaxGradeSkills, RelativeSource={RelativeSource AncestorType={x:Type controls:MetricGraphChart}}}" Value="True" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Path.Style>
+                        </Path>
                     </Grid>
                 </Grid>
             </Grid>

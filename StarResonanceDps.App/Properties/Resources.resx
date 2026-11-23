@@ -1270,6 +1270,9 @@ Wait a moment and copy again.</value>
   <data name="Classes_Entity" xml:space="preserve">
     <value>Entity</value>
   </data>
+  <data name="Classes_FriendlyEntity" xml:space="preserve">
+    <value>Entity (Ally)</value>
+  </data>
   <data name="Classes_Unknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
@@ -1706,6 +1709,9 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="Settings_Display_SelfDisplay" xml:space="preserve">
     <value>Self highlight</value>
+  </data>
+  <data name="Settings_Display_MaxGradeSkillHighlight" xml:space="preserve">
+    <value>Highlight max-upgraded Imagine and role skills</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>Show all</value>

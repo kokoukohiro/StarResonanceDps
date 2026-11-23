@@ -1272,6 +1272,9 @@ VOICEVOXを起動し直してください。</value>
   <data name="Classes_Entity" xml:space="preserve">
     <value>エンティティ</value>
   </data>
+  <data name="Classes_FriendlyEntity" xml:space="preserve">
+    <value>エンティティ(味方)</value>
+  </data>
   <data name="Classes_Unknown" xml:space="preserve">
     <value>不明</value>
   </data>
@@ -1708,6 +1711,9 @@ VOICEVOXを起動し直してください。</value>
   </data>
   <data name="Settings_Display_SelfDisplay" xml:space="preserve">
     <value>自分の強調表示</value>
+  </data>
+  <data name="Settings_Display_MaxGradeSkillHighlight" xml:space="preserve">
+    <value>最大強化のイマジン・ロールスキルを強調表示</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>すべて表示</value>

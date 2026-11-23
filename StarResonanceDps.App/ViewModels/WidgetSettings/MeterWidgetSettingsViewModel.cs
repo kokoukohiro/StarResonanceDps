@@ -43,6 +43,10 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     [ObservableProperty]
     private bool _showSeasonTalent = true;
 
+    /// <summary>「最大強化のイマジン・ロールスキルを強調表示」のスイッチ。</summary>
+    [ObservableProperty]
+    private bool _highlightMaxGradeSkills = true;
+
     /// <summary>「戦闘状態」の選択(<see cref="MeterWidgetSettingsConfig.CombatStateDisplayModeIndex"/>)。</summary>
     [ObservableProperty]
     private int _combatStateDisplayModeIndex = WidgetConfigDefaults.DefaultCombatStateDisplayModeIndex;
@@ -153,6 +157,13 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     public string ShowSeasonTalentStateText => LocalizationManager.Instance.GetString(
         ShowSeasonTalent ? "Settings_Switch_On" : "Settings_Switch_Off");
 
+    /// <summary>「最大強化のイマジン・ロールスキルを強調表示」を出すか。プレイヤーリストだけ。</summary>
+    public bool ShowsMaxGradeSkillSettings => _kind == WidgetKind.PlayerList;
+
+    /// <summary>「最大強化のイマジン・ロールスキルを強調表示」のスイッチの右に出す ON / OFF。</summary>
+    public string HighlightMaxGradeSkillsStateText => LocalizationManager.Instance.GetString(
+        HighlightMaxGradeSkills ? "Settings_Switch_On" : "Settings_Switch_Off");
+
     /// <summary>「戦闘状態」を出すか。プレイヤーリストとエンティティリスト。</summary>
     public bool ShowsCombatStateSettings => _kind is WidgetKind.PlayerList or WidgetKind.EntityList;
 
@@ -234,6 +245,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             PlayerInfoFormatString = PlayerInfoFormatString ?? string.Empty,
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             ShowSeasonTalent = ShowSeasonTalent,
+            HighlightMaxGradeSkills = HighlightMaxGradeSkills,
             CombatStateDisplayModeIndex = CombatStateDisplayModeIndex,
             TargetedPlayerDisplayModeIndex = TargetedPlayerDisplayModeIndex,
             HateRankDisplayModeIndex = HateRankDisplayModeIndex,
@@ -322,6 +334,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             PlayerInfoFormatString = normalized.PlayerInfoFormatString ?? string.Empty;
             HealthValueDisplayModeIndex = normalized.HealthValueDisplayModeIndex;
             ShowSeasonTalent = normalized.ShowSeasonTalent;
+            HighlightMaxGradeSkills = normalized.HighlightMaxGradeSkills;
             CombatStateDisplayModeIndex = normalized.CombatStateDisplayModeIndex;
             TargetedPlayerDisplayModeIndex = normalized.TargetedPlayerDisplayModeIndex;
             HateRankDisplayModeIndex = normalized.HateRankDisplayModeIndex;
@@ -351,6 +364,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         if (!string.Equals(left.PlayerInfoFormatString, right.PlayerInfoFormatString, StringComparison.Ordinal)
             || left.HealthValueDisplayModeIndex != right.HealthValueDisplayModeIndex
             || left.ShowSeasonTalent != right.ShowSeasonTalent
+            || left.HighlightMaxGradeSkills != right.HighlightMaxGradeSkills
             || left.CombatStateDisplayModeIndex != right.CombatStateDisplayModeIndex
             || left.TargetedPlayerDisplayModeIndex != right.TargetedPlayerDisplayModeIndex
             || left.HateRankDisplayModeIndex != right.HateRankDisplayModeIndex
@@ -451,6 +465,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         OnPropertyChanged(nameof(PlayerInfoCustomizationTitle));
         OnPropertyChanged(nameof(ClassColorSectionTitle));
         OnPropertyChanged(nameof(ShowSeasonTalentStateText));
+        OnPropertyChanged(nameof(HighlightMaxGradeSkillsStateText));
         OnPropertyChanged(nameof(SelfHighlightStateText));
         RebuildPlayerInfoFormatFields();
         RefreshFormatPreview();
@@ -493,6 +508,12 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     partial void OnShowSeasonTalentChanged(bool value)
     {
         OnPropertyChanged(nameof(ShowSeasonTalentStateText));
+        NotifyChanged();
+    }
+
+    partial void OnHighlightMaxGradeSkillsChanged(bool value)
+    {
+        OnPropertyChanged(nameof(HighlightMaxGradeSkillsStateText));
         NotifyChanged();
     }
 

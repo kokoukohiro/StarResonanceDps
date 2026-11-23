@@ -7,7 +7,8 @@
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
     <!--
-        マップのアイコンカラー。行はエンティティ全部の1行、プレイヤーのクラス、最後に不明(WidgetConfigDefaults.MapClassColorKeys)で、
+        マップのアイコンカラー。行はエンティティの1行、味方のエンティティの1行(アイコンは直径12の円)、
+        プレイヤーのクラス、最後に不明(WidgetConfigDefaults.MapClassColorKeys)で、
         行の作りはエンティティ情報のアイコンカラー(EntityInfoClassColorSettingsView)と同じ。不透明度は持たない。
     -->
     <UserControl.Resources>
@@ -27,6 +28,12 @@
                             <ImageBrush ImageSource="{StaticResource Icon.Profession.Entity}" Stretch="Uniform" />
                         </Setter.Value>
                     </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Key}" Value="FriendlyEntity">
+                    <Setter Property="Width" Value="12" />
+                    <Setter Property="Height" Value="12" />
+                    <Setter Property="RadiusX" Value="6" />
+                    <Setter Property="RadiusY" Value="6" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Key}" Value="ShieldKnight">
                     <Setter Property="OpacityMask">
@@ -144,9 +151,7 @@
                                       Width="27"
                                       Height="27"
                                       VerticalAlignment="Center">
-                                    <Rectangle Width="25"
-                                               Height="25"
-                                               HorizontalAlignment="Center"
+                                    <Rectangle HorizontalAlignment="Center"
                                                VerticalAlignment="Center"
                                                Style="{StaticResource MapClassColorSettings.ProfessionIconMask}"
                                                Fill="{Binding Colors.SelectedColor, Converter={StaticResource ColorToBrushConverter}}">

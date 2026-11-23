@@ -1,38 +1,43 @@
 // This file is part of StarResonanceDps. See LICENSING.md for the license, additional permissions and additional terms.
 
+using Serilog;
 using Zproto;
 
 namespace StarResonanceDps.Core.Services;
 
 /// <summary>
-/// ダンジョンで隊長が置くフィールドマーク(技 1101〜1106「フィールドマーク01〜06」)の控え。マップが番号の印で出す。
+/// パーティで置くマークの控え。マップが番号の絵(フィールドマーク)と、マークを付けられたプレイヤーの印に使う。
 ///
 /// <para>
-/// マークは持ち主(置いた隊長)の実体のパッシブの技として届く。置くと差分の <c>PassiveSkillInfos</c> に技の番号と位置(<c>TarPos</c>)、
-/// 外すと <c>PassiveSkillEndInfos</c> に置いたときのパッシブの技の番号が届く。
-/// 出現の一覧(<c>Entity.PassiveSkillInfos</c>)は、その実体の今のパッシブの技の全部として扱い、その持ち主の分を置き換える。
+/// マークは通知 <c>NotifySceneMark</c> の <see cref="SceneMarkSync"/> で届き、中身はその時に置かれているマークの全部
+/// (外すと残りだけ、全部外すと空)。届くたびに丸ごと置き換える。
 /// </para>
 ///
-/// <para>
-/// 持ち主と番号(1〜6)ごとに1つ持つ(ゲームの画面も番号ごとに置いたかを持つ)。同じ番号の新しい情報が来たら置き換える。
-/// 持ち主が周りから消えたら、その持ち主の分を外す(外した知らせを受け取れなくなるため。周りに戻れば出現の一覧で戻る)。
-/// マップ移動・キャプチャの停止・ログアウトで全部消す。持つのは周りにいる隊長の数 × 6 まで。
-/// </para>
+/// <list type="bullet">
+/// <item>フィールドマーク: 番号(0〜9)ごとに1つの位置。届く種類は表 <c>SceneMarkType</c> の番号(1〜10)で、番号は種類 − 1</item>
+/// <item>プレイヤーのマーク: キャラIDごとに1つの種類(1〜6)</item>
+/// </list>
 ///
 /// <para>
-/// 知らせは出さない。マップが自分の更新のときに読む(<see cref="EntityPositionStore"/> と同じ)。
+/// マップ移動・キャプチャの停止・ログアウトで全部消す。持つのはフィールドマーク 10 個とパーティの人数まで。
+/// 知らせは出さない。マップが自分の更新のときに読み、<see cref="Version"/> で変わったかを見る。
 /// </para>
 /// </summary>
 public sealed class FieldMarkStore
 {
-    private const int FirstSkillId = 1101;
-    private const int LastSkillId = 1106;
+    private const int FirstMarkType = 1;
+    private const int LastMarkType = 10;
+    private const int FirstTeammateMarkType = 1;
+    private const int LastTeammateMarkType = 6;
 
     private static readonly Lazy<FieldMarkStore> LazyInstance = new(() => new FieldMarkStore());
 
     private readonly object _sync = new();
-    private readonly Dictionary<(long OwnerUuid, int Number), FieldMark> _marks = [];
-    private readonly List<(long OwnerUuid, int Number)> _removingKeys = [];
+    private readonly Dictionary<int, FieldMark> _fieldMarks = [];
+    private readonly Dictionary<long, int> _teammateMarks = [];
+    private readonly HashSet<int> _warnedMarkTypes = [];
+    private readonly HashSet<int> _warnedTeammateMarkTypes = [];
+    private int _version;
 
     private FieldMarkStore()
     {
@@ -40,64 +45,69 @@ public sealed class FieldMarkStore
 
     public static FieldMarkStore Instance => LazyInstance.Value;
 
-    /// <param name="OwnerUuid">置いた人(隊長)の実体。</param>
-    /// <param name="Number">マークの番号(1〜6)。</param>
-    /// <param name="PassiveUuid">そのマークのパッシブの技の番号(外したときの知らせで引く)。</param>
+    /// <param name="Number">マークの番号(0〜9)。</param>
     /// <param name="Position">置いた位置。</param>
-    public readonly record struct FieldMark(long OwnerUuid, int Number, long PassiveUuid, EntityPositionStore.WorldPosition Position);
+    public readonly record struct FieldMark(int Number, EntityPositionStore.WorldPosition Position);
 
-    /// <summary>差分のパッシブの技の情報(置いた)と終わり(外した)を当てる。持ち主は差分の実体。</summary>
-    public void ApplyDelta(long ownerUuid, SeqPassiveSkillInfo? infos, SeqPassiveSkillEndInfo? ends)
+    /// <summary>中身が変わるたびに増える番号。</summary>
+    public int Version
     {
-        if (infos is null && ends is null)
+        get
         {
-            return;
-        }
-
-        lock (_sync)
-        {
-            if (infos is not null)
+            lock (_sync)
             {
-                foreach (var info in infos.PassiveInfos)
-                {
-                    TryPut(ownerUuid, info);
-                }
-            }
-
-            if (ends is not null)
-            {
-                foreach (var passiveUuid in ends.Uuids)
-                {
-                    RemoveLocked(ownerUuid, passiveUuid);
-                }
+                return _version;
             }
         }
     }
 
-    /// <summary>出現の一覧。その持ち主の分を、一覧にあるマークで置き換える(無ければ消す)。</summary>
-    public void ApplyAppear(long ownerUuid, SeqPassiveSkillInfo? infos)
+    /// <summary>届いたマークで丸ごと置き換える。中身が無ければ全部消す。</summary>
+    public void Apply(SceneMarkSync? sync)
     {
         lock (_sync)
         {
-            RemoveLocked(ownerUuid, passiveUuid: null);
-            if (infos is null)
+            _fieldMarks.Clear();
+            _teammateMarks.Clear();
+            if (sync is not null)
             {
-                return;
+                foreach (var mark in sync.SceneMarks)
+                {
+                    if (mark.MarkType is < FirstMarkType or > LastMarkType)
+                    {
+                        if (_warnedMarkTypes.Add(mark.MarkType))
+                        {
+                            Log.Warning("Unknown scene mark type {MarkType} was ignored", mark.MarkType);
+                        }
+
+                        continue;
+                    }
+
+                    if (mark.Position is not { } position)
+                    {
+                        continue;
+                    }
+
+                    var number = mark.MarkType - FirstMarkType;
+                    _fieldMarks[number] = new FieldMark(number, new EntityPositionStore.WorldPosition(position.X, position.Y, position.Z));
+                }
+
+                foreach (var mark in sync.TeammateMarks)
+                {
+                    if (mark.MarkType is < FirstTeammateMarkType or > LastTeammateMarkType)
+                    {
+                        if (_warnedTeammateMarkTypes.Add(mark.MarkType))
+                        {
+                            Log.Warning("Unknown teammate mark type {MarkType} was ignored", mark.MarkType);
+                        }
+
+                        continue;
+                    }
+
+                    _teammateMarks[mark.CharId] = mark.MarkType;
+                }
             }
 
-            foreach (var info in infos.PassiveInfos)
-            {
-                TryPut(ownerUuid, info);
-            }
-        }
-    }
-
-    /// <summary>周りから消えた実体の分を外す。</summary>
-    public void RemoveOwner(long ownerUuid)
-    {
-        lock (_sync)
-        {
-            RemoveLocked(ownerUuid, passiveUuid: null);
+            _version++;
         }
     }
 
@@ -106,58 +116,44 @@ public sealed class FieldMarkStore
     {
         lock (_sync)
         {
-            _marks.Clear();
+            if (_fieldMarks.Count == 0 && _teammateMarks.Count == 0)
+            {
+                return;
+            }
+
+            _fieldMarks.Clear();
+            _teammateMarks.Clear();
+            _version++;
         }
     }
 
-    /// <summary>今のマークを <paramref name="target"/> に写す(中身は入れ替える)。呼び手の一覧を使い回し、読むたびに新しく作らない。</summary>
-    public void CopyTo(List<FieldMark> target)
+    /// <summary>今のフィールドマークを <paramref name="target"/> に写す(中身は入れ替える)。呼び手の一覧を使い回し、読むたびに新しく作らない。</summary>
+    public void CopyFieldMarksTo(List<FieldMark> target)
     {
         target.Clear();
         lock (_sync)
         {
-            foreach (var mark in _marks.Values)
+            foreach (var mark in _fieldMarks.Values)
             {
                 target.Add(mark);
             }
         }
     }
 
-    private void TryPut(long ownerUuid, PassiveSkillInfo info)
+    /// <summary>
+    /// 今のプレイヤーのマーク(キャラID → 種類 1〜6)を <paramref name="target"/> に写す(中身は入れ替える)。写した中身の <see cref="Version"/> を返す。
+    /// </summary>
+    public int CopyTeammateMarksTo(Dictionary<long, int> target)
     {
-        if (info.SkillId is < FirstSkillId or > LastSkillId || info.TarPos is not { } position)
+        target.Clear();
+        lock (_sync)
         {
-            return;
-        }
-
-        var number = info.SkillId - FirstSkillId + 1;
-        _marks[(ownerUuid, number)] = new FieldMark(
-            ownerUuid,
-            number,
-            info.Uuid,
-            new EntityPositionStore.WorldPosition(position.X, position.Y, position.Z));
-    }
-
-    /// <summary>その持ち主の分を外す。<paramref name="passiveUuid"/> があれば、そのパッシブの技のマークだけ。</summary>
-    private void RemoveLocked(long ownerUuid, long? passiveUuid)
-    {
-        if (_marks.Count == 0)
-        {
-            return;
-        }
-
-        _removingKeys.Clear();
-        foreach (var (key, mark) in _marks)
-        {
-            if (mark.OwnerUuid == ownerUuid && (passiveUuid is null || mark.PassiveUuid == passiveUuid))
+            foreach (var (characterId, markType) in _teammateMarks)
             {
-                _removingKeys.Add(key);
+                target[characterId] = markType;
             }
-        }
 
-        foreach (var key in _removingKeys)
-        {
-            _marks.Remove(key);
+            return _version;
         }
     }
 }

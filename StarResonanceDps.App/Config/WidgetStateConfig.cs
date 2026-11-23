@@ -207,6 +207,9 @@ public sealed class MetricGraphWidgetSettingsConfig
     /// <summary>横軸の下に押した技のアイコンの行(スキルログ)を出すか。</summary>
     public bool ShowSkillLog { get; set; } = true;
 
+    /// <summary>スキルログの技が最大の段階なら、アイコンの枠の左下に星を出すか。</summary>
+    public bool HighlightMaxGradeSkills { get; set; } = true;
+
     public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DpsMeter);
 
     public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DpsMeter);
@@ -218,6 +221,7 @@ public sealed class MetricGraphWidgetSettingsConfig
             AggregationIntervalSeconds = AggregationIntervalSeconds,
             VisibleSeconds = VisibleSeconds,
             ShowSkillLog = ShowSkillLog,
+            HighlightMaxGradeSkills = HighlightMaxGradeSkills,
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DpsMeter)
                 : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
@@ -641,6 +645,9 @@ public sealed class MeterWidgetSettingsConfig
     /// <summary>プレイヤーリストに潜在心相晶の型の絵を出すか。使うのはプレイヤーリストだけ。</summary>
     public bool ShowSeasonTalent { get; set; } = true;
 
+    /// <summary>技の枠の技が最大の段階なら、枠の左下に星を出すか。使うのはプレイヤーリストだけ。</summary>
+    public bool HighlightMaxGradeSkills { get; set; } = true;
+
     /// <summary>
     /// プレイヤーリストとエンティティリストの設定「戦闘状態」(戦闘状態の人・実体の名前の左に印を出すか)。
     /// 0=表示 / 1=非表示 / 2=自分のみ表示(<see cref="WidgetConfigDefaults.CombatStateDisplayShowIndex"/> ほか)。
@@ -695,6 +702,7 @@ public sealed class MeterWidgetSettingsConfig
             PlayerInfoFormatString = PlayerInfoFormatString,
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             ShowSeasonTalent = ShowSeasonTalent,
+            HighlightMaxGradeSkills = HighlightMaxGradeSkills,
             CombatStateDisplayModeIndex = CombatStateDisplayModeIndex,
             TargetedPlayerDisplayModeIndex = TargetedPlayerDisplayModeIndex,
             HateRankDisplayModeIndex = HateRankDisplayModeIndex,
@@ -1048,7 +1056,7 @@ public sealed class ChatWidgetSettingsConfig
 
 /// <summary>
 /// マップの設定。印のフィルター(プレイヤーとエンティティ)、印の名前を出す相手(プレイヤーとエンティティ)、地図の画像の不透明度と、
-/// アイコンカラー(エンティティ全部の1色とプレイヤーのクラス。鍵は <see cref="WidgetConfigDefaults.MapClassColorKeys"/>)。
+/// アイコンカラー(エンティティの1色と味方のエンティティの1色、プレイヤーのクラス。鍵は <see cref="WidgetConfigDefaults.MapClassColorKeys"/>)。
 /// </summary>
 public sealed class MapWidgetSettingsConfig
 {
@@ -1415,11 +1423,13 @@ public static class WidgetConfigDefaults
     ];
 
     /// <summary>
-    /// マップのアイコンカラーの鍵。エンティティ全部を塗る1行、プレイヤーのクラス、最後に不明(クラスの分からないプレイヤー)。
+    /// マップのアイコンカラーの鍵。エンティティを塗る1行と、そのうち自分と同じ陣営(味方)のエンティティを塗る1行、
+    /// プレイヤーのクラス、最後に不明(クラスの分からないプレイヤー)。
     /// </summary>
     public static readonly string[] MapClassColorKeys =
     [
         MapEntityColorKey,
+        MapFriendlyEntityColorKey,
         .. ClassColorKeys.Where(key => key != "Unknown"),
         "Unknown"
     ];
@@ -1710,8 +1720,14 @@ public static class WidgetConfigDefaults
     /// <summary>マップの「自分を常に簡略化表示」の既定(オン)。</summary>
     public const bool DefaultMapAlwaysSimplifiesSelf = true;
 
-    /// <summary>マップのアイコンカラーの、エンティティ全部を塗る行の鍵(アイコンはボスの印の絵 <c>Icon.Profession.Entity</c>)。</summary>
+    /// <summary>マップのアイコンカラーの、エンティティ(味方以外)を塗る行の鍵(アイコンはボスの印の絵 <c>Icon.Profession.Entity</c>)。</summary>
     public const string MapEntityColorKey = "Entity";
+
+    /// <summary>
+    /// マップのアイコンカラーの、自分と同じ陣営(味方)のエンティティを塗る行の鍵。判定はエンティティリストの HP バーの緑と同じ
+    /// (<c>EntityListEntry.UsesFriendlyHealthBar</c>)。マップの印の絵は「エンティティ」と同じで、設定の行のアイコンは直径12の円。
+    /// </summary>
+    public const string MapFriendlyEntityColorKey = "FriendlyEntity";
 
     /// <summary>バフ・デバフ一覧の行のバフ名の書式の既定。付与者が出ないときは空になった括弧ごと消える。</summary>
     public const string DefaultBuffListBuffInfoFormatString = "{BuffName}({CasterName})";
@@ -1876,6 +1892,12 @@ public static class WidgetConfigDefaults
 
     /// <summary>マップのアイコンカラーの「エンティティ」の既定の色。2枠目はエンティティリストの狙われる印の色(<c>HateBadgeImages</c>)。</summary>
     private static readonly string[] MapDefaultEntityColorHexes = ["#FFFFFF", "#FF7D4B"];
+
+    /// <summary>
+    /// マップのアイコンカラーの「エンティティ(味方)」の既定の色。1枠目は「エンティティ」の1枠目と同じ白、
+    /// 2枠目はエンティティリストの味方の HP バーの色。
+    /// </summary>
+    private static readonly string[] MapDefaultFriendlyEntityColorHexes = ["#FFFFFF", "#1CE6A7"];
 
     private static readonly Dictionary<string, string[]> EntityListDefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -3077,6 +3099,7 @@ public static class WidgetConfigDefaults
             AggregationIntervalSeconds = DefaultMetricGraphAggregationIntervalSeconds,
             VisibleSeconds = DefaultMetricGraphVisibleSeconds,
             ShowSkillLog = true,
+            HighlightMaxGradeSkills = true,
             ClassColorIndexes = CreateDefaultClassColorIndexes(source),
             ClassColorPalettes = CreateDefaultClassColorPalettes(source)
         };
@@ -3375,12 +3398,13 @@ public static class WidgetConfigDefaults
 
     /// <summary>
     /// クラスカラーで最初に選ばれている枠。プレイヤーリストの潜在心相晶(不明を含む)と、
-    /// プレイヤー情報の潜在心相晶(無効を含む)とシーズンと、マップのエンティティだけ2枠目。
+    /// プレイヤー情報の潜在心相晶(無効を含む)とシーズンと、マップのエンティティとエンティティ(味方)だけ2枠目。
     /// </summary>
     public static int GetDefaultClassColorIndex(WidgetKind kind, string key)
     {
         return (kind == WidgetKind.Map
-                && string.Equals(key, MapEntityColorKey, StringComparison.OrdinalIgnoreCase))
+                && (string.Equals(key, MapEntityColorKey, StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(key, MapFriendlyEntityColorKey, StringComparison.OrdinalIgnoreCase)))
             || (kind == WidgetKind.PlayerList
                 && TryGetDefaultSeasonTalentColors(key, out _))
             || (kind == WidgetKind.PlayerInfo
@@ -3642,6 +3666,11 @@ public static class WidgetConfigDefaults
         if (kind == WidgetKind.Map && string.Equals(key, MapEntityColorKey, StringComparison.OrdinalIgnoreCase))
         {
             return [.. MapDefaultEntityColorHexes];
+        }
+
+        if (kind == WidgetKind.Map && string.Equals(key, MapFriendlyEntityColorKey, StringComparison.OrdinalIgnoreCase))
+        {
+            return [.. MapDefaultFriendlyEntityColorHexes];
         }
 
         var source = kind switch

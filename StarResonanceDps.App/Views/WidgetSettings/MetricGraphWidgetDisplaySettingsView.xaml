@@ -87,7 +87,7 @@
                     </Grid>
                 </Border>
 
-                <Border Style="{StaticResource Panel.SettingFieldLast}">
+                <Border Style="{StaticResource Panel.SettingField}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -110,6 +110,36 @@
                                        VerticalAlignment="Center"
                                        MinWidth="28"
                                        Text="{Binding ShowSkillLogStateText}"
+                                       Foreground="{DynamicResource Brush.TextPrimary}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Panel.SettingFieldLast}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_MaxGradeSkillHighlight]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <ToggleButton Style="{StaticResource Input.Switch}"
+                                          IsChecked="{Binding HighlightMaxGradeSkills, Mode=TwoWay}" />
+                            <TextBlock Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       MinWidth="28"
+                                       Text="{Binding HighlightMaxGradeSkillsStateText}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />
