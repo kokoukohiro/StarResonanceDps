@@ -15,8 +15,8 @@ This widget shows where you, the players and enemies around you, and your party 
 - Enemies: Bosses are shown with the boss icon, and other enemies as small circles without a border. They use the color of "Entity" in the icon colors, and allies (those whose HP bar is green in the Entity List) use the color of "Entity (Ally)".
 - Points: In dungeons where you collect points through the spatial investigation, the enemy's points (such as "60pt") are shown above the circles of enemies that are not in combat. A boss's points are shown in the center of its icon.
 - Names: Shown below the icons. Choose whose names are shown in the display settings. Hover over an icon to see the name in a tooltip, even when the name is not shown.
-- Markers: The markers 0 to 9 that the captain places in dungeons are shown with the same images as the game, regardless of the layer.
-- Player markers: Players the captain marks in dungeons (including you) are shown with the same marker images as the game, regardless of "Players", "Simplify Players In Combat", and "Always Simplify Self" in the display settings.
+- Markers: The markers 0 to 9 that the captain places in dungeons are shown the same way as in the game, regardless of the layer.
+- Player markers: Players the captain marks in dungeons (including you) are shown with the same markers as in the game, regardless of "Players", "Simplify Players In Combat", and "Always Simplify Self" in the display settings.
 - Position marker: Shown at a spot shared with a link in chat.
 - Footer: The left shows the name of the map being shown (with the channel in the form "ch12" if there is one), and the right shows the number of "Entities" and "Players". The numbers count those on that map after the display settings filter them, including marked players and those outside the window. While you are collecting points through the spatial investigation, it changes to "In Combat" (the total points of the enemies in combat) and "Current" (the current points).
 

@@ -14,7 +14,7 @@ This widget shows the game's chat in one window per channel or per private chat 
 - Messages: The first line shows the name and the time (in the form "21:40"), and the text follows from the second line. The text wraps at the width of the window. Your own messages are also shown.
 - Names: They follow "Player name" in Settings. For announcements that have no sender, only the time is shown.
 - Text
-  - Emoticons are shown as emoji. They use the Windows emoji designs, which differ from the game's images.
+  - Emoticons are shown as emoji. They use the Windows emoji designs, which differ from how the game shows them.
   - URLs are underlined links.
   - Stickers are shown as images. Stickers with no image show "[Sticker]".
   - Voice messages show "[Voice Message]" (followed by the text, if there is any).
@@ -28,7 +28,7 @@ This widget shows the game's chat in one window per channel or per private chat 
 - When text is selected, right-click to choose "Copy". While the window is active, you can also copy with Ctrl+C.
 - In copied text, each message has "name time" followed by the text on the next line. Emoticons become emoji characters, and stickers become "[Sticker]".
 - Click a URL to open it in your default browser.
-- Click a shared position link to open the [Map](Map) window, center it on that spot, and show the map of that spot's layer (such as "Wasteland" and "Deepreach") with a marker. The marker uses the same image as the game.
+- Click a shared position link to open the [Map](Map) window, center it on that spot, and show the map of that spot's layer (such as "Wasteland" and "Deepreach") with a marker. The marker looks the same as in the game.
 - When the linked spot is on another map or another layer, the map keeps showing that spot and layer even when you move, until you click "Back to My Map" in the header or the right-click menu, or move to another map. When you move to that layer, or when you click a link on your current map and layer, the map returns to the normal view and centers on you when you move.
 - You can remove the marker with "Clear Position Marker" in the right-click menu (the shown spot and layer stay as they are).
 - Scroll with the mouse wheel or the scroll bar on the right.
